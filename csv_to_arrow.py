@@ -18,6 +18,12 @@ with pa.OSFile("pw.arrow","wb") as sink:
     writer.write_batch(record_batch[0])
     writer.close()
 
+reader = pa.RecordBatchFileReader("pw.arrow")
+rb = reader.get_record_batch(0)
+df_aw = rb.to_pandas()
+
+print(df_aw)
+'''
 table1 = pa.RecordBatch.from_pandas(df)    
 with open("./arrow-out.ipc", 'wb') as f:
     writer = pa.ipc.RecordBatchFileWriter(f, table1.schema)
@@ -31,3 +37,4 @@ table2 = pq.read_table('exm.parquet')#書き出したファイルを読み込む
 table3 = table2.to_pandas()
 print(type(table2))
 print(type(table3))
+'''
