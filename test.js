@@ -63,3 +63,6 @@ for(var j = 0; j < fldnames.length; j++){
 } 
 
 console.log(result)
+
+//const tablex = aa.Table.from(fetch(("./pw.arrow")));
+//console.log(tablex.toString());

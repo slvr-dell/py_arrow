@@ -1,16 +1,40 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+-->
+
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Red Arrow Test</title>
-    <script type="text/javascript" src="./jquery-3.5.1.min.js"></script>
-    <script type="text/javascript" src="./app2.js"></script>
-  </head>
-  <body>
-    <h3>Red Arrow Test</h3>
 
-<script type="text/javascript">
-  var data = arrowInput("ex.parquet");
-  console.log(data);
-</script>
+<head>
 
-  </body>
+    <meta name="viewport">
+    <script src="https://unpkg.com/@finos/perspective-viewer"></script>
+    <script src="https://unpkg.com/@finos/perspective"></script>
+
+    
+</head>
+
+<body>
+
+    <perspective-viewer id="viewer">
+    
+    </perspective-viewer>
+
+    <script>
+
+        window.addEventListener('WebComponentsReady', async function() {
+            const viewer = document.getElementById('viewer');
+            const data = await fetch("pw.arrow");
+            viewer.load(await data.arrayBuffer());
+            viewer.toggleConfig();
+        });
+
+    </script>
+
+</body>
+
 </html>
