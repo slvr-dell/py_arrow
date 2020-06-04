@@ -1,2032 +1,471 @@
-(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-'use strict'
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = "./foo.js");
+/******/ })
+/************************************************************************/
+/******/ ({
+
+/***/ "./foo.js":
+/*!****************!*\
+  !*** ./foo.js ***!
+  \****************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+aa = __webpack_require__(/*! apache-arrow */ "./node_modules/apache-arrow/Arrow.dom.mjs");
+
+async function main(){
+    const table = await aa.Table.from(fetch(("./pw.arrow")));
+    console.log(table.get(0).toString());
+}
 
-exports.byteLength = byteLength
-exports.toByteArray = toByteArray
-exports.fromByteArray = fromByteArray
+main();
 
-var lookup = []
-var revLookup = []
-var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array
+/***/ }),
 
-var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-for (var i = 0, len = code.length; i < len; ++i) {
-  lookup[i] = code[i]
-  revLookup[code.charCodeAt(i)] = i
-}
-
-// Support decoding URL-safe base64 strings, as Node.js does.
-// See: https://en.wikipedia.org/wiki/Base64#URL_applications
-revLookup['-'.charCodeAt(0)] = 62
-revLookup['_'.charCodeAt(0)] = 63
-
-function getLens (b64) {
-  var len = b64.length
-
-  if (len % 4 > 0) {
-    throw new Error('Invalid string. Length must be a multiple of 4')
-  }
-
-  // Trim off extra bytes after placeholder bytes are found
-  // See: https://github.com/beatgammit/base64-js/issues/42
-  var validLen = b64.indexOf('=')
-  if (validLen === -1) validLen = len
-
-  var placeHoldersLen = validLen === len
-    ? 0
-    : 4 - (validLen % 4)
-
-  return [validLen, placeHoldersLen]
-}
-
-// base64 is 4/3 + up to two characters of the original data
-function byteLength (b64) {
-  var lens = getLens(b64)
-  var validLen = lens[0]
-  var placeHoldersLen = lens[1]
-  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
-}
-
-function _byteLength (b64, validLen, placeHoldersLen) {
-  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
-}
-
-function toByteArray (b64) {
-  var tmp
-  var lens = getLens(b64)
-  var validLen = lens[0]
-  var placeHoldersLen = lens[1]
-
-  var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen))
-
-  var curByte = 0
-
-  // if there are placeholders, only get up to the last complete 4 chars
-  var len = placeHoldersLen > 0
-    ? validLen - 4
-    : validLen
-
-  var i
-  for (i = 0; i < len; i += 4) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 18) |
-      (revLookup[b64.charCodeAt(i + 1)] << 12) |
-      (revLookup[b64.charCodeAt(i + 2)] << 6) |
-      revLookup[b64.charCodeAt(i + 3)]
-    arr[curByte++] = (tmp >> 16) & 0xFF
-    arr[curByte++] = (tmp >> 8) & 0xFF
-    arr[curByte++] = tmp & 0xFF
-  }
-
-  if (placeHoldersLen === 2) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 2) |
-      (revLookup[b64.charCodeAt(i + 1)] >> 4)
-    arr[curByte++] = tmp & 0xFF
-  }
-
-  if (placeHoldersLen === 1) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 10) |
-      (revLookup[b64.charCodeAt(i + 1)] << 4) |
-      (revLookup[b64.charCodeAt(i + 2)] >> 2)
-    arr[curByte++] = (tmp >> 8) & 0xFF
-    arr[curByte++] = tmp & 0xFF
-  }
-
-  return arr
-}
-
-function tripletToBase64 (num) {
-  return lookup[num >> 18 & 0x3F] +
-    lookup[num >> 12 & 0x3F] +
-    lookup[num >> 6 & 0x3F] +
-    lookup[num & 0x3F]
-}
-
-function encodeChunk (uint8, start, end) {
-  var tmp
-  var output = []
-  for (var i = start; i < end; i += 3) {
-    tmp =
-      ((uint8[i] << 16) & 0xFF0000) +
-      ((uint8[i + 1] << 8) & 0xFF00) +
-      (uint8[i + 2] & 0xFF)
-    output.push(tripletToBase64(tmp))
-  }
-  return output.join('')
-}
-
-function fromByteArray (uint8) {
-  var tmp
-  var len = uint8.length
-  var extraBytes = len % 3 // if we have 1 byte left, pad 2 bytes
-  var parts = []
-  var maxChunkLength = 16383 // must be multiple of 3
-
-  // go through the array every three bytes, we'll deal with trailing stuff later
-  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
-    parts.push(encodeChunk(
-      uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)
-    ))
-  }
-
-  // pad the end with zeros, but make sure to not forget the extra bytes
-  if (extraBytes === 1) {
-    tmp = uint8[len - 1]
-    parts.push(
-      lookup[tmp >> 2] +
-      lookup[(tmp << 4) & 0x3F] +
-      '=='
-    )
-  } else if (extraBytes === 2) {
-    tmp = (uint8[len - 2] << 8) + uint8[len - 1]
-    parts.push(
-      lookup[tmp >> 10] +
-      lookup[(tmp >> 4) & 0x3F] +
-      lookup[(tmp << 2) & 0x3F] +
-      '='
-    )
-  }
-
-  return parts.join('')
-}
-
-},{}],2:[function(require,module,exports){
-(function (Buffer){
-/*!
- * The buffer module from node.js, for the browser.
- *
- * @author   Feross Aboukhadijeh <https://feross.org>
- * @license  MIT
- */
-/* eslint-disable no-proto */
-
-'use strict'
-
-var base64 = require('base64-js')
-var ieee754 = require('ieee754')
-
-exports.Buffer = Buffer
-exports.SlowBuffer = SlowBuffer
-exports.INSPECT_MAX_BYTES = 50
-
-var K_MAX_LENGTH = 0x7fffffff
-exports.kMaxLength = K_MAX_LENGTH
-
-/**
- * If `Buffer.TYPED_ARRAY_SUPPORT`:
- *   === true    Use Uint8Array implementation (fastest)
- *   === false   Print warning and recommend using `buffer` v4.x which has an Object
- *               implementation (most compatible, even IE6)
- *
- * Browsers that support typed arrays are IE 10+, Firefox 4+, Chrome 7+, Safari 5.1+,
- * Opera 11.6+, iOS 4.2+.
- *
- * We report that the browser does not support typed arrays if the are not subclassable
- * using __proto__. Firefox 4-29 lacks support for adding new properties to `Uint8Array`
- * (See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438). IE 10 lacks support
- * for __proto__ and has a buggy typed array implementation.
- */
-Buffer.TYPED_ARRAY_SUPPORT = typedArraySupport()
-
-if (!Buffer.TYPED_ARRAY_SUPPORT && typeof console !== 'undefined' &&
-    typeof console.error === 'function') {
-  console.error(
-    'This browser lacks typed array (Uint8Array) support which is required by ' +
-    '`buffer` v5.x. Use `buffer` v4.x if you require old browser support.'
-  )
-}
-
-function typedArraySupport () {
-  // Can typed array instances can be augmented?
-  try {
-    var arr = new Uint8Array(1)
-    arr.__proto__ = { __proto__: Uint8Array.prototype, foo: function () { return 42 } }
-    return arr.foo() === 42
-  } catch (e) {
-    return false
-  }
-}
-
-Object.defineProperty(Buffer.prototype, 'parent', {
-  enumerable: true,
-  get: function () {
-    if (!Buffer.isBuffer(this)) return undefined
-    return this.buffer
-  }
-})
-
-Object.defineProperty(Buffer.prototype, 'offset', {
-  enumerable: true,
-  get: function () {
-    if (!Buffer.isBuffer(this)) return undefined
-    return this.byteOffset
-  }
-})
-
-function createBuffer (length) {
-  if (length > K_MAX_LENGTH) {
-    throw new RangeError('The value "' + length + '" is invalid for option "size"')
-  }
-  // Return an augmented `Uint8Array` instance
-  var buf = new Uint8Array(length)
-  buf.__proto__ = Buffer.prototype
-  return buf
-}
-
-/**
- * The Buffer constructor returns instances of `Uint8Array` that have their
- * prototype changed to `Buffer.prototype`. Furthermore, `Buffer` is a subclass of
- * `Uint8Array`, so the returned instances will have all the node `Buffer` methods
- * and the `Uint8Array` methods. Square bracket notation works as expected -- it
- * returns a single octet.
- *
- * The `Uint8Array` prototype remains unmodified.
- */
-
-function Buffer (arg, encodingOrOffset, length) {
-  // Common case.
-  if (typeof arg === 'number') {
-    if (typeof encodingOrOffset === 'string') {
-      throw new TypeError(
-        'The "string" argument must be of type string. Received type number'
-      )
-    }
-    return allocUnsafe(arg)
-  }
-  return from(arg, encodingOrOffset, length)
-}
-
-// Fix subarray() in ES2016. See: https://github.com/feross/buffer/pull/97
-if (typeof Symbol !== 'undefined' && Symbol.species != null &&
-    Buffer[Symbol.species] === Buffer) {
-  Object.defineProperty(Buffer, Symbol.species, {
-    value: null,
-    configurable: true,
-    enumerable: false,
-    writable: false
-  })
-}
-
-Buffer.poolSize = 8192 // not used by this implementation
-
-function from (value, encodingOrOffset, length) {
-  if (typeof value === 'string') {
-    return fromString(value, encodingOrOffset)
-  }
-
-  if (ArrayBuffer.isView(value)) {
-    return fromArrayLike(value)
-  }
-
-  if (value == null) {
-    throw TypeError(
-      'The first argument must be one of type string, Buffer, ArrayBuffer, Array, ' +
-      'or Array-like Object. Received type ' + (typeof value)
-    )
-  }
-
-  if (isInstance(value, ArrayBuffer) ||
-      (value && isInstance(value.buffer, ArrayBuffer))) {
-    return fromArrayBuffer(value, encodingOrOffset, length)
-  }
-
-  if (typeof value === 'number') {
-    throw new TypeError(
-      'The "value" argument must not be of type number. Received type number'
-    )
-  }
-
-  var valueOf = value.valueOf && value.valueOf()
-  if (valueOf != null && valueOf !== value) {
-    return Buffer.from(valueOf, encodingOrOffset, length)
-  }
-
-  var b = fromObject(value)
-  if (b) return b
-
-  if (typeof Symbol !== 'undefined' && Symbol.toPrimitive != null &&
-      typeof value[Symbol.toPrimitive] === 'function') {
-    return Buffer.from(
-      value[Symbol.toPrimitive]('string'), encodingOrOffset, length
-    )
-  }
-
-  throw new TypeError(
-    'The first argument must be one of type string, Buffer, ArrayBuffer, Array, ' +
-    'or Array-like Object. Received type ' + (typeof value)
-  )
-}
-
-/**
- * Functionally equivalent to Buffer(arg, encoding) but throws a TypeError
- * if value is a number.
- * Buffer.from(str[, encoding])
- * Buffer.from(array)
- * Buffer.from(buffer)
- * Buffer.from(arrayBuffer[, byteOffset[, length]])
- **/
-Buffer.from = function (value, encodingOrOffset, length) {
-  return from(value, encodingOrOffset, length)
-}
-
-// Note: Change prototype *after* Buffer.from is defined to workaround Chrome bug:
-// https://github.com/feross/buffer/pull/148
-Buffer.prototype.__proto__ = Uint8Array.prototype
-Buffer.__proto__ = Uint8Array
-
-function assertSize (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('"size" argument must be of type number')
-  } else if (size < 0) {
-    throw new RangeError('The value "' + size + '" is invalid for option "size"')
-  }
-}
-
-function alloc (size, fill, encoding) {
-  assertSize(size)
-  if (size <= 0) {
-    return createBuffer(size)
-  }
-  if (fill !== undefined) {
-    // Only pay attention to encoding if it's a string. This
-    // prevents accidentally sending in a number that would
-    // be interpretted as a start offset.
-    return typeof encoding === 'string'
-      ? createBuffer(size).fill(fill, encoding)
-      : createBuffer(size).fill(fill)
-  }
-  return createBuffer(size)
-}
-
-/**
- * Creates a new filled Buffer instance.
- * alloc(size[, fill[, encoding]])
- **/
-Buffer.alloc = function (size, fill, encoding) {
-  return alloc(size, fill, encoding)
-}
-
-function allocUnsafe (size) {
-  assertSize(size)
-  return createBuffer(size < 0 ? 0 : checked(size) | 0)
-}
-
-/**
- * Equivalent to Buffer(num), by default creates a non-zero-filled Buffer instance.
- * */
-Buffer.allocUnsafe = function (size) {
-  return allocUnsafe(size)
-}
-/**
- * Equivalent to SlowBuffer(num), by default creates a non-zero-filled Buffer instance.
- */
-Buffer.allocUnsafeSlow = function (size) {
-  return allocUnsafe(size)
-}
-
-function fromString (string, encoding) {
-  if (typeof encoding !== 'string' || encoding === '') {
-    encoding = 'utf8'
-  }
-
-  if (!Buffer.isEncoding(encoding)) {
-    throw new TypeError('Unknown encoding: ' + encoding)
-  }
-
-  var length = byteLength(string, encoding) | 0
-  var buf = createBuffer(length)
-
-  var actual = buf.write(string, encoding)
-
-  if (actual !== length) {
-    // Writing a hex string, for example, that contains invalid characters will
-    // cause everything after the first invalid character to be ignored. (e.g.
-    // 'abxxcd' will be treated as 'ab')
-    buf = buf.slice(0, actual)
-  }
-
-  return buf
-}
-
-function fromArrayLike (array) {
-  var length = array.length < 0 ? 0 : checked(array.length) | 0
-  var buf = createBuffer(length)
-  for (var i = 0; i < length; i += 1) {
-    buf[i] = array[i] & 255
-  }
-  return buf
-}
-
-function fromArrayBuffer (array, byteOffset, length) {
-  if (byteOffset < 0 || array.byteLength < byteOffset) {
-    throw new RangeError('"offset" is outside of buffer bounds')
-  }
-
-  if (array.byteLength < byteOffset + (length || 0)) {
-    throw new RangeError('"length" is outside of buffer bounds')
-  }
-
-  var buf
-  if (byteOffset === undefined && length === undefined) {
-    buf = new Uint8Array(array)
-  } else if (length === undefined) {
-    buf = new Uint8Array(array, byteOffset)
-  } else {
-    buf = new Uint8Array(array, byteOffset, length)
-  }
-
-  // Return an augmented `Uint8Array` instance
-  buf.__proto__ = Buffer.prototype
-  return buf
-}
-
-function fromObject (obj) {
-  if (Buffer.isBuffer(obj)) {
-    var len = checked(obj.length) | 0
-    var buf = createBuffer(len)
-
-    if (buf.length === 0) {
-      return buf
-    }
-
-    obj.copy(buf, 0, 0, len)
-    return buf
-  }
-
-  if (obj.length !== undefined) {
-    if (typeof obj.length !== 'number' || numberIsNaN(obj.length)) {
-      return createBuffer(0)
-    }
-    return fromArrayLike(obj)
-  }
-
-  if (obj.type === 'Buffer' && Array.isArray(obj.data)) {
-    return fromArrayLike(obj.data)
-  }
-}
-
-function checked (length) {
-  // Note: cannot use `length < K_MAX_LENGTH` here because that fails when
-  // length is NaN (which is otherwise coerced to zero.)
-  if (length >= K_MAX_LENGTH) {
-    throw new RangeError('Attempt to allocate Buffer larger than maximum ' +
-                         'size: 0x' + K_MAX_LENGTH.toString(16) + ' bytes')
-  }
-  return length | 0
-}
-
-function SlowBuffer (length) {
-  if (+length != length) { // eslint-disable-line eqeqeq
-    length = 0
-  }
-  return Buffer.alloc(+length)
-}
-
-Buffer.isBuffer = function isBuffer (b) {
-  return b != null && b._isBuffer === true &&
-    b !== Buffer.prototype // so Buffer.isBuffer(Buffer.prototype) will be false
-}
-
-Buffer.compare = function compare (a, b) {
-  if (isInstance(a, Uint8Array)) a = Buffer.from(a, a.offset, a.byteLength)
-  if (isInstance(b, Uint8Array)) b = Buffer.from(b, b.offset, b.byteLength)
-  if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {
-    throw new TypeError(
-      'The "buf1", "buf2" arguments must be one of type Buffer or Uint8Array'
-    )
-  }
-
-  if (a === b) return 0
-
-  var x = a.length
-  var y = b.length
-
-  for (var i = 0, len = Math.min(x, y); i < len; ++i) {
-    if (a[i] !== b[i]) {
-      x = a[i]
-      y = b[i]
-      break
-    }
-  }
-
-  if (x < y) return -1
-  if (y < x) return 1
-  return 0
-}
-
-Buffer.isEncoding = function isEncoding (encoding) {
-  switch (String(encoding).toLowerCase()) {
-    case 'hex':
-    case 'utf8':
-    case 'utf-8':
-    case 'ascii':
-    case 'latin1':
-    case 'binary':
-    case 'base64':
-    case 'ucs2':
-    case 'ucs-2':
-    case 'utf16le':
-    case 'utf-16le':
-      return true
-    default:
-      return false
-  }
-}
-
-Buffer.concat = function concat (list, length) {
-  if (!Array.isArray(list)) {
-    throw new TypeError('"list" argument must be an Array of Buffers')
-  }
-
-  if (list.length === 0) {
-    return Buffer.alloc(0)
-  }
-
-  var i
-  if (length === undefined) {
-    length = 0
-    for (i = 0; i < list.length; ++i) {
-      length += list[i].length
-    }
-  }
-
-  var buffer = Buffer.allocUnsafe(length)
-  var pos = 0
-  for (i = 0; i < list.length; ++i) {
-    var buf = list[i]
-    if (isInstance(buf, Uint8Array)) {
-      buf = Buffer.from(buf)
-    }
-    if (!Buffer.isBuffer(buf)) {
-      throw new TypeError('"list" argument must be an Array of Buffers')
-    }
-    buf.copy(buffer, pos)
-    pos += buf.length
-  }
-  return buffer
-}
-
-function byteLength (string, encoding) {
-  if (Buffer.isBuffer(string)) {
-    return string.length
-  }
-  if (ArrayBuffer.isView(string) || isInstance(string, ArrayBuffer)) {
-    return string.byteLength
-  }
-  if (typeof string !== 'string') {
-    throw new TypeError(
-      'The "string" argument must be one of type string, Buffer, or ArrayBuffer. ' +
-      'Received type ' + typeof string
-    )
-  }
-
-  var len = string.length
-  var mustMatch = (arguments.length > 2 && arguments[2] === true)
-  if (!mustMatch && len === 0) return 0
-
-  // Use a for loop to avoid recursion
-  var loweredCase = false
-  for (;;) {
-    switch (encoding) {
-      case 'ascii':
-      case 'latin1':
-      case 'binary':
-        return len
-      case 'utf8':
-      case 'utf-8':
-        return utf8ToBytes(string).length
-      case 'ucs2':
-      case 'ucs-2':
-      case 'utf16le':
-      case 'utf-16le':
-        return len * 2
-      case 'hex':
-        return len >>> 1
-      case 'base64':
-        return base64ToBytes(string).length
-      default:
-        if (loweredCase) {
-          return mustMatch ? -1 : utf8ToBytes(string).length // assume utf8
-        }
-        encoding = ('' + encoding).toLowerCase()
-        loweredCase = true
-    }
-  }
-}
-Buffer.byteLength = byteLength
-
-function slowToString (encoding, start, end) {
-  var loweredCase = false
-
-  // No need to verify that "this.length <= MAX_UINT32" since it's a read-only
-  // property of a typed array.
-
-  // This behaves neither like String nor Uint8Array in that we set start/end
-  // to their upper/lower bounds if the value passed is out of range.
-  // undefined is handled specially as per ECMA-262 6th Edition,
-  // Section 13.3.3.7 Runtime Semantics: KeyedBindingInitialization.
-  if (start === undefined || start < 0) {
-    start = 0
-  }
-  // Return early if start > this.length. Done here to prevent potential uint32
-  // coercion fail below.
-  if (start > this.length) {
-    return ''
-  }
-
-  if (end === undefined || end > this.length) {
-    end = this.length
-  }
-
-  if (end <= 0) {
-    return ''
-  }
-
-  // Force coersion to uint32. This will also coerce falsey/NaN values to 0.
-  end >>>= 0
-  start >>>= 0
-
-  if (end <= start) {
-    return ''
-  }
-
-  if (!encoding) encoding = 'utf8'
-
-  while (true) {
-    switch (encoding) {
-      case 'hex':
-        return hexSlice(this, start, end)
-
-      case 'utf8':
-      case 'utf-8':
-        return utf8Slice(this, start, end)
-
-      case 'ascii':
-        return asciiSlice(this, start, end)
-
-      case 'latin1':
-      case 'binary':
-        return latin1Slice(this, start, end)
-
-      case 'base64':
-        return base64Slice(this, start, end)
-
-      case 'ucs2':
-      case 'ucs-2':
-      case 'utf16le':
-      case 'utf-16le':
-        return utf16leSlice(this, start, end)
-
-      default:
-        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
-        encoding = (encoding + '').toLowerCase()
-        loweredCase = true
-    }
-  }
-}
-
-// This property is used by `Buffer.isBuffer` (and the `is-buffer` npm package)
-// to detect a Buffer instance. It's not possible to use `instanceof Buffer`
-// reliably in a browserify context because there could be multiple different
-// copies of the 'buffer' package in use. This method works even for Buffer
-// instances that were created from another copy of the `buffer` package.
-// See: https://github.com/feross/buffer/issues/154
-Buffer.prototype._isBuffer = true
-
-function swap (b, n, m) {
-  var i = b[n]
-  b[n] = b[m]
-  b[m] = i
-}
-
-Buffer.prototype.swap16 = function swap16 () {
-  var len = this.length
-  if (len % 2 !== 0) {
-    throw new RangeError('Buffer size must be a multiple of 16-bits')
-  }
-  for (var i = 0; i < len; i += 2) {
-    swap(this, i, i + 1)
-  }
-  return this
-}
-
-Buffer.prototype.swap32 = function swap32 () {
-  var len = this.length
-  if (len % 4 !== 0) {
-    throw new RangeError('Buffer size must be a multiple of 32-bits')
-  }
-  for (var i = 0; i < len; i += 4) {
-    swap(this, i, i + 3)
-    swap(this, i + 1, i + 2)
-  }
-  return this
-}
-
-Buffer.prototype.swap64 = function swap64 () {
-  var len = this.length
-  if (len % 8 !== 0) {
-    throw new RangeError('Buffer size must be a multiple of 64-bits')
-  }
-  for (var i = 0; i < len; i += 8) {
-    swap(this, i, i + 7)
-    swap(this, i + 1, i + 6)
-    swap(this, i + 2, i + 5)
-    swap(this, i + 3, i + 4)
-  }
-  return this
-}
-
-Buffer.prototype.toString = function toString () {
-  var length = this.length
-  if (length === 0) return ''
-  if (arguments.length === 0) return utf8Slice(this, 0, length)
-  return slowToString.apply(this, arguments)
-}
-
-Buffer.prototype.toLocaleString = Buffer.prototype.toString
-
-Buffer.prototype.equals = function equals (b) {
-  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
-  if (this === b) return true
-  return Buffer.compare(this, b) === 0
-}
-
-Buffer.prototype.inspect = function inspect () {
-  var str = ''
-  var max = exports.INSPECT_MAX_BYTES
-  str = this.toString('hex', 0, max).replace(/(.{2})/g, '$1 ').trim()
-  if (this.length > max) str += ' ... '
-  return '<Buffer ' + str + '>'
-}
-
-Buffer.prototype.compare = function compare (target, start, end, thisStart, thisEnd) {
-  if (isInstance(target, Uint8Array)) {
-    target = Buffer.from(target, target.offset, target.byteLength)
-  }
-  if (!Buffer.isBuffer(target)) {
-    throw new TypeError(
-      'The "target" argument must be one of type Buffer or Uint8Array. ' +
-      'Received type ' + (typeof target)
-    )
-  }
-
-  if (start === undefined) {
-    start = 0
-  }
-  if (end === undefined) {
-    end = target ? target.length : 0
-  }
-  if (thisStart === undefined) {
-    thisStart = 0
-  }
-  if (thisEnd === undefined) {
-    thisEnd = this.length
-  }
-
-  if (start < 0 || end > target.length || thisStart < 0 || thisEnd > this.length) {
-    throw new RangeError('out of range index')
-  }
-
-  if (thisStart >= thisEnd && start >= end) {
-    return 0
-  }
-  if (thisStart >= thisEnd) {
-    return -1
-  }
-  if (start >= end) {
-    return 1
-  }
-
-  start >>>= 0
-  end >>>= 0
-  thisStart >>>= 0
-  thisEnd >>>= 0
-
-  if (this === target) return 0
-
-  var x = thisEnd - thisStart
-  var y = end - start
-  var len = Math.min(x, y)
-
-  var thisCopy = this.slice(thisStart, thisEnd)
-  var targetCopy = target.slice(start, end)
-
-  for (var i = 0; i < len; ++i) {
-    if (thisCopy[i] !== targetCopy[i]) {
-      x = thisCopy[i]
-      y = targetCopy[i]
-      break
-    }
-  }
-
-  if (x < y) return -1
-  if (y < x) return 1
-  return 0
-}
-
-// Finds either the first index of `val` in `buffer` at offset >= `byteOffset`,
-// OR the last index of `val` in `buffer` at offset <= `byteOffset`.
-//
-// Arguments:
-// - buffer - a Buffer to search
-// - val - a string, Buffer, or number
-// - byteOffset - an index into `buffer`; will be clamped to an int32
-// - encoding - an optional encoding, relevant is val is a string
-// - dir - true for indexOf, false for lastIndexOf
-function bidirectionalIndexOf (buffer, val, byteOffset, encoding, dir) {
-  // Empty buffer means no match
-  if (buffer.length === 0) return -1
-
-  // Normalize byteOffset
-  if (typeof byteOffset === 'string') {
-    encoding = byteOffset
-    byteOffset = 0
-  } else if (byteOffset > 0x7fffffff) {
-    byteOffset = 0x7fffffff
-  } else if (byteOffset < -0x80000000) {
-    byteOffset = -0x80000000
-  }
-  byteOffset = +byteOffset // Coerce to Number.
-  if (numberIsNaN(byteOffset)) {
-    // byteOffset: it it's undefined, null, NaN, "foo", etc, search whole buffer
-    byteOffset = dir ? 0 : (buffer.length - 1)
-  }
-
-  // Normalize byteOffset: negative offsets start from the end of the buffer
-  if (byteOffset < 0) byteOffset = buffer.length + byteOffset
-  if (byteOffset >= buffer.length) {
-    if (dir) return -1
-    else byteOffset = buffer.length - 1
-  } else if (byteOffset < 0) {
-    if (dir) byteOffset = 0
-    else return -1
-  }
-
-  // Normalize val
-  if (typeof val === 'string') {
-    val = Buffer.from(val, encoding)
-  }
-
-  // Finally, search either indexOf (if dir is true) or lastIndexOf
-  if (Buffer.isBuffer(val)) {
-    // Special case: looking for empty string/buffer always fails
-    if (val.length === 0) {
-      return -1
-    }
-    return arrayIndexOf(buffer, val, byteOffset, encoding, dir)
-  } else if (typeof val === 'number') {
-    val = val & 0xFF // Search for a byte value [0-255]
-    if (typeof Uint8Array.prototype.indexOf === 'function') {
-      if (dir) {
-        return Uint8Array.prototype.indexOf.call(buffer, val, byteOffset)
-      } else {
-        return Uint8Array.prototype.lastIndexOf.call(buffer, val, byteOffset)
-      }
-    }
-    return arrayIndexOf(buffer, [ val ], byteOffset, encoding, dir)
-  }
-
-  throw new TypeError('val must be string, number or Buffer')
-}
-
-function arrayIndexOf (arr, val, byteOffset, encoding, dir) {
-  var indexSize = 1
-  var arrLength = arr.length
-  var valLength = val.length
-
-  if (encoding !== undefined) {
-    encoding = String(encoding).toLowerCase()
-    if (encoding === 'ucs2' || encoding === 'ucs-2' ||
-        encoding === 'utf16le' || encoding === 'utf-16le') {
-      if (arr.length < 2 || val.length < 2) {
-        return -1
-      }
-      indexSize = 2
-      arrLength /= 2
-      valLength /= 2
-      byteOffset /= 2
-    }
-  }
-
-  function read (buf, i) {
-    if (indexSize === 1) {
-      return buf[i]
-    } else {
-      return buf.readUInt16BE(i * indexSize)
-    }
-  }
-
-  var i
-  if (dir) {
-    var foundIndex = -1
-    for (i = byteOffset; i < arrLength; i++) {
-      if (read(arr, i) === read(val, foundIndex === -1 ? 0 : i - foundIndex)) {
-        if (foundIndex === -1) foundIndex = i
-        if (i - foundIndex + 1 === valLength) return foundIndex * indexSize
-      } else {
-        if (foundIndex !== -1) i -= i - foundIndex
-        foundIndex = -1
-      }
-    }
-  } else {
-    if (byteOffset + valLength > arrLength) byteOffset = arrLength - valLength
-    for (i = byteOffset; i >= 0; i--) {
-      var found = true
-      for (var j = 0; j < valLength; j++) {
-        if (read(arr, i + j) !== read(val, j)) {
-          found = false
-          break
-        }
-      }
-      if (found) return i
-    }
-  }
-
-  return -1
-}
-
-Buffer.prototype.includes = function includes (val, byteOffset, encoding) {
-  return this.indexOf(val, byteOffset, encoding) !== -1
-}
-
-Buffer.prototype.indexOf = function indexOf (val, byteOffset, encoding) {
-  return bidirectionalIndexOf(this, val, byteOffset, encoding, true)
-}
-
-Buffer.prototype.lastIndexOf = function lastIndexOf (val, byteOffset, encoding) {
-  return bidirectionalIndexOf(this, val, byteOffset, encoding, false)
-}
-
-function hexWrite (buf, string, offset, length) {
-  offset = Number(offset) || 0
-  var remaining = buf.length - offset
-  if (!length) {
-    length = remaining
-  } else {
-    length = Number(length)
-    if (length > remaining) {
-      length = remaining
-    }
-  }
-
-  var strLen = string.length
-
-  if (length > strLen / 2) {
-    length = strLen / 2
-  }
-  for (var i = 0; i < length; ++i) {
-    var parsed = parseInt(string.substr(i * 2, 2), 16)
-    if (numberIsNaN(parsed)) return i
-    buf[offset + i] = parsed
-  }
-  return i
-}
-
-function utf8Write (buf, string, offset, length) {
-  return blitBuffer(utf8ToBytes(string, buf.length - offset), buf, offset, length)
-}
-
-function asciiWrite (buf, string, offset, length) {
-  return blitBuffer(asciiToBytes(string), buf, offset, length)
-}
-
-function latin1Write (buf, string, offset, length) {
-  return asciiWrite(buf, string, offset, length)
-}
-
-function base64Write (buf, string, offset, length) {
-  return blitBuffer(base64ToBytes(string), buf, offset, length)
-}
-
-function ucs2Write (buf, string, offset, length) {
-  return blitBuffer(utf16leToBytes(string, buf.length - offset), buf, offset, length)
-}
-
-Buffer.prototype.write = function write (string, offset, length, encoding) {
-  // Buffer#write(string)
-  if (offset === undefined) {
-    encoding = 'utf8'
-    length = this.length
-    offset = 0
-  // Buffer#write(string, encoding)
-  } else if (length === undefined && typeof offset === 'string') {
-    encoding = offset
-    length = this.length
-    offset = 0
-  // Buffer#write(string, offset[, length][, encoding])
-  } else if (isFinite(offset)) {
-    offset = offset >>> 0
-    if (isFinite(length)) {
-      length = length >>> 0
-      if (encoding === undefined) encoding = 'utf8'
-    } else {
-      encoding = length
-      length = undefined
-    }
-  } else {
-    throw new Error(
-      'Buffer.write(string, encoding, offset[, length]) is no longer supported'
-    )
-  }
-
-  var remaining = this.length - offset
-  if (length === undefined || length > remaining) length = remaining
-
-  if ((string.length > 0 && (length < 0 || offset < 0)) || offset > this.length) {
-    throw new RangeError('Attempt to write outside buffer bounds')
-  }
-
-  if (!encoding) encoding = 'utf8'
-
-  var loweredCase = false
-  for (;;) {
-    switch (encoding) {
-      case 'hex':
-        return hexWrite(this, string, offset, length)
-
-      case 'utf8':
-      case 'utf-8':
-        return utf8Write(this, string, offset, length)
-
-      case 'ascii':
-        return asciiWrite(this, string, offset, length)
-
-      case 'latin1':
-      case 'binary':
-        return latin1Write(this, string, offset, length)
-
-      case 'base64':
-        // Warning: maxLength not taken into account in base64Write
-        return base64Write(this, string, offset, length)
-
-      case 'ucs2':
-      case 'ucs-2':
-      case 'utf16le':
-      case 'utf-16le':
-        return ucs2Write(this, string, offset, length)
-
-      default:
-        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
-        encoding = ('' + encoding).toLowerCase()
-        loweredCase = true
-    }
-  }
-}
-
-Buffer.prototype.toJSON = function toJSON () {
-  return {
-    type: 'Buffer',
-    data: Array.prototype.slice.call(this._arr || this, 0)
-  }
-}
-
-function base64Slice (buf, start, end) {
-  if (start === 0 && end === buf.length) {
-    return base64.fromByteArray(buf)
-  } else {
-    return base64.fromByteArray(buf.slice(start, end))
-  }
-}
-
-function utf8Slice (buf, start, end) {
-  end = Math.min(buf.length, end)
-  var res = []
-
-  var i = start
-  while (i < end) {
-    var firstByte = buf[i]
-    var codePoint = null
-    var bytesPerSequence = (firstByte > 0xEF) ? 4
-      : (firstByte > 0xDF) ? 3
-        : (firstByte > 0xBF) ? 2
-          : 1
-
-    if (i + bytesPerSequence <= end) {
-      var secondByte, thirdByte, fourthByte, tempCodePoint
-
-      switch (bytesPerSequence) {
-        case 1:
-          if (firstByte < 0x80) {
-            codePoint = firstByte
-          }
-          break
-        case 2:
-          secondByte = buf[i + 1]
-          if ((secondByte & 0xC0) === 0x80) {
-            tempCodePoint = (firstByte & 0x1F) << 0x6 | (secondByte & 0x3F)
-            if (tempCodePoint > 0x7F) {
-              codePoint = tempCodePoint
-            }
-          }
-          break
-        case 3:
-          secondByte = buf[i + 1]
-          thirdByte = buf[i + 2]
-          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80) {
-            tempCodePoint = (firstByte & 0xF) << 0xC | (secondByte & 0x3F) << 0x6 | (thirdByte & 0x3F)
-            if (tempCodePoint > 0x7FF && (tempCodePoint < 0xD800 || tempCodePoint > 0xDFFF)) {
-              codePoint = tempCodePoint
-            }
-          }
-          break
-        case 4:
-          secondByte = buf[i + 1]
-          thirdByte = buf[i + 2]
-          fourthByte = buf[i + 3]
-          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80 && (fourthByte & 0xC0) === 0x80) {
-            tempCodePoint = (firstByte & 0xF) << 0x12 | (secondByte & 0x3F) << 0xC | (thirdByte & 0x3F) << 0x6 | (fourthByte & 0x3F)
-            if (tempCodePoint > 0xFFFF && tempCodePoint < 0x110000) {
-              codePoint = tempCodePoint
-            }
-          }
-      }
-    }
-
-    if (codePoint === null) {
-      // we did not generate a valid codePoint so insert a
-      // replacement char (U+FFFD) and advance only 1 byte
-      codePoint = 0xFFFD
-      bytesPerSequence = 1
-    } else if (codePoint > 0xFFFF) {
-      // encode to utf16 (surrogate pair dance)
-      codePoint -= 0x10000
-      res.push(codePoint >>> 10 & 0x3FF | 0xD800)
-      codePoint = 0xDC00 | codePoint & 0x3FF
-    }
-
-    res.push(codePoint)
-    i += bytesPerSequence
-  }
-
-  return decodeCodePointsArray(res)
-}
-
-// Based on http://stackoverflow.com/a/22747272/680742, the browser with
-// the lowest limit is Chrome, with 0x10000 args.
-// We go 1 magnitude less, for safety
-var MAX_ARGUMENTS_LENGTH = 0x1000
-
-function decodeCodePointsArray (codePoints) {
-  var len = codePoints.length
-  if (len <= MAX_ARGUMENTS_LENGTH) {
-    return String.fromCharCode.apply(String, codePoints) // avoid extra slice()
-  }
-
-  // Decode in chunks to avoid "call stack size exceeded".
-  var res = ''
-  var i = 0
-  while (i < len) {
-    res += String.fromCharCode.apply(
-      String,
-      codePoints.slice(i, i += MAX_ARGUMENTS_LENGTH)
-    )
-  }
-  return res
-}
-
-function asciiSlice (buf, start, end) {
-  var ret = ''
-  end = Math.min(buf.length, end)
-
-  for (var i = start; i < end; ++i) {
-    ret += String.fromCharCode(buf[i] & 0x7F)
-  }
-  return ret
-}
-
-function latin1Slice (buf, start, end) {
-  var ret = ''
-  end = Math.min(buf.length, end)
-
-  for (var i = start; i < end; ++i) {
-    ret += String.fromCharCode(buf[i])
-  }
-  return ret
-}
-
-function hexSlice (buf, start, end) {
-  var len = buf.length
-
-  if (!start || start < 0) start = 0
-  if (!end || end < 0 || end > len) end = len
-
-  var out = ''
-  for (var i = start; i < end; ++i) {
-    out += toHex(buf[i])
-  }
-  return out
-}
-
-function utf16leSlice (buf, start, end) {
-  var bytes = buf.slice(start, end)
-  var res = ''
-  for (var i = 0; i < bytes.length; i += 2) {
-    res += String.fromCharCode(bytes[i] + (bytes[i + 1] * 256))
-  }
-  return res
-}
-
-Buffer.prototype.slice = function slice (start, end) {
-  var len = this.length
-  start = ~~start
-  end = end === undefined ? len : ~~end
-
-  if (start < 0) {
-    start += len
-    if (start < 0) start = 0
-  } else if (start > len) {
-    start = len
-  }
-
-  if (end < 0) {
-    end += len
-    if (end < 0) end = 0
-  } else if (end > len) {
-    end = len
-  }
-
-  if (end < start) end = start
-
-  var newBuf = this.subarray(start, end)
-  // Return an augmented `Uint8Array` instance
-  newBuf.__proto__ = Buffer.prototype
-  return newBuf
-}
-
-/*
- * Need to make sure that buffer isn't trying to write out of bounds.
- */
-function checkOffset (offset, ext, length) {
-  if ((offset % 1) !== 0 || offset < 0) throw new RangeError('offset is not uint')
-  if (offset + ext > length) throw new RangeError('Trying to access beyond buffer length')
-}
-
-Buffer.prototype.readUIntLE = function readUIntLE (offset, byteLength, noAssert) {
-  offset = offset >>> 0
-  byteLength = byteLength >>> 0
-  if (!noAssert) checkOffset(offset, byteLength, this.length)
-
-  var val = this[offset]
-  var mul = 1
-  var i = 0
-  while (++i < byteLength && (mul *= 0x100)) {
-    val += this[offset + i] * mul
-  }
-
-  return val
-}
-
-Buffer.prototype.readUIntBE = function readUIntBE (offset, byteLength, noAssert) {
-  offset = offset >>> 0
-  byteLength = byteLength >>> 0
-  if (!noAssert) {
-    checkOffset(offset, byteLength, this.length)
-  }
-
-  var val = this[offset + --byteLength]
-  var mul = 1
-  while (byteLength > 0 && (mul *= 0x100)) {
-    val += this[offset + --byteLength] * mul
-  }
-
-  return val
-}
-
-Buffer.prototype.readUInt8 = function readUInt8 (offset, noAssert) {
-  offset = offset >>> 0
-  if (!noAssert) checkOffset(offset, 1, this.length)
-  return this[offset]
-}
-
-Buffer.prototype.readUInt16LE = function readUInt16LE (offset, noAssert) {
-  offset = offset >>> 0
-  if (!noAssert) checkOffset(offset, 2, this.length)
-  return this[offset] | (this[offset + 1] << 8)
-}
-
-Buffer.prototype.readUInt16BE = function readUInt16BE (offset, noAssert) {
-  offset = offset >>> 0
-  if (!noAssert) checkOffset(offset, 2, this.length)
-  return (this[offset] << 8) | this[offset + 1]
-}
-
-Buffer.prototype.readUInt32LE = function readUInt32LE (offset, noAssert) {
-  offset = offset >>> 0
-  if (!noAssert) checkOffset(offset, 4, this.length)
-
-  return ((this[offset]) |
-      (this[offset + 1] << 8) |
-      (this[offset + 2] << 16)) +
-      (this[offset + 3] * 0x1000000)
-}
-
-Buffer.prototype.readUInt32BE = function readUInt32BE (offset, noAssert) {
-  offset = offset >>> 0
-  if (!noAssert) checkOffset(offset, 4, this.length)
-
-  return (this[offset] * 0x1000000) +
-    ((this[offset + 1] << 16) |
-    (this[offset + 2] << 8) |
-    this[offset + 3])
-}
-
-Buffer.prototype.readIntLE = function readIntLE (offset, byteLength, noAssert) {
-  offset = offset >>> 0
-  byteLength = byteLength >>> 0
-  if (!noAssert) checkOffset(offset, byteLength, this.length)
-
-  var val = this[offset]
-  var mul = 1
-  var i = 0
-  while (++i < byteLength && (mul *= 0x100)) {
-    val += this[offset + i] * mul
-  }
-  mul *= 0x80
-
-  if (val >= mul) val -= Math.pow(2, 8 * byteLength)
-
-  return val
-}
-
-Buffer.prototype.readIntBE = function readIntBE (offset, byteLength, noAssert) {
-  offset = offset >>> 0
-  byteLength = byteLength >>> 0
-  if (!noAssert) checkOffset(offset, byteLength, this.length)
-
-  var i = byteLength
-  var mul = 1
-  var val = this[offset + --i]
-  while (i > 0 && (mul *= 0x100)) {
-    val += this[offset + --i] * mul
-  }
-  mul *= 0x80
-
-  if (val >= mul) val -= Math.pow(2, 8 * byteLength)
-
-  return val
-}
-
-Buffer.prototype.readInt8 = function readInt8 (offset, noAssert) {
-  offset = offset >>> 0
-  if (!noAssert) checkOffset(offset, 1, this.length)
-  if (!(this[offset] & 0x80)) return (this[offset])
-  return ((0xff - this[offset] + 1) * -1)
-}
-
-Buffer.prototype.readInt16LE = function readInt16LE (offset, noAssert) {
-  offset = offset >>> 0
-  if (!noAssert) checkOffset(offset, 2, this.length)
-  var val = this[offset] | (this[offset + 1] << 8)
-  return (val & 0x8000) ? val | 0xFFFF0000 : val
-}
-
-Buffer.prototype.readInt16BE = function readInt16BE (offset, noAssert) {
-  offset = offset >>> 0
-  if (!noAssert) checkOffset(offset, 2, this.length)
-  var val = this[offset + 1] | (this[offset] << 8)
-  return (val & 0x8000) ? val | 0xFFFF0000 : val
-}
-
-Buffer.prototype.readInt32LE = function readInt32LE (offset, noAssert) {
-  offset = offset >>> 0
-  if (!noAssert) checkOffset(offset, 4, this.length)
-
-  return (this[offset]) |
-    (this[offset + 1] << 8) |
-    (this[offset + 2] << 16) |
-    (this[offset + 3] << 24)
-}
-
-Buffer.prototype.readInt32BE = function readInt32BE (offset, noAssert) {
-  offset = offset >>> 0
-  if (!noAssert) checkOffset(offset, 4, this.length)
-
-  return (this[offset] << 24) |
-    (this[offset + 1] << 16) |
-    (this[offset + 2] << 8) |
-    (this[offset + 3])
-}
-
-Buffer.prototype.readFloatLE = function readFloatLE (offset, noAssert) {
-  offset = offset >>> 0
-  if (!noAssert) checkOffset(offset, 4, this.length)
-  return ieee754.read(this, offset, true, 23, 4)
-}
-
-Buffer.prototype.readFloatBE = function readFloatBE (offset, noAssert) {
-  offset = offset >>> 0
-  if (!noAssert) checkOffset(offset, 4, this.length)
-  return ieee754.read(this, offset, false, 23, 4)
-}
-
-Buffer.prototype.readDoubleLE = function readDoubleLE (offset, noAssert) {
-  offset = offset >>> 0
-  if (!noAssert) checkOffset(offset, 8, this.length)
-  return ieee754.read(this, offset, true, 52, 8)
-}
-
-Buffer.prototype.readDoubleBE = function readDoubleBE (offset, noAssert) {
-  offset = offset >>> 0
-  if (!noAssert) checkOffset(offset, 8, this.length)
-  return ieee754.read(this, offset, false, 52, 8)
-}
-
-function checkInt (buf, value, offset, ext, max, min) {
-  if (!Buffer.isBuffer(buf)) throw new TypeError('"buffer" argument must be a Buffer instance')
-  if (value > max || value < min) throw new RangeError('"value" argument is out of bounds')
-  if (offset + ext > buf.length) throw new RangeError('Index out of range')
-}
-
-Buffer.prototype.writeUIntLE = function writeUIntLE (value, offset, byteLength, noAssert) {
-  value = +value
-  offset = offset >>> 0
-  byteLength = byteLength >>> 0
-  if (!noAssert) {
-    var maxBytes = Math.pow(2, 8 * byteLength) - 1
-    checkInt(this, value, offset, byteLength, maxBytes, 0)
-  }
-
-  var mul = 1
-  var i = 0
-  this[offset] = value & 0xFF
-  while (++i < byteLength && (mul *= 0x100)) {
-    this[offset + i] = (value / mul) & 0xFF
-  }
-
-  return offset + byteLength
-}
-
-Buffer.prototype.writeUIntBE = function writeUIntBE (value, offset, byteLength, noAssert) {
-  value = +value
-  offset = offset >>> 0
-  byteLength = byteLength >>> 0
-  if (!noAssert) {
-    var maxBytes = Math.pow(2, 8 * byteLength) - 1
-    checkInt(this, value, offset, byteLength, maxBytes, 0)
-  }
-
-  var i = byteLength - 1
-  var mul = 1
-  this[offset + i] = value & 0xFF
-  while (--i >= 0 && (mul *= 0x100)) {
-    this[offset + i] = (value / mul) & 0xFF
-  }
-
-  return offset + byteLength
-}
-
-Buffer.prototype.writeUInt8 = function writeUInt8 (value, offset, noAssert) {
-  value = +value
-  offset = offset >>> 0
-  if (!noAssert) checkInt(this, value, offset, 1, 0xff, 0)
-  this[offset] = (value & 0xff)
-  return offset + 1
-}
-
-Buffer.prototype.writeUInt16LE = function writeUInt16LE (value, offset, noAssert) {
-  value = +value
-  offset = offset >>> 0
-  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
-  this[offset] = (value & 0xff)
-  this[offset + 1] = (value >>> 8)
-  return offset + 2
-}
-
-Buffer.prototype.writeUInt16BE = function writeUInt16BE (value, offset, noAssert) {
-  value = +value
-  offset = offset >>> 0
-  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
-  this[offset] = (value >>> 8)
-  this[offset + 1] = (value & 0xff)
-  return offset + 2
-}
-
-Buffer.prototype.writeUInt32LE = function writeUInt32LE (value, offset, noAssert) {
-  value = +value
-  offset = offset >>> 0
-  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)
-  this[offset + 3] = (value >>> 24)
-  this[offset + 2] = (value >>> 16)
-  this[offset + 1] = (value >>> 8)
-  this[offset] = (value & 0xff)
-  return offset + 4
-}
-
-Buffer.prototype.writeUInt32BE = function writeUInt32BE (value, offset, noAssert) {
-  value = +value
-  offset = offset >>> 0
-  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)
-  this[offset] = (value >>> 24)
-  this[offset + 1] = (value >>> 16)
-  this[offset + 2] = (value >>> 8)
-  this[offset + 3] = (value & 0xff)
-  return offset + 4
-}
-
-Buffer.prototype.writeIntLE = function writeIntLE (value, offset, byteLength, noAssert) {
-  value = +value
-  offset = offset >>> 0
-  if (!noAssert) {
-    var limit = Math.pow(2, (8 * byteLength) - 1)
-
-    checkInt(this, value, offset, byteLength, limit - 1, -limit)
-  }
-
-  var i = 0
-  var mul = 1
-  var sub = 0
-  this[offset] = value & 0xFF
-  while (++i < byteLength && (mul *= 0x100)) {
-    if (value < 0 && sub === 0 && this[offset + i - 1] !== 0) {
-      sub = 1
-    }
-    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF
-  }
-
-  return offset + byteLength
-}
-
-Buffer.prototype.writeIntBE = function writeIntBE (value, offset, byteLength, noAssert) {
-  value = +value
-  offset = offset >>> 0
-  if (!noAssert) {
-    var limit = Math.pow(2, (8 * byteLength) - 1)
-
-    checkInt(this, value, offset, byteLength, limit - 1, -limit)
-  }
-
-  var i = byteLength - 1
-  var mul = 1
-  var sub = 0
-  this[offset + i] = value & 0xFF
-  while (--i >= 0 && (mul *= 0x100)) {
-    if (value < 0 && sub === 0 && this[offset + i + 1] !== 0) {
-      sub = 1
-    }
-    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF
-  }
-
-  return offset + byteLength
-}
-
-Buffer.prototype.writeInt8 = function writeInt8 (value, offset, noAssert) {
-  value = +value
-  offset = offset >>> 0
-  if (!noAssert) checkInt(this, value, offset, 1, 0x7f, -0x80)
-  if (value < 0) value = 0xff + value + 1
-  this[offset] = (value & 0xff)
-  return offset + 1
-}
-
-Buffer.prototype.writeInt16LE = function writeInt16LE (value, offset, noAssert) {
-  value = +value
-  offset = offset >>> 0
-  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
-  this[offset] = (value & 0xff)
-  this[offset + 1] = (value >>> 8)
-  return offset + 2
-}
-
-Buffer.prototype.writeInt16BE = function writeInt16BE (value, offset, noAssert) {
-  value = +value
-  offset = offset >>> 0
-  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
-  this[offset] = (value >>> 8)
-  this[offset + 1] = (value & 0xff)
-  return offset + 2
-}
-
-Buffer.prototype.writeInt32LE = function writeInt32LE (value, offset, noAssert) {
-  value = +value
-  offset = offset >>> 0
-  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
-  this[offset] = (value & 0xff)
-  this[offset + 1] = (value >>> 8)
-  this[offset + 2] = (value >>> 16)
-  this[offset + 3] = (value >>> 24)
-  return offset + 4
-}
-
-Buffer.prototype.writeInt32BE = function writeInt32BE (value, offset, noAssert) {
-  value = +value
-  offset = offset >>> 0
-  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
-  if (value < 0) value = 0xffffffff + value + 1
-  this[offset] = (value >>> 24)
-  this[offset + 1] = (value >>> 16)
-  this[offset + 2] = (value >>> 8)
-  this[offset + 3] = (value & 0xff)
-  return offset + 4
-}
-
-function checkIEEE754 (buf, value, offset, ext, max, min) {
-  if (offset + ext > buf.length) throw new RangeError('Index out of range')
-  if (offset < 0) throw new RangeError('Index out of range')
-}
-
-function writeFloat (buf, value, offset, littleEndian, noAssert) {
-  value = +value
-  offset = offset >>> 0
-  if (!noAssert) {
-    checkIEEE754(buf, value, offset, 4, 3.4028234663852886e+38, -3.4028234663852886e+38)
-  }
-  ieee754.write(buf, value, offset, littleEndian, 23, 4)
-  return offset + 4
-}
-
-Buffer.prototype.writeFloatLE = function writeFloatLE (value, offset, noAssert) {
-  return writeFloat(this, value, offset, true, noAssert)
-}
-
-Buffer.prototype.writeFloatBE = function writeFloatBE (value, offset, noAssert) {
-  return writeFloat(this, value, offset, false, noAssert)
-}
-
-function writeDouble (buf, value, offset, littleEndian, noAssert) {
-  value = +value
-  offset = offset >>> 0
-  if (!noAssert) {
-    checkIEEE754(buf, value, offset, 8, 1.7976931348623157E+308, -1.7976931348623157E+308)
-  }
-  ieee754.write(buf, value, offset, littleEndian, 52, 8)
-  return offset + 8
-}
-
-Buffer.prototype.writeDoubleLE = function writeDoubleLE (value, offset, noAssert) {
-  return writeDouble(this, value, offset, true, noAssert)
-}
-
-Buffer.prototype.writeDoubleBE = function writeDoubleBE (value, offset, noAssert) {
-  return writeDouble(this, value, offset, false, noAssert)
-}
-
-// copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
-Buffer.prototype.copy = function copy (target, targetStart, start, end) {
-  if (!Buffer.isBuffer(target)) throw new TypeError('argument should be a Buffer')
-  if (!start) start = 0
-  if (!end && end !== 0) end = this.length
-  if (targetStart >= target.length) targetStart = target.length
-  if (!targetStart) targetStart = 0
-  if (end > 0 && end < start) end = start
-
-  // Copy 0 bytes; we're done
-  if (end === start) return 0
-  if (target.length === 0 || this.length === 0) return 0
-
-  // Fatal error conditions
-  if (targetStart < 0) {
-    throw new RangeError('targetStart out of bounds')
-  }
-  if (start < 0 || start >= this.length) throw new RangeError('Index out of range')
-  if (end < 0) throw new RangeError('sourceEnd out of bounds')
-
-  // Are we oob?
-  if (end > this.length) end = this.length
-  if (target.length - targetStart < end - start) {
-    end = target.length - targetStart + start
-  }
-
-  var len = end - start
-
-  if (this === target && typeof Uint8Array.prototype.copyWithin === 'function') {
-    // Use built-in when available, missing from IE11
-    this.copyWithin(targetStart, start, end)
-  } else if (this === target && start < targetStart && targetStart < end) {
-    // descending copy from end
-    for (var i = len - 1; i >= 0; --i) {
-      target[i + targetStart] = this[i + start]
-    }
-  } else {
-    Uint8Array.prototype.set.call(
-      target,
-      this.subarray(start, end),
-      targetStart
-    )
-  }
-
-  return len
-}
-
-// Usage:
-//    buffer.fill(number[, offset[, end]])
-//    buffer.fill(buffer[, offset[, end]])
-//    buffer.fill(string[, offset[, end]][, encoding])
-Buffer.prototype.fill = function fill (val, start, end, encoding) {
-  // Handle string cases:
-  if (typeof val === 'string') {
-    if (typeof start === 'string') {
-      encoding = start
-      start = 0
-      end = this.length
-    } else if (typeof end === 'string') {
-      encoding = end
-      end = this.length
-    }
-    if (encoding !== undefined && typeof encoding !== 'string') {
-      throw new TypeError('encoding must be a string')
-    }
-    if (typeof encoding === 'string' && !Buffer.isEncoding(encoding)) {
-      throw new TypeError('Unknown encoding: ' + encoding)
-    }
-    if (val.length === 1) {
-      var code = val.charCodeAt(0)
-      if ((encoding === 'utf8' && code < 128) ||
-          encoding === 'latin1') {
-        // Fast path: If `val` fits into a single byte, use that numeric value.
-        val = code
-      }
-    }
-  } else if (typeof val === 'number') {
-    val = val & 255
-  }
-
-  // Invalid ranges are not set to a default, so can range check early.
-  if (start < 0 || this.length < start || this.length < end) {
-    throw new RangeError('Out of range index')
-  }
-
-  if (end <= start) {
-    return this
-  }
-
-  start = start >>> 0
-  end = end === undefined ? this.length : end >>> 0
-
-  if (!val) val = 0
-
-  var i
-  if (typeof val === 'number') {
-    for (i = start; i < end; ++i) {
-      this[i] = val
-    }
-  } else {
-    var bytes = Buffer.isBuffer(val)
-      ? val
-      : Buffer.from(val, encoding)
-    var len = bytes.length
-    if (len === 0) {
-      throw new TypeError('The value "' + val +
-        '" is invalid for argument "value"')
-    }
-    for (i = 0; i < end - start; ++i) {
-      this[i + start] = bytes[i % len]
-    }
-  }
-
-  return this
-}
-
-// HELPER FUNCTIONS
-// ================
-
-var INVALID_BASE64_RE = /[^+/0-9A-Za-z-_]/g
-
-function base64clean (str) {
-  // Node takes equal signs as end of the Base64 encoding
-  str = str.split('=')[0]
-  // Node strips out invalid characters like \n and \t from the string, base64-js does not
-  str = str.trim().replace(INVALID_BASE64_RE, '')
-  // Node converts strings with length < 2 to ''
-  if (str.length < 2) return ''
-  // Node allows for non-padded base64 strings (missing trailing ===), base64-js does not
-  while (str.length % 4 !== 0) {
-    str = str + '='
-  }
-  return str
-}
-
-function toHex (n) {
-  if (n < 16) return '0' + n.toString(16)
-  return n.toString(16)
-}
-
-function utf8ToBytes (string, units) {
-  units = units || Infinity
-  var codePoint
-  var length = string.length
-  var leadSurrogate = null
-  var bytes = []
-
-  for (var i = 0; i < length; ++i) {
-    codePoint = string.charCodeAt(i)
-
-    // is surrogate component
-    if (codePoint > 0xD7FF && codePoint < 0xE000) {
-      // last char was a lead
-      if (!leadSurrogate) {
-        // no lead yet
-        if (codePoint > 0xDBFF) {
-          // unexpected trail
-          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
-          continue
-        } else if (i + 1 === length) {
-          // unpaired lead
-          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
-          continue
-        }
-
-        // valid lead
-        leadSurrogate = codePoint
-
-        continue
-      }
-
-      // 2 leads in a row
-      if (codePoint < 0xDC00) {
-        if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
-        leadSurrogate = codePoint
-        continue
-      }
-
-      // valid surrogate pair
-      codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000
-    } else if (leadSurrogate) {
-      // valid bmp char, but last char was a lead
-      if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
-    }
-
-    leadSurrogate = null
-
-    // encode utf8
-    if (codePoint < 0x80) {
-      if ((units -= 1) < 0) break
-      bytes.push(codePoint)
-    } else if (codePoint < 0x800) {
-      if ((units -= 2) < 0) break
-      bytes.push(
-        codePoint >> 0x6 | 0xC0,
-        codePoint & 0x3F | 0x80
-      )
-    } else if (codePoint < 0x10000) {
-      if ((units -= 3) < 0) break
-      bytes.push(
-        codePoint >> 0xC | 0xE0,
-        codePoint >> 0x6 & 0x3F | 0x80,
-        codePoint & 0x3F | 0x80
-      )
-    } else if (codePoint < 0x110000) {
-      if ((units -= 4) < 0) break
-      bytes.push(
-        codePoint >> 0x12 | 0xF0,
-        codePoint >> 0xC & 0x3F | 0x80,
-        codePoint >> 0x6 & 0x3F | 0x80,
-        codePoint & 0x3F | 0x80
-      )
-    } else {
-      throw new Error('Invalid code point')
-    }
-  }
-
-  return bytes
-}
-
-function asciiToBytes (str) {
-  var byteArray = []
-  for (var i = 0; i < str.length; ++i) {
-    // Node's code seems to be doing this and not & 0x7F..
-    byteArray.push(str.charCodeAt(i) & 0xFF)
-  }
-  return byteArray
-}
-
-function utf16leToBytes (str, units) {
-  var c, hi, lo
-  var byteArray = []
-  for (var i = 0; i < str.length; ++i) {
-    if ((units -= 2) < 0) break
-
-    c = str.charCodeAt(i)
-    hi = c >> 8
-    lo = c % 256
-    byteArray.push(lo)
-    byteArray.push(hi)
-  }
-
-  return byteArray
-}
-
-function base64ToBytes (str) {
-  return base64.toByteArray(base64clean(str))
-}
-
-function blitBuffer (src, dst, offset, length) {
-  for (var i = 0; i < length; ++i) {
-    if ((i + offset >= dst.length) || (i >= src.length)) break
-    dst[i + offset] = src[i]
-  }
-  return i
-}
-
-// ArrayBuffer or Uint8Array objects from other contexts (i.e. iframes) do not pass
-// the `instanceof` check but they should be treated as of that type.
-// See: https://github.com/feross/buffer/issues/166
-function isInstance (obj, type) {
-  return obj instanceof type ||
-    (obj != null && obj.constructor != null && obj.constructor.name != null &&
-      obj.constructor.name === type.name)
-}
-function numberIsNaN (obj) {
-  // For IE11 support
-  return obj !== obj // eslint-disable-line no-self-compare
-}
-
-}).call(this,require("buffer").Buffer)
-},{"base64-js":1,"buffer":2,"ieee754":3}],3:[function(require,module,exports){
-exports.read = function (buffer, offset, isLE, mLen, nBytes) {
-  var e, m
-  var eLen = (nBytes * 8) - mLen - 1
-  var eMax = (1 << eLen) - 1
-  var eBias = eMax >> 1
-  var nBits = -7
-  var i = isLE ? (nBytes - 1) : 0
-  var d = isLE ? -1 : 1
-  var s = buffer[offset + i]
-
-  i += d
-
-  e = s & ((1 << (-nBits)) - 1)
-  s >>= (-nBits)
-  nBits += eLen
-  for (; nBits > 0; e = (e * 256) + buffer[offset + i], i += d, nBits -= 8) {}
-
-  m = e & ((1 << (-nBits)) - 1)
-  e >>= (-nBits)
-  nBits += mLen
-  for (; nBits > 0; m = (m * 256) + buffer[offset + i], i += d, nBits -= 8) {}
-
-  if (e === 0) {
-    e = 1 - eBias
-  } else if (e === eMax) {
-    return m ? NaN : ((s ? -1 : 1) * Infinity)
-  } else {
-    m = m + Math.pow(2, mLen)
-    e = e - eBias
-  }
-  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)
-}
-
-exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
-  var e, m, c
-  var eLen = (nBytes * 8) - mLen - 1
-  var eMax = (1 << eLen) - 1
-  var eBias = eMax >> 1
-  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0)
-  var i = isLE ? 0 : (nBytes - 1)
-  var d = isLE ? 1 : -1
-  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0
-
-  value = Math.abs(value)
-
-  if (isNaN(value) || value === Infinity) {
-    m = isNaN(value) ? 1 : 0
-    e = eMax
-  } else {
-    e = Math.floor(Math.log(value) / Math.LN2)
-    if (value * (c = Math.pow(2, -e)) < 1) {
-      e--
-      c *= 2
-    }
-    if (e + eBias >= 1) {
-      value += rt / c
-    } else {
-      value += rt * Math.pow(2, 1 - eBias)
-    }
-    if (value * c >= 2) {
-      e++
-      c /= 2
-    }
-
-    if (e + eBias >= eMax) {
-      m = 0
-      e = eMax
-    } else if (e + eBias >= 1) {
-      m = ((value * c) - 1) * Math.pow(2, mLen)
-      e = e + eBias
-    } else {
-      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen)
-      e = 0
-    }
-  }
-
-  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
-
-  e = (e << mLen) | m
-  eLen += mLen
-  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
-
-  buffer[offset + i - d] |= s * 128
-}
-
-},{}],4:[function(require,module,exports){
-aa = require("apache-arrow");
-const table = aa.Table.from(fetch(("./pw.arrow")));
-var ss = table.toArray()
-console.log(ss);
+/***/ "./node_modules/apache-arrow/Arrow.dom.mjs":
+/*!*************************************************!*\
+  !*** ./node_modules/apache-arrow/Arrow.dom.mjs ***!
+  \*************************************************/
+/*! exports provided: ArrowType, DateUnit, IntervalUnit, MessageHeader, MetadataVersion, Precision, TimeUnit, Type, UnionMode, BufferType, Data, DataType, Null, Bool, Int, Int8, Int16, Int32, Int64, Uint8, Uint16, Uint32, Uint64, Float, Float16, Float32, Float64, Utf8, Binary, FixedSizeBinary, Date_, DateDay, DateMillisecond, Timestamp, TimestampSecond, TimestampMillisecond, TimestampMicrosecond, TimestampNanosecond, Time, TimeSecond, TimeMillisecond, TimeMicrosecond, TimeNanosecond, Decimal, List, Struct, Union, DenseUnion, SparseUnion, Dictionary, Interval, IntervalDayTime, IntervalYearMonth, FixedSizeList, Map_, Table, Column, Schema, Field, Visitor, Vector, BaseVector, BinaryVector, BoolVector, Chunked, DateVector, DateDayVector, DateMillisecondVector, DecimalVector, DictionaryVector, FixedSizeBinaryVector, FixedSizeListVector, FloatVector, Float16Vector, Float32Vector, Float64Vector, IntervalVector, IntervalDayTimeVector, IntervalYearMonthVector, IntVector, Int8Vector, Int16Vector, Int32Vector, Int64Vector, Uint8Vector, Uint16Vector, Uint32Vector, Uint64Vector, ListVector, MapVector, NullVector, StructVector, TimestampVector, TimestampSecondVector, TimestampMillisecondVector, TimestampMicrosecondVector, TimestampNanosecondVector, TimeVector, TimeSecondVector, TimeMillisecondVector, TimeMicrosecondVector, TimeNanosecondVector, UnionVector, DenseUnionVector, SparseUnionVector, Utf8Vector, ByteStream, AsyncByteStream, AsyncByteQueue, RecordBatchReader, RecordBatchFileReader, RecordBatchStreamReader, AsyncRecordBatchFileReader, AsyncRecordBatchStreamReader, RecordBatchWriter, RecordBatchFileWriter, RecordBatchStreamWriter, RecordBatchJSONWriter, MessageReader, AsyncMessageReader, JSONMessageReader, Message, RecordBatch, DataFrame, FilteredDataFrame, CountByResult, predicate, util, Builder, BinaryBuilder, BoolBuilder, DateBuilder, DateDayBuilder, DateMillisecondBuilder, DecimalBuilder, DictionaryBuilder, FixedSizeBinaryBuilder, FixedSizeListBuilder, FloatBuilder, Float16Builder, Float32Builder, Float64Builder, IntervalBuilder, IntervalDayTimeBuilder, IntervalYearMonthBuilder, IntBuilder, Int8Builder, Int16Builder, Int32Builder, Int64Builder, Uint8Builder, Uint16Builder, Uint32Builder, Uint64Builder, ListBuilder, MapBuilder, NullBuilder, StructBuilder, TimestampBuilder, TimestampSecondBuilder, TimestampMillisecondBuilder, TimestampMicrosecondBuilder, TimestampNanosecondBuilder, TimeBuilder, TimeSecondBuilder, TimeMillisecondBuilder, TimeMicrosecondBuilder, TimeNanosecondBuilder, UnionBuilder, DenseUnionBuilder, SparseUnionBuilder, Utf8Builder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
 
-},{"apache-arrow":5}],5:[function(require,module,exports){
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _io_adapters__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./io/adapters */ "./node_modules/apache-arrow/io/adapters.mjs");
+/* harmony import */ var _builder_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./builder/index */ "./node_modules/apache-arrow/builder/index.mjs");
+/* harmony import */ var _ipc_reader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ipc/reader */ "./node_modules/apache-arrow/ipc/reader.mjs");
+/* harmony import */ var _ipc_writer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./ipc/writer */ "./node_modules/apache-arrow/ipc/writer.mjs");
+/* harmony import */ var _io_whatwg_iterable__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./io/whatwg/iterable */ "./node_modules/apache-arrow/io/whatwg/iterable.mjs");
+/* harmony import */ var _io_whatwg_builder__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./io/whatwg/builder */ "./node_modules/apache-arrow/io/whatwg/builder.mjs");
+/* harmony import */ var _io_whatwg_reader__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./io/whatwg/reader */ "./node_modules/apache-arrow/io/whatwg/reader.mjs");
+/* harmony import */ var _io_whatwg_writer__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./io/whatwg/writer */ "./node_modules/apache-arrow/io/whatwg/writer.mjs");
+/* harmony import */ var _Arrow__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./Arrow */ "./node_modules/apache-arrow/Arrow.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ArrowType", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["ArrowType"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateUnit", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DateUnit"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalUnit", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["IntervalUnit"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MessageHeader", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["MessageHeader"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MetadataVersion", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["MetadataVersion"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Precision", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Precision"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeUnit", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimeUnit"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Type", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Type"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "UnionMode", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["UnionMode"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BufferType", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["BufferType"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Data", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Data"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DataType", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DataType"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Null", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Null"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Bool", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Bool"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Int"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int8", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Int8"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int16", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Int16"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int32", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Int32"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int64", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Int64"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint8", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Uint8"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint16", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Uint16"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint32", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Uint32"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint64", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Uint64"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Float"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float16", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Float16"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float32", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Float32"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float64", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Float64"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Utf8", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Utf8"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Binary", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Binary"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FixedSizeBinary", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["FixedSizeBinary"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Date_", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Date_"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateDay", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DateDay"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateMillisecond", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DateMillisecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Timestamp", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Timestamp"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampSecond", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimestampSecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampMillisecond", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimestampMillisecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampMicrosecond", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimestampMicrosecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampNanosecond", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimestampNanosecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Time", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Time"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeSecond", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimeSecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeMillisecond", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimeMillisecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeMicrosecond", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimeMicrosecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeNanosecond", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimeNanosecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Decimal", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Decimal"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "List", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["List"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Struct", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Struct"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Union", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Union"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DenseUnion", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DenseUnion"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SparseUnion", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["SparseUnion"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Dictionary", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Dictionary"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Interval", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Interval"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalDayTime", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["IntervalDayTime"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalYearMonth", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["IntervalYearMonth"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FixedSizeList", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["FixedSizeList"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Map_", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Map_"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Table", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Table"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Column", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Column"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Schema", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Schema"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Field", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Field"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Visitor", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Visitor"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Vector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["BaseVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BinaryVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["BinaryVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoolVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["BoolVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Chunked", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Chunked"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DateVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateDayVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DateDayVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateMillisecondVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DateMillisecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DecimalVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DecimalVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DictionaryVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DictionaryVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FixedSizeBinaryVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["FixedSizeBinaryVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FixedSizeListVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["FixedSizeListVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FloatVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["FloatVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float16Vector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Float16Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float32Vector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Float32Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float64Vector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Float64Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["IntervalVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalDayTimeVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["IntervalDayTimeVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalYearMonthVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["IntervalYearMonthVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["IntVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int8Vector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Int8Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int16Vector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Int16Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int32Vector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Int32Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int64Vector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Int64Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint8Vector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Uint8Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint16Vector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Uint16Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint32Vector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Uint32Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint64Vector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Uint64Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ListVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["ListVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MapVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["MapVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "NullVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["NullVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "StructVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["StructVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimestampVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampSecondVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimestampSecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampMillisecondVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimestampMillisecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampMicrosecondVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimestampMicrosecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampNanosecondVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimestampNanosecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimeVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeSecondVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimeSecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeMillisecondVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimeMillisecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeMicrosecondVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimeMicrosecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeNanosecondVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimeNanosecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "UnionVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["UnionVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DenseUnionVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DenseUnionVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SparseUnionVector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["SparseUnionVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Utf8Vector", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Utf8Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ByteStream", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["ByteStream"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AsyncByteStream", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["AsyncByteStream"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AsyncByteQueue", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["AsyncByteQueue"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RecordBatchReader", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["RecordBatchReader"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RecordBatchFileReader", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["RecordBatchFileReader"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RecordBatchStreamReader", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["RecordBatchStreamReader"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AsyncRecordBatchFileReader", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["AsyncRecordBatchFileReader"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AsyncRecordBatchStreamReader", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["AsyncRecordBatchStreamReader"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RecordBatchWriter", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["RecordBatchWriter"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RecordBatchFileWriter", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["RecordBatchFileWriter"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RecordBatchStreamWriter", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["RecordBatchStreamWriter"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RecordBatchJSONWriter", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["RecordBatchJSONWriter"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MessageReader", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["MessageReader"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AsyncMessageReader", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["AsyncMessageReader"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "JSONMessageReader", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["JSONMessageReader"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Message", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Message"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RecordBatch", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["RecordBatch"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DataFrame", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DataFrame"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FilteredDataFrame", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["FilteredDataFrame"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "CountByResult", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["CountByResult"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "predicate", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["predicate"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "util", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["util"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Builder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BinaryBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["BinaryBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoolBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["BoolBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DateBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateDayBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DateDayBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateMillisecondBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DateMillisecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DecimalBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DecimalBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DictionaryBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DictionaryBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FixedSizeBinaryBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["FixedSizeBinaryBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FixedSizeListBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["FixedSizeListBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FloatBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["FloatBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float16Builder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Float16Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float32Builder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Float32Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float64Builder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Float64Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["IntervalBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalDayTimeBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["IntervalDayTimeBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalYearMonthBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["IntervalYearMonthBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["IntBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int8Builder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Int8Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int16Builder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Int16Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int32Builder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Int32Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int64Builder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Int64Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint8Builder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Uint8Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint16Builder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Uint16Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint32Builder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Uint32Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint64Builder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Uint64Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ListBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["ListBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MapBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["MapBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "NullBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["NullBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "StructBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["StructBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimestampBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampSecondBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimestampSecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampMillisecondBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimestampMillisecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampMicrosecondBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimestampMicrosecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampNanosecondBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimestampNanosecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimeBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeSecondBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimeSecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeMillisecondBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimeMillisecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeMicrosecondBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimeMicrosecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeNanosecondBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["TimeNanosecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "UnionBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["UnionBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DenseUnionBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["DenseUnionBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SparseUnionBuilder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["SparseUnionBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Utf8Builder", function() { return _Arrow__WEBPACK_IMPORTED_MODULE_8__["Utf8Builder"]; });
+
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2043,197 +482,399 @@ console.log(ss);
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const adapters_1 = require("./io/adapters");
-const index_1 = require("./builder/index");
-const reader_1 = require("./ipc/reader");
-const writer_1 = require("./ipc/writer");
-const iterable_1 = require("./io/whatwg/iterable");
-const builder_1 = require("./io/whatwg/builder");
-const reader_2 = require("./io/whatwg/reader");
-const writer_2 = require("./io/whatwg/writer");
-adapters_1.default.toDOMStream = iterable_1.toDOMStream;
-index_1.Builder['throughDOM'] = builder_1.builderThroughDOMStream;
-reader_1.RecordBatchReader['throughDOM'] = reader_2.recordBatchReaderThroughDOMStream;
-writer_1.RecordBatchWriter['throughDOM'] = writer_2.recordBatchWriterThroughDOMStream;
-var Arrow_1 = require("./Arrow");
-exports.ArrowType = Arrow_1.ArrowType;
-exports.DateUnit = Arrow_1.DateUnit;
-exports.IntervalUnit = Arrow_1.IntervalUnit;
-exports.MessageHeader = Arrow_1.MessageHeader;
-exports.MetadataVersion = Arrow_1.MetadataVersion;
-exports.Precision = Arrow_1.Precision;
-exports.TimeUnit = Arrow_1.TimeUnit;
-exports.Type = Arrow_1.Type;
-exports.UnionMode = Arrow_1.UnionMode;
-exports.BufferType = Arrow_1.BufferType;
-exports.Data = Arrow_1.Data;
-exports.DataType = Arrow_1.DataType;
-exports.Null = Arrow_1.Null;
-exports.Bool = Arrow_1.Bool;
-exports.Int = Arrow_1.Int;
-exports.Int8 = Arrow_1.Int8;
-exports.Int16 = Arrow_1.Int16;
-exports.Int32 = Arrow_1.Int32;
-exports.Int64 = Arrow_1.Int64;
-exports.Uint8 = Arrow_1.Uint8;
-exports.Uint16 = Arrow_1.Uint16;
-exports.Uint32 = Arrow_1.Uint32;
-exports.Uint64 = Arrow_1.Uint64;
-exports.Float = Arrow_1.Float;
-exports.Float16 = Arrow_1.Float16;
-exports.Float32 = Arrow_1.Float32;
-exports.Float64 = Arrow_1.Float64;
-exports.Utf8 = Arrow_1.Utf8;
-exports.Binary = Arrow_1.Binary;
-exports.FixedSizeBinary = Arrow_1.FixedSizeBinary;
-exports.Date_ = Arrow_1.Date_;
-exports.DateDay = Arrow_1.DateDay;
-exports.DateMillisecond = Arrow_1.DateMillisecond;
-exports.Timestamp = Arrow_1.Timestamp;
-exports.TimestampSecond = Arrow_1.TimestampSecond;
-exports.TimestampMillisecond = Arrow_1.TimestampMillisecond;
-exports.TimestampMicrosecond = Arrow_1.TimestampMicrosecond;
-exports.TimestampNanosecond = Arrow_1.TimestampNanosecond;
-exports.Time = Arrow_1.Time;
-exports.TimeSecond = Arrow_1.TimeSecond;
-exports.TimeMillisecond = Arrow_1.TimeMillisecond;
-exports.TimeMicrosecond = Arrow_1.TimeMicrosecond;
-exports.TimeNanosecond = Arrow_1.TimeNanosecond;
-exports.Decimal = Arrow_1.Decimal;
-exports.List = Arrow_1.List;
-exports.Struct = Arrow_1.Struct;
-exports.Union = Arrow_1.Union;
-exports.DenseUnion = Arrow_1.DenseUnion;
-exports.SparseUnion = Arrow_1.SparseUnion;
-exports.Dictionary = Arrow_1.Dictionary;
-exports.Interval = Arrow_1.Interval;
-exports.IntervalDayTime = Arrow_1.IntervalDayTime;
-exports.IntervalYearMonth = Arrow_1.IntervalYearMonth;
-exports.FixedSizeList = Arrow_1.FixedSizeList;
-exports.Map_ = Arrow_1.Map_;
-exports.Table = Arrow_1.Table;
-exports.Column = Arrow_1.Column;
-exports.Schema = Arrow_1.Schema;
-exports.Field = Arrow_1.Field;
-exports.Visitor = Arrow_1.Visitor;
-exports.Vector = Arrow_1.Vector;
-exports.BaseVector = Arrow_1.BaseVector;
-exports.BinaryVector = Arrow_1.BinaryVector;
-exports.BoolVector = Arrow_1.BoolVector;
-exports.Chunked = Arrow_1.Chunked;
-exports.DateVector = Arrow_1.DateVector;
-exports.DateDayVector = Arrow_1.DateDayVector;
-exports.DateMillisecondVector = Arrow_1.DateMillisecondVector;
-exports.DecimalVector = Arrow_1.DecimalVector;
-exports.DictionaryVector = Arrow_1.DictionaryVector;
-exports.FixedSizeBinaryVector = Arrow_1.FixedSizeBinaryVector;
-exports.FixedSizeListVector = Arrow_1.FixedSizeListVector;
-exports.FloatVector = Arrow_1.FloatVector;
-exports.Float16Vector = Arrow_1.Float16Vector;
-exports.Float32Vector = Arrow_1.Float32Vector;
-exports.Float64Vector = Arrow_1.Float64Vector;
-exports.IntervalVector = Arrow_1.IntervalVector;
-exports.IntervalDayTimeVector = Arrow_1.IntervalDayTimeVector;
-exports.IntervalYearMonthVector = Arrow_1.IntervalYearMonthVector;
-exports.IntVector = Arrow_1.IntVector;
-exports.Int8Vector = Arrow_1.Int8Vector;
-exports.Int16Vector = Arrow_1.Int16Vector;
-exports.Int32Vector = Arrow_1.Int32Vector;
-exports.Int64Vector = Arrow_1.Int64Vector;
-exports.Uint8Vector = Arrow_1.Uint8Vector;
-exports.Uint16Vector = Arrow_1.Uint16Vector;
-exports.Uint32Vector = Arrow_1.Uint32Vector;
-exports.Uint64Vector = Arrow_1.Uint64Vector;
-exports.ListVector = Arrow_1.ListVector;
-exports.MapVector = Arrow_1.MapVector;
-exports.NullVector = Arrow_1.NullVector;
-exports.StructVector = Arrow_1.StructVector;
-exports.TimestampVector = Arrow_1.TimestampVector;
-exports.TimestampSecondVector = Arrow_1.TimestampSecondVector;
-exports.TimestampMillisecondVector = Arrow_1.TimestampMillisecondVector;
-exports.TimestampMicrosecondVector = Arrow_1.TimestampMicrosecondVector;
-exports.TimestampNanosecondVector = Arrow_1.TimestampNanosecondVector;
-exports.TimeVector = Arrow_1.TimeVector;
-exports.TimeSecondVector = Arrow_1.TimeSecondVector;
-exports.TimeMillisecondVector = Arrow_1.TimeMillisecondVector;
-exports.TimeMicrosecondVector = Arrow_1.TimeMicrosecondVector;
-exports.TimeNanosecondVector = Arrow_1.TimeNanosecondVector;
-exports.UnionVector = Arrow_1.UnionVector;
-exports.DenseUnionVector = Arrow_1.DenseUnionVector;
-exports.SparseUnionVector = Arrow_1.SparseUnionVector;
-exports.Utf8Vector = Arrow_1.Utf8Vector;
-exports.ByteStream = Arrow_1.ByteStream;
-exports.AsyncByteStream = Arrow_1.AsyncByteStream;
-exports.AsyncByteQueue = Arrow_1.AsyncByteQueue;
-exports.RecordBatchReader = Arrow_1.RecordBatchReader;
-exports.RecordBatchFileReader = Arrow_1.RecordBatchFileReader;
-exports.RecordBatchStreamReader = Arrow_1.RecordBatchStreamReader;
-exports.AsyncRecordBatchFileReader = Arrow_1.AsyncRecordBatchFileReader;
-exports.AsyncRecordBatchStreamReader = Arrow_1.AsyncRecordBatchStreamReader;
-exports.RecordBatchWriter = Arrow_1.RecordBatchWriter;
-exports.RecordBatchFileWriter = Arrow_1.RecordBatchFileWriter;
-exports.RecordBatchStreamWriter = Arrow_1.RecordBatchStreamWriter;
-exports.RecordBatchJSONWriter = Arrow_1.RecordBatchJSONWriter;
-exports.MessageReader = Arrow_1.MessageReader;
-exports.AsyncMessageReader = Arrow_1.AsyncMessageReader;
-exports.JSONMessageReader = Arrow_1.JSONMessageReader;
-exports.Message = Arrow_1.Message;
-exports.RecordBatch = Arrow_1.RecordBatch;
-exports.DataFrame = Arrow_1.DataFrame;
-exports.FilteredDataFrame = Arrow_1.FilteredDataFrame;
-exports.CountByResult = Arrow_1.CountByResult;
-exports.predicate = Arrow_1.predicate;
-exports.util = Arrow_1.util;
-exports.Builder = Arrow_1.Builder;
-exports.BinaryBuilder = Arrow_1.BinaryBuilder;
-exports.BoolBuilder = Arrow_1.BoolBuilder;
-exports.DateBuilder = Arrow_1.DateBuilder;
-exports.DateDayBuilder = Arrow_1.DateDayBuilder;
-exports.DateMillisecondBuilder = Arrow_1.DateMillisecondBuilder;
-exports.DecimalBuilder = Arrow_1.DecimalBuilder;
-exports.DictionaryBuilder = Arrow_1.DictionaryBuilder;
-exports.FixedSizeBinaryBuilder = Arrow_1.FixedSizeBinaryBuilder;
-exports.FixedSizeListBuilder = Arrow_1.FixedSizeListBuilder;
-exports.FloatBuilder = Arrow_1.FloatBuilder;
-exports.Float16Builder = Arrow_1.Float16Builder;
-exports.Float32Builder = Arrow_1.Float32Builder;
-exports.Float64Builder = Arrow_1.Float64Builder;
-exports.IntervalBuilder = Arrow_1.IntervalBuilder;
-exports.IntervalDayTimeBuilder = Arrow_1.IntervalDayTimeBuilder;
-exports.IntervalYearMonthBuilder = Arrow_1.IntervalYearMonthBuilder;
-exports.IntBuilder = Arrow_1.IntBuilder;
-exports.Int8Builder = Arrow_1.Int8Builder;
-exports.Int16Builder = Arrow_1.Int16Builder;
-exports.Int32Builder = Arrow_1.Int32Builder;
-exports.Int64Builder = Arrow_1.Int64Builder;
-exports.Uint8Builder = Arrow_1.Uint8Builder;
-exports.Uint16Builder = Arrow_1.Uint16Builder;
-exports.Uint32Builder = Arrow_1.Uint32Builder;
-exports.Uint64Builder = Arrow_1.Uint64Builder;
-exports.ListBuilder = Arrow_1.ListBuilder;
-exports.MapBuilder = Arrow_1.MapBuilder;
-exports.NullBuilder = Arrow_1.NullBuilder;
-exports.StructBuilder = Arrow_1.StructBuilder;
-exports.TimestampBuilder = Arrow_1.TimestampBuilder;
-exports.TimestampSecondBuilder = Arrow_1.TimestampSecondBuilder;
-exports.TimestampMillisecondBuilder = Arrow_1.TimestampMillisecondBuilder;
-exports.TimestampMicrosecondBuilder = Arrow_1.TimestampMicrosecondBuilder;
-exports.TimestampNanosecondBuilder = Arrow_1.TimestampNanosecondBuilder;
-exports.TimeBuilder = Arrow_1.TimeBuilder;
-exports.TimeSecondBuilder = Arrow_1.TimeSecondBuilder;
-exports.TimeMillisecondBuilder = Arrow_1.TimeMillisecondBuilder;
-exports.TimeMicrosecondBuilder = Arrow_1.TimeMicrosecondBuilder;
-exports.TimeNanosecondBuilder = Arrow_1.TimeNanosecondBuilder;
-exports.UnionBuilder = Arrow_1.UnionBuilder;
-exports.DenseUnionBuilder = Arrow_1.DenseUnionBuilder;
-exports.SparseUnionBuilder = Arrow_1.SparseUnionBuilder;
-exports.Utf8Builder = Arrow_1.Utf8Builder;
 
 
 
-},{"./Arrow":6,"./builder/index":17,"./io/adapters":38,"./io/whatwg/builder":42,"./io/whatwg/iterable":43,"./io/whatwg/reader":44,"./io/whatwg/writer":45,"./ipc/reader":50,"./ipc/writer":51}],6:[function(require,module,exports){
+
+
+
+
+
+_io_adapters__WEBPACK_IMPORTED_MODULE_0__["default"].toDOMStream = _io_whatwg_iterable__WEBPACK_IMPORTED_MODULE_4__["toDOMStream"];
+_builder_index__WEBPACK_IMPORTED_MODULE_1__["Builder"]['throughDOM'] = _io_whatwg_builder__WEBPACK_IMPORTED_MODULE_5__["builderThroughDOMStream"];
+_ipc_reader__WEBPACK_IMPORTED_MODULE_2__["RecordBatchReader"]['throughDOM'] = _io_whatwg_reader__WEBPACK_IMPORTED_MODULE_6__["recordBatchReaderThroughDOMStream"];
+_ipc_writer__WEBPACK_IMPORTED_MODULE_3__["RecordBatchWriter"]['throughDOM'] = _io_whatwg_writer__WEBPACK_IMPORTED_MODULE_7__["recordBatchWriterThroughDOMStream"];
+
+
+//# sourceMappingURL=Arrow.dom.mjs.map
+
+
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/Arrow.mjs":
+/*!*********************************************!*\
+  !*** ./node_modules/apache-arrow/Arrow.mjs ***!
+  \*********************************************/
+/*! exports provided: ArrowType, DateUnit, IntervalUnit, MessageHeader, MetadataVersion, Precision, TimeUnit, Type, UnionMode, BufferType, Data, DataType, Null, Bool, Int, Int8, Int16, Int32, Int64, Uint8, Uint16, Uint32, Uint64, Float, Float16, Float32, Float64, Utf8, Binary, FixedSizeBinary, Date_, DateDay, DateMillisecond, Timestamp, TimestampSecond, TimestampMillisecond, TimestampMicrosecond, TimestampNanosecond, Time, TimeSecond, TimeMillisecond, TimeMicrosecond, TimeNanosecond, Decimal, List, Struct, Union, DenseUnion, SparseUnion, Dictionary, Interval, IntervalDayTime, IntervalYearMonth, FixedSizeList, Map_, Table, Column, Visitor, Schema, Field, Vector, BaseVector, BinaryVector, BoolVector, Chunked, DateVector, DateDayVector, DateMillisecondVector, DecimalVector, DictionaryVector, FixedSizeBinaryVector, FixedSizeListVector, FloatVector, Float16Vector, Float32Vector, Float64Vector, IntervalVector, IntervalDayTimeVector, IntervalYearMonthVector, IntVector, Int8Vector, Int16Vector, Int32Vector, Int64Vector, Uint8Vector, Uint16Vector, Uint32Vector, Uint64Vector, ListVector, MapVector, NullVector, StructVector, TimestampVector, TimestampSecondVector, TimestampMillisecondVector, TimestampMicrosecondVector, TimestampNanosecondVector, TimeVector, TimeSecondVector, TimeMillisecondVector, TimeMicrosecondVector, TimeNanosecondVector, UnionVector, DenseUnionVector, SparseUnionVector, Utf8Vector, Builder, BinaryBuilder, BoolBuilder, DateBuilder, DateDayBuilder, DateMillisecondBuilder, DecimalBuilder, DictionaryBuilder, FixedSizeBinaryBuilder, FixedSizeListBuilder, FloatBuilder, Float16Builder, Float32Builder, Float64Builder, IntervalBuilder, IntervalDayTimeBuilder, IntervalYearMonthBuilder, IntBuilder, Int8Builder, Int16Builder, Int32Builder, Int64Builder, Uint8Builder, Uint16Builder, Uint32Builder, Uint64Builder, ListBuilder, MapBuilder, NullBuilder, StructBuilder, TimestampBuilder, TimestampSecondBuilder, TimestampMillisecondBuilder, TimestampMicrosecondBuilder, TimestampNanosecondBuilder, TimeBuilder, TimeSecondBuilder, TimeMillisecondBuilder, TimeMicrosecondBuilder, TimeNanosecondBuilder, UnionBuilder, DenseUnionBuilder, SparseUnionBuilder, Utf8Builder, ByteStream, AsyncByteStream, AsyncByteQueue, RecordBatchReader, RecordBatchFileReader, RecordBatchStreamReader, AsyncRecordBatchFileReader, AsyncRecordBatchStreamReader, RecordBatchWriter, RecordBatchFileWriter, RecordBatchStreamWriter, RecordBatchJSONWriter, MessageReader, AsyncMessageReader, JSONMessageReader, Message, RecordBatch, DataFrame, FilteredDataFrame, CountByResult, predicate, util */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "util", function() { return util; });
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ArrowType", function() { return _enum__WEBPACK_IMPORTED_MODULE_0__["ArrowType"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateUnit", function() { return _enum__WEBPACK_IMPORTED_MODULE_0__["DateUnit"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalUnit", function() { return _enum__WEBPACK_IMPORTED_MODULE_0__["IntervalUnit"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MessageHeader", function() { return _enum__WEBPACK_IMPORTED_MODULE_0__["MessageHeader"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MetadataVersion", function() { return _enum__WEBPACK_IMPORTED_MODULE_0__["MetadataVersion"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Precision", function() { return _enum__WEBPACK_IMPORTED_MODULE_0__["Precision"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeUnit", function() { return _enum__WEBPACK_IMPORTED_MODULE_0__["TimeUnit"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Type", function() { return _enum__WEBPACK_IMPORTED_MODULE_0__["Type"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "UnionMode", function() { return _enum__WEBPACK_IMPORTED_MODULE_0__["UnionMode"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BufferType", function() { return _enum__WEBPACK_IMPORTED_MODULE_0__["BufferType"]; });
+
+/* harmony import */ var _data__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./data */ "./node_modules/apache-arrow/data.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Data", function() { return _data__WEBPACK_IMPORTED_MODULE_1__["Data"]; });
+
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./type */ "./node_modules/apache-arrow/type.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DataType", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["DataType"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Null", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Null"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Bool", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Bool"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Int"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int8", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Int8"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int16", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Int16"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int32", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Int32"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int64", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Int64"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint8", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Uint8"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint16", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Uint16"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint32", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Uint32"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint64", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Uint64"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Float"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float16", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Float16"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float32", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Float32"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float64", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Float64"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Utf8", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Utf8"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Binary", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Binary"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FixedSizeBinary", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["FixedSizeBinary"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Date_", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Date_"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateDay", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["DateDay"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateMillisecond", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["DateMillisecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Timestamp", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Timestamp"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampSecond", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["TimestampSecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampMillisecond", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["TimestampMillisecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampMicrosecond", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["TimestampMicrosecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampNanosecond", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["TimestampNanosecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Time", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Time"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeSecond", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["TimeSecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeMillisecond", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["TimeMillisecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeMicrosecond", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["TimeMicrosecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeNanosecond", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["TimeNanosecond"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Decimal", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Decimal"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "List", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["List"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Struct", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Struct"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Union", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Union"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DenseUnion", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["DenseUnion"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SparseUnion", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["SparseUnion"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Dictionary", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Dictionary"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Interval", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Interval"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalDayTime", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["IntervalDayTime"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalYearMonth", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["IntervalYearMonth"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FixedSizeList", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["FixedSizeList"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Map_", function() { return _type__WEBPACK_IMPORTED_MODULE_2__["Map_"]; });
+
+/* harmony import */ var _table__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./table */ "./node_modules/apache-arrow/table.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Table", function() { return _table__WEBPACK_IMPORTED_MODULE_3__["Table"]; });
+
+/* harmony import */ var _column__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./column */ "./node_modules/apache-arrow/column.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Column", function() { return _column__WEBPACK_IMPORTED_MODULE_4__["Column"]; });
+
+/* harmony import */ var _visitor__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./visitor */ "./node_modules/apache-arrow/visitor.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Visitor", function() { return _visitor__WEBPACK_IMPORTED_MODULE_5__["Visitor"]; });
+
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./schema */ "./node_modules/apache-arrow/schema.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Schema", function() { return _schema__WEBPACK_IMPORTED_MODULE_6__["Schema"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Field", function() { return _schema__WEBPACK_IMPORTED_MODULE_6__["Field"]; });
+
+/* harmony import */ var _vector_index__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./vector/index */ "./node_modules/apache-arrow/vector/index.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Vector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["BaseVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BinaryVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["BinaryVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoolVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["BoolVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Chunked", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["Chunked"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["DateVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateDayVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["DateDayVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateMillisecondVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["DateMillisecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DecimalVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["DecimalVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DictionaryVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["DictionaryVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FixedSizeBinaryVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["FixedSizeBinaryVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FixedSizeListVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["FixedSizeListVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FloatVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["FloatVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float16Vector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["Float16Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float32Vector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["Float32Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float64Vector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["Float64Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["IntervalVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalDayTimeVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["IntervalDayTimeVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalYearMonthVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["IntervalYearMonthVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["IntVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int8Vector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["Int8Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int16Vector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["Int16Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int32Vector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["Int32Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int64Vector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["Int64Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint8Vector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["Uint8Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint16Vector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["Uint16Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint32Vector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["Uint32Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint64Vector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["Uint64Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ListVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["ListVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MapVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["MapVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "NullVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["NullVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "StructVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["StructVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["TimestampVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampSecondVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["TimestampSecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampMillisecondVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["TimestampMillisecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampMicrosecondVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["TimestampMicrosecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampNanosecondVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["TimestampNanosecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["TimeVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeSecondVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["TimeSecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeMillisecondVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["TimeMillisecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeMicrosecondVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["TimeMicrosecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeNanosecondVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["TimeNanosecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "UnionVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["UnionVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DenseUnionVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["DenseUnionVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SparseUnionVector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["SparseUnionVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Utf8Vector", function() { return _vector_index__WEBPACK_IMPORTED_MODULE_7__["Utf8Vector"]; });
+
+/* harmony import */ var _builder_index__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./builder/index */ "./node_modules/apache-arrow/builder/index.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Builder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BinaryBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["BinaryBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoolBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["BoolBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["DateBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateDayBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["DateDayBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateMillisecondBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["DateMillisecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DecimalBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["DecimalBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DictionaryBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["DictionaryBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FixedSizeBinaryBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["FixedSizeBinaryBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FixedSizeListBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["FixedSizeListBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FloatBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["FloatBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float16Builder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["Float16Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float32Builder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["Float32Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float64Builder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["Float64Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["IntervalBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalDayTimeBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["IntervalDayTimeBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalYearMonthBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["IntervalYearMonthBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["IntBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int8Builder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["Int8Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int16Builder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["Int16Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int32Builder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["Int32Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int64Builder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["Int64Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint8Builder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["Uint8Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint16Builder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["Uint16Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint32Builder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["Uint32Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint64Builder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["Uint64Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ListBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["ListBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MapBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["MapBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "NullBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["NullBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "StructBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["StructBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["TimestampBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampSecondBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["TimestampSecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampMillisecondBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["TimestampMillisecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampMicrosecondBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["TimestampMicrosecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampNanosecondBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["TimestampNanosecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["TimeBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeSecondBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["TimeSecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeMillisecondBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["TimeMillisecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeMicrosecondBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["TimeMicrosecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeNanosecondBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["TimeNanosecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "UnionBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["UnionBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DenseUnionBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["DenseUnionBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SparseUnionBuilder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["SparseUnionBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Utf8Builder", function() { return _builder_index__WEBPACK_IMPORTED_MODULE_8__["Utf8Builder"]; });
+
+/* harmony import */ var _io_stream__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./io/stream */ "./node_modules/apache-arrow/io/stream.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ByteStream", function() { return _io_stream__WEBPACK_IMPORTED_MODULE_9__["ByteStream"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AsyncByteStream", function() { return _io_stream__WEBPACK_IMPORTED_MODULE_9__["AsyncByteStream"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AsyncByteQueue", function() { return _io_stream__WEBPACK_IMPORTED_MODULE_9__["AsyncByteQueue"]; });
+
+/* harmony import */ var _ipc_reader__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./ipc/reader */ "./node_modules/apache-arrow/ipc/reader.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RecordBatchReader", function() { return _ipc_reader__WEBPACK_IMPORTED_MODULE_10__["RecordBatchReader"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RecordBatchFileReader", function() { return _ipc_reader__WEBPACK_IMPORTED_MODULE_10__["RecordBatchFileReader"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RecordBatchStreamReader", function() { return _ipc_reader__WEBPACK_IMPORTED_MODULE_10__["RecordBatchStreamReader"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AsyncRecordBatchFileReader", function() { return _ipc_reader__WEBPACK_IMPORTED_MODULE_10__["AsyncRecordBatchFileReader"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AsyncRecordBatchStreamReader", function() { return _ipc_reader__WEBPACK_IMPORTED_MODULE_10__["AsyncRecordBatchStreamReader"]; });
+
+/* harmony import */ var _ipc_writer__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./ipc/writer */ "./node_modules/apache-arrow/ipc/writer.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RecordBatchWriter", function() { return _ipc_writer__WEBPACK_IMPORTED_MODULE_11__["RecordBatchWriter"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RecordBatchFileWriter", function() { return _ipc_writer__WEBPACK_IMPORTED_MODULE_11__["RecordBatchFileWriter"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RecordBatchStreamWriter", function() { return _ipc_writer__WEBPACK_IMPORTED_MODULE_11__["RecordBatchStreamWriter"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RecordBatchJSONWriter", function() { return _ipc_writer__WEBPACK_IMPORTED_MODULE_11__["RecordBatchJSONWriter"]; });
+
+/* harmony import */ var _ipc_message__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./ipc/message */ "./node_modules/apache-arrow/ipc/message.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MessageReader", function() { return _ipc_message__WEBPACK_IMPORTED_MODULE_12__["MessageReader"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AsyncMessageReader", function() { return _ipc_message__WEBPACK_IMPORTED_MODULE_12__["AsyncMessageReader"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "JSONMessageReader", function() { return _ipc_message__WEBPACK_IMPORTED_MODULE_12__["JSONMessageReader"]; });
+
+/* harmony import */ var _ipc_metadata_message__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./ipc/metadata/message */ "./node_modules/apache-arrow/ipc/metadata/message.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Message", function() { return _ipc_metadata_message__WEBPACK_IMPORTED_MODULE_13__["Message"]; });
+
+/* harmony import */ var _recordbatch__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./recordbatch */ "./node_modules/apache-arrow/recordbatch.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RecordBatch", function() { return _recordbatch__WEBPACK_IMPORTED_MODULE_14__["RecordBatch"]; });
+
+/* harmony import */ var _compute_dataframe__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./compute/dataframe */ "./node_modules/apache-arrow/compute/dataframe.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DataFrame", function() { return _compute_dataframe__WEBPACK_IMPORTED_MODULE_15__["DataFrame"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FilteredDataFrame", function() { return _compute_dataframe__WEBPACK_IMPORTED_MODULE_15__["FilteredDataFrame"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "CountByResult", function() { return _compute_dataframe__WEBPACK_IMPORTED_MODULE_15__["CountByResult"]; });
+
+/* harmony import */ var _util_bn__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./util/bn */ "./node_modules/apache-arrow/util/bn.mjs");
+/* harmony import */ var _util_int__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./util/int */ "./node_modules/apache-arrow/util/int.mjs");
+/* harmony import */ var _util_bit__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./util/bit */ "./node_modules/apache-arrow/util/bit.mjs");
+/* harmony import */ var _util_math__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./util/math */ "./node_modules/apache-arrow/util/math.mjs");
+/* harmony import */ var _util_buffer__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./util/buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
+/* harmony import */ var _util_vector__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./util/vector */ "./node_modules/apache-arrow/util/vector.mjs");
+/* harmony import */ var _compute_predicate__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./compute/predicate */ "./node_modules/apache-arrow/compute/predicate.mjs");
+/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "predicate", function() { return _compute_predicate__WEBPACK_IMPORTED_MODULE_22__; });
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2250,215 +891,63 @@ exports.Utf8Builder = Arrow_1.Utf8Builder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-var enum_1 = require("./enum");
-exports.ArrowType = enum_1.ArrowType;
-exports.DateUnit = enum_1.DateUnit;
-exports.IntervalUnit = enum_1.IntervalUnit;
-exports.MessageHeader = enum_1.MessageHeader;
-exports.MetadataVersion = enum_1.MetadataVersion;
-exports.Precision = enum_1.Precision;
-exports.TimeUnit = enum_1.TimeUnit;
-exports.Type = enum_1.Type;
-exports.UnionMode = enum_1.UnionMode;
-exports.BufferType = enum_1.BufferType;
-var data_1 = require("./data");
-exports.Data = data_1.Data;
-var type_1 = require("./type");
-exports.DataType = type_1.DataType;
-exports.Null = type_1.Null;
-exports.Bool = type_1.Bool;
-exports.Int = type_1.Int;
-exports.Int8 = type_1.Int8;
-exports.Int16 = type_1.Int16;
-exports.Int32 = type_1.Int32;
-exports.Int64 = type_1.Int64;
-exports.Uint8 = type_1.Uint8;
-exports.Uint16 = type_1.Uint16;
-exports.Uint32 = type_1.Uint32;
-exports.Uint64 = type_1.Uint64;
-exports.Float = type_1.Float;
-exports.Float16 = type_1.Float16;
-exports.Float32 = type_1.Float32;
-exports.Float64 = type_1.Float64;
-exports.Utf8 = type_1.Utf8;
-exports.Binary = type_1.Binary;
-exports.FixedSizeBinary = type_1.FixedSizeBinary;
-exports.Date_ = type_1.Date_;
-exports.DateDay = type_1.DateDay;
-exports.DateMillisecond = type_1.DateMillisecond;
-exports.Timestamp = type_1.Timestamp;
-exports.TimestampSecond = type_1.TimestampSecond;
-exports.TimestampMillisecond = type_1.TimestampMillisecond;
-exports.TimestampMicrosecond = type_1.TimestampMicrosecond;
-exports.TimestampNanosecond = type_1.TimestampNanosecond;
-exports.Time = type_1.Time;
-exports.TimeSecond = type_1.TimeSecond;
-exports.TimeMillisecond = type_1.TimeMillisecond;
-exports.TimeMicrosecond = type_1.TimeMicrosecond;
-exports.TimeNanosecond = type_1.TimeNanosecond;
-exports.Decimal = type_1.Decimal;
-exports.List = type_1.List;
-exports.Struct = type_1.Struct;
-exports.Union = type_1.Union;
-exports.DenseUnion = type_1.DenseUnion;
-exports.SparseUnion = type_1.SparseUnion;
-exports.Dictionary = type_1.Dictionary;
-exports.Interval = type_1.Interval;
-exports.IntervalDayTime = type_1.IntervalDayTime;
-exports.IntervalYearMonth = type_1.IntervalYearMonth;
-exports.FixedSizeList = type_1.FixedSizeList;
-exports.Map_ = type_1.Map_;
-var table_1 = require("./table");
-exports.Table = table_1.Table;
-var column_1 = require("./column");
-exports.Column = column_1.Column;
-var visitor_1 = require("./visitor");
-exports.Visitor = visitor_1.Visitor;
-var schema_1 = require("./schema");
-exports.Schema = schema_1.Schema;
-exports.Field = schema_1.Field;
-var index_1 = require("./vector/index");
-exports.Vector = index_1.Vector;
-exports.BaseVector = index_1.BaseVector;
-exports.BinaryVector = index_1.BinaryVector;
-exports.BoolVector = index_1.BoolVector;
-exports.Chunked = index_1.Chunked;
-exports.DateVector = index_1.DateVector;
-exports.DateDayVector = index_1.DateDayVector;
-exports.DateMillisecondVector = index_1.DateMillisecondVector;
-exports.DecimalVector = index_1.DecimalVector;
-exports.DictionaryVector = index_1.DictionaryVector;
-exports.FixedSizeBinaryVector = index_1.FixedSizeBinaryVector;
-exports.FixedSizeListVector = index_1.FixedSizeListVector;
-exports.FloatVector = index_1.FloatVector;
-exports.Float16Vector = index_1.Float16Vector;
-exports.Float32Vector = index_1.Float32Vector;
-exports.Float64Vector = index_1.Float64Vector;
-exports.IntervalVector = index_1.IntervalVector;
-exports.IntervalDayTimeVector = index_1.IntervalDayTimeVector;
-exports.IntervalYearMonthVector = index_1.IntervalYearMonthVector;
-exports.IntVector = index_1.IntVector;
-exports.Int8Vector = index_1.Int8Vector;
-exports.Int16Vector = index_1.Int16Vector;
-exports.Int32Vector = index_1.Int32Vector;
-exports.Int64Vector = index_1.Int64Vector;
-exports.Uint8Vector = index_1.Uint8Vector;
-exports.Uint16Vector = index_1.Uint16Vector;
-exports.Uint32Vector = index_1.Uint32Vector;
-exports.Uint64Vector = index_1.Uint64Vector;
-exports.ListVector = index_1.ListVector;
-exports.MapVector = index_1.MapVector;
-exports.NullVector = index_1.NullVector;
-exports.StructVector = index_1.StructVector;
-exports.TimestampVector = index_1.TimestampVector;
-exports.TimestampSecondVector = index_1.TimestampSecondVector;
-exports.TimestampMillisecondVector = index_1.TimestampMillisecondVector;
-exports.TimestampMicrosecondVector = index_1.TimestampMicrosecondVector;
-exports.TimestampNanosecondVector = index_1.TimestampNanosecondVector;
-exports.TimeVector = index_1.TimeVector;
-exports.TimeSecondVector = index_1.TimeSecondVector;
-exports.TimeMillisecondVector = index_1.TimeMillisecondVector;
-exports.TimeMicrosecondVector = index_1.TimeMicrosecondVector;
-exports.TimeNanosecondVector = index_1.TimeNanosecondVector;
-exports.UnionVector = index_1.UnionVector;
-exports.DenseUnionVector = index_1.DenseUnionVector;
-exports.SparseUnionVector = index_1.SparseUnionVector;
-exports.Utf8Vector = index_1.Utf8Vector;
-var index_2 = require("./builder/index");
-exports.Builder = index_2.Builder;
-exports.BinaryBuilder = index_2.BinaryBuilder;
-exports.BoolBuilder = index_2.BoolBuilder;
-exports.DateBuilder = index_2.DateBuilder;
-exports.DateDayBuilder = index_2.DateDayBuilder;
-exports.DateMillisecondBuilder = index_2.DateMillisecondBuilder;
-exports.DecimalBuilder = index_2.DecimalBuilder;
-exports.DictionaryBuilder = index_2.DictionaryBuilder;
-exports.FixedSizeBinaryBuilder = index_2.FixedSizeBinaryBuilder;
-exports.FixedSizeListBuilder = index_2.FixedSizeListBuilder;
-exports.FloatBuilder = index_2.FloatBuilder;
-exports.Float16Builder = index_2.Float16Builder;
-exports.Float32Builder = index_2.Float32Builder;
-exports.Float64Builder = index_2.Float64Builder;
-exports.IntervalBuilder = index_2.IntervalBuilder;
-exports.IntervalDayTimeBuilder = index_2.IntervalDayTimeBuilder;
-exports.IntervalYearMonthBuilder = index_2.IntervalYearMonthBuilder;
-exports.IntBuilder = index_2.IntBuilder;
-exports.Int8Builder = index_2.Int8Builder;
-exports.Int16Builder = index_2.Int16Builder;
-exports.Int32Builder = index_2.Int32Builder;
-exports.Int64Builder = index_2.Int64Builder;
-exports.Uint8Builder = index_2.Uint8Builder;
-exports.Uint16Builder = index_2.Uint16Builder;
-exports.Uint32Builder = index_2.Uint32Builder;
-exports.Uint64Builder = index_2.Uint64Builder;
-exports.ListBuilder = index_2.ListBuilder;
-exports.MapBuilder = index_2.MapBuilder;
-exports.NullBuilder = index_2.NullBuilder;
-exports.StructBuilder = index_2.StructBuilder;
-exports.TimestampBuilder = index_2.TimestampBuilder;
-exports.TimestampSecondBuilder = index_2.TimestampSecondBuilder;
-exports.TimestampMillisecondBuilder = index_2.TimestampMillisecondBuilder;
-exports.TimestampMicrosecondBuilder = index_2.TimestampMicrosecondBuilder;
-exports.TimestampNanosecondBuilder = index_2.TimestampNanosecondBuilder;
-exports.TimeBuilder = index_2.TimeBuilder;
-exports.TimeSecondBuilder = index_2.TimeSecondBuilder;
-exports.TimeMillisecondBuilder = index_2.TimeMillisecondBuilder;
-exports.TimeMicrosecondBuilder = index_2.TimeMicrosecondBuilder;
-exports.TimeNanosecondBuilder = index_2.TimeNanosecondBuilder;
-exports.UnionBuilder = index_2.UnionBuilder;
-exports.DenseUnionBuilder = index_2.DenseUnionBuilder;
-exports.SparseUnionBuilder = index_2.SparseUnionBuilder;
-exports.Utf8Builder = index_2.Utf8Builder;
-var stream_1 = require("./io/stream");
-exports.ByteStream = stream_1.ByteStream;
-exports.AsyncByteStream = stream_1.AsyncByteStream;
-exports.AsyncByteQueue = stream_1.AsyncByteQueue;
-var reader_1 = require("./ipc/reader");
-exports.RecordBatchReader = reader_1.RecordBatchReader;
-exports.RecordBatchFileReader = reader_1.RecordBatchFileReader;
-exports.RecordBatchStreamReader = reader_1.RecordBatchStreamReader;
-exports.AsyncRecordBatchFileReader = reader_1.AsyncRecordBatchFileReader;
-exports.AsyncRecordBatchStreamReader = reader_1.AsyncRecordBatchStreamReader;
-var writer_1 = require("./ipc/writer");
-exports.RecordBatchWriter = writer_1.RecordBatchWriter;
-exports.RecordBatchFileWriter = writer_1.RecordBatchFileWriter;
-exports.RecordBatchStreamWriter = writer_1.RecordBatchStreamWriter;
-exports.RecordBatchJSONWriter = writer_1.RecordBatchJSONWriter;
-var message_1 = require("./ipc/message");
-exports.MessageReader = message_1.MessageReader;
-exports.AsyncMessageReader = message_1.AsyncMessageReader;
-exports.JSONMessageReader = message_1.JSONMessageReader;
-var message_2 = require("./ipc/metadata/message");
-exports.Message = message_2.Message;
-var recordbatch_1 = require("./recordbatch");
-exports.RecordBatch = recordbatch_1.RecordBatch;
-var dataframe_1 = require("./compute/dataframe");
-exports.DataFrame = dataframe_1.DataFrame;
-exports.FilteredDataFrame = dataframe_1.FilteredDataFrame;
-exports.CountByResult = dataframe_1.CountByResult;
-const util_bn_ = require("./util/bn");
-const util_int_ = require("./util/int");
-const util_bit_ = require("./util/bit");
-const util_math_ = require("./util/math");
-const util_buffer_ = require("./util/buffer");
-const util_vector_ = require("./util/vector");
-const predicate = require("./compute/predicate");
-exports.predicate = predicate;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /** @ignore */
-exports.util = {
-    ...util_bn_,
-    ...util_int_,
-    ...util_bit_,
-    ...util_math_,
-    ...util_buffer_,
-    ...util_vector_
+const util = {
+    ..._util_bn__WEBPACK_IMPORTED_MODULE_16__,
+    ..._util_int__WEBPACK_IMPORTED_MODULE_17__,
+    ..._util_bit__WEBPACK_IMPORTED_MODULE_18__,
+    ..._util_math__WEBPACK_IMPORTED_MODULE_19__,
+    ..._util_buffer__WEBPACK_IMPORTED_MODULE_20__,
+    ..._util_vector__WEBPACK_IMPORTED_MODULE_21__
 };
 
+//# sourceMappingURL=Arrow.mjs.map
 
 
-},{"./builder/index":17,"./column":30,"./compute/dataframe":31,"./compute/predicate":32,"./data":33,"./enum":34,"./io/stream":41,"./ipc/message":46,"./ipc/metadata/message":49,"./ipc/reader":50,"./ipc/writer":51,"./recordbatch":52,"./schema":53,"./table":54,"./type":55,"./util/bit":57,"./util/bn":58,"./util/buffer":59,"./util/int":62,"./util/math":63,"./util/vector":67,"./vector/index":79,"./visitor":91}],7:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/builder.mjs":
+/*!***********************************************!*\
+  !*** ./node_modules/apache-arrow/builder.mjs ***!
+  \***********************************************/
+/*! exports provided: Builder, FixedWidthBuilder, VariableWidthBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Builder", function() { return Builder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FixedWidthBuilder", function() { return FixedWidthBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "VariableWidthBuilder", function() { return VariableWidthBuilder; });
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./vector */ "./node_modules/apache-arrow/vector.mjs");
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony import */ var _data__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./data */ "./node_modules/apache-arrow/data.mjs");
+/* harmony import */ var _builder_valid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./builder/valid */ "./node_modules/apache-arrow/builder/valid.mjs");
+/* harmony import */ var _builder_buffer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./builder/buffer */ "./node_modules/apache-arrow/builder/buffer.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./type */ "./node_modules/apache-arrow/type.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2475,13 +964,12 @@ exports.util = {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const vector_1 = require("./vector");
-const enum_1 = require("./enum");
-const data_1 = require("./data");
-const valid_1 = require("./builder/valid");
-const buffer_1 = require("./builder/buffer");
-const type_1 = require("./type");
+
+
+
+
+
+
 /**
  * An abstract base class for types that construct Arrow Vectors from arbitrary JavaScript values.
  *
@@ -2558,10 +1046,10 @@ class Builder {
         this.type = type;
         this.children = [];
         this.nullValues = nulls;
-        this.stride = type_1.strideForType(type);
-        this._nulls = new buffer_1.BitmapBufferBuilder();
+        this.stride = Object(_type__WEBPACK_IMPORTED_MODULE_5__["strideForType"])(type);
+        this._nulls = new _builder_buffer__WEBPACK_IMPORTED_MODULE_4__["BitmapBufferBuilder"]();
         if (nulls && nulls.length > 0) {
-            this._isValid = valid_1.createIsValidFunction(nulls);
+            this._isValid = Object(_builder_valid__WEBPACK_IMPORTED_MODULE_3__["createIsValidFunction"])(nulls);
         }
     }
     /**
@@ -2644,7 +1132,7 @@ class Builder {
      * Flush the `Builder` and return a `Vector<T>`.
      * @returns {Vector<T>} A `Vector<T>` of the flushed values.
      */
-    toVector() { return vector_1.Vector.new(this.flush()); }
+    toVector() { return _vector__WEBPACK_IMPORTED_MODULE_0__["Vector"].new(this.flush()); }
     get ArrayType() { return this.type.ArrayType; }
     get nullCount() { return this._nulls.numInvalid; }
     get numChildren() { return this.children.length; }
@@ -2746,20 +1234,20 @@ class Builder {
         const typeIds = this._typeIds;
         const { length, nullCount } = this;
         if (typeIds) { /* Unions */
-            buffers[enum_1.BufferType.TYPE] = typeIds.flush(length);
+            buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].TYPE] = typeIds.flush(length);
             // DenseUnions
-            offsets && (buffers[enum_1.BufferType.OFFSET] = offsets.flush(length));
+            offsets && (buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].OFFSET] = offsets.flush(length));
         }
         else if (offsets) { /* Variable-width primitives (Binary, Utf8) and Lists */
             // Binary, Utf8
-            values && (buffers[enum_1.BufferType.DATA] = values.flush(offsets.last()));
-            buffers[enum_1.BufferType.OFFSET] = offsets.flush(length);
+            values && (buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].DATA] = values.flush(offsets.last()));
+            buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].OFFSET] = offsets.flush(length);
         }
         else if (values) { /* Fixed-width primitives (Int, Float, Decimal, Time, Timestamp, and Interval) */
-            buffers[enum_1.BufferType.DATA] = values.flush(length);
+            buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].DATA] = values.flush(length);
         }
-        nullCount > 0 && (buffers[enum_1.BufferType.VALIDITY] = this._nulls.flush(length));
-        const data = data_1.Data.new(this.type, 0, length, nullCount, buffers, this.children.map((child) => child.flush()));
+        nullCount > 0 && (buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY] = this._nulls.flush(length));
+        const data = _data__WEBPACK_IMPORTED_MODULE_2__["Data"].new(this.type, 0, length, nullCount, buffers, this.children.map((child) => child.flush()));
         this.clear();
         return data;
     }
@@ -2786,7 +1274,6 @@ class Builder {
         return this;
     }
 }
-exports.Builder = Builder;
 Builder.prototype.length = 1;
 Builder.prototype.stride = 1;
 Builder.prototype.children = null;
@@ -2797,7 +1284,7 @@ Builder.prototype._isValid = () => true;
 class FixedWidthBuilder extends Builder {
     constructor(opts) {
         super(opts);
-        this._values = new buffer_1.DataBufferBuilder(new this.ArrayType(0), this.stride);
+        this._values = new _builder_buffer__WEBPACK_IMPORTED_MODULE_4__["DataBufferBuilder"](new this.ArrayType(0), this.stride);
     }
     setValue(index, value) {
         const values = this._values;
@@ -2805,13 +1292,12 @@ class FixedWidthBuilder extends Builder {
         return super.setValue(index, value);
     }
 }
-exports.FixedWidthBuilder = FixedWidthBuilder;
 /** @ignore */
 class VariableWidthBuilder extends Builder {
     constructor(opts) {
         super(opts);
         this._pendingLength = 0;
-        this._offsets = new buffer_1.OffsetsBufferBuilder();
+        this._offsets = new _builder_buffer__WEBPACK_IMPORTED_MODULE_4__["OffsetsBufferBuilder"]();
     }
     setValue(index, value) {
         const pending = this._pending || (this._pending = new Map());
@@ -2851,7 +1337,6 @@ class VariableWidthBuilder extends Builder {
         return this;
     }
 }
-exports.VariableWidthBuilder = VariableWidthBuilder;
 /** @ignore */
 function throughIterable(options) {
     const { ['queueingStrategy']: queueingStrategy = 'count' } = options;
@@ -2889,10 +1374,24 @@ function throughAsyncIterable(options) {
     };
 }
 
+//# sourceMappingURL=builder.mjs.map
 
 
-},{"./builder/buffer":10,"./builder/valid":29,"./data":33,"./enum":34,"./type":55,"./vector":68}],8:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/builder/binary.mjs":
+/*!******************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/binary.mjs ***!
+  \******************************************************/
+/*! exports provided: BinaryBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BinaryBuilder", function() { return BinaryBuilder; });
+/* harmony import */ var _util_buffer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
+/* harmony import */ var _buffer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./buffer */ "./node_modules/apache-arrow/builder/buffer.mjs");
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2909,15 +1408,14 @@ function throughAsyncIterable(options) {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const buffer_1 = require("../util/buffer");
-const buffer_2 = require("./buffer");
-const builder_1 = require("../builder");
+
+
+
 /** @ignore */
-class BinaryBuilder extends builder_1.VariableWidthBuilder {
+class BinaryBuilder extends _builder__WEBPACK_IMPORTED_MODULE_2__["VariableWidthBuilder"] {
     constructor(opts) {
         super(opts);
-        this._values = new buffer_2.BufferBuilder(new Uint8Array(0));
+        this._values = new _buffer__WEBPACK_IMPORTED_MODULE_1__["BufferBuilder"](new Uint8Array(0));
     }
     get byteLength() {
         let size = this._pendingLength + (this.length * 4);
@@ -2927,7 +1425,7 @@ class BinaryBuilder extends builder_1.VariableWidthBuilder {
         return size;
     }
     setValue(index, value) {
-        return super.setValue(index, buffer_1.toUint8Array(value));
+        return super.setValue(index, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["toUint8Array"])(value));
     }
     _flushPending(pending, pendingLength) {
         const offsets = this._offsets;
@@ -2946,12 +1444,24 @@ class BinaryBuilder extends builder_1.VariableWidthBuilder {
         }
     }
 }
-exports.BinaryBuilder = BinaryBuilder;
+
+//# sourceMappingURL=binary.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7,"../util/buffer":59,"./buffer":10}],9:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/bool.mjs":
+/*!****************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/bool.mjs ***!
+  \****************************************************/
+/*! exports provided: BoolBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BoolBuilder", function() { return BoolBuilder; });
+/* harmony import */ var _buffer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./buffer */ "./node_modules/apache-arrow/builder/buffer.mjs");
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2968,25 +1478,40 @@ exports.BinaryBuilder = BinaryBuilder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const buffer_1 = require("./buffer");
-const builder_1 = require("../builder");
+
+
 /** @ignore */
-class BoolBuilder extends builder_1.Builder {
+class BoolBuilder extends _builder__WEBPACK_IMPORTED_MODULE_1__["Builder"] {
     constructor(options) {
         super(options);
-        this._values = new buffer_1.BitmapBufferBuilder();
+        this._values = new _buffer__WEBPACK_IMPORTED_MODULE_0__["BitmapBufferBuilder"]();
     }
     setValue(index, value) {
         this._values.set(index, +value);
     }
 }
-exports.BoolBuilder = BoolBuilder;
+
+//# sourceMappingURL=bool.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7,"./buffer":10}],10:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/buffer.mjs":
+/*!******************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/buffer.mjs ***!
+  \******************************************************/
+/*! exports provided: BufferBuilder, DataBufferBuilder, BitmapBufferBuilder, OffsetsBufferBuilder, WideBufferBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BufferBuilder", function() { return BufferBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DataBufferBuilder", function() { return DataBufferBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BitmapBufferBuilder", function() { return BitmapBufferBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "OffsetsBufferBuilder", function() { return OffsetsBufferBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "WideBufferBuilder", function() { return WideBufferBuilder; });
+/* harmony import */ var _util_buffer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
+/* harmony import */ var _util_compat__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/compat */ "./node_modules/apache-arrow/util/compat.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3003,13 +1528,12 @@ exports.BoolBuilder = BoolBuilder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const buffer_1 = require("../util/buffer");
-const compat_1 = require("../util/compat");
+
+
 /** @ignore */
 const roundLengthUpToNearest64Bytes = (len, BPE) => ((((len * BPE) + 63) & ~63) || 64) / BPE;
 /** @ignore */
-const sliceOrExtendArray = (arr, len = 0) => (arr.length >= len ? arr.subarray(0, len) : buffer_1.memcpy(new arr.constructor(len), arr, 0));
+const sliceOrExtendArray = (arr, len = 0) => (arr.length >= len ? arr.subarray(0, len) : Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["memcpy"])(new arr.constructor(len), arr, 0));
 /** @ignore */
 class BufferBuilder {
     constructor(buffer, stride = 1) {
@@ -3051,10 +1575,9 @@ class BufferBuilder {
         return this;
     }
     _resize(newLength) {
-        return this.buffer = buffer_1.memcpy(new this.ArrayType(newLength), this.buffer);
+        return this.buffer = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["memcpy"])(new this.ArrayType(newLength), this.buffer);
     }
 }
-exports.BufferBuilder = BufferBuilder;
 BufferBuilder.prototype.offset = 0;
 /** @ignore */
 class DataBufferBuilder extends BufferBuilder {
@@ -3066,7 +1589,6 @@ class DataBufferBuilder extends BufferBuilder {
         return this;
     }
 }
-exports.DataBufferBuilder = DataBufferBuilder;
 /** @ignore */
 class BitmapBufferBuilder extends DataBufferBuilder {
     constructor(data = new Uint8Array(0)) {
@@ -3089,7 +1611,6 @@ class BitmapBufferBuilder extends DataBufferBuilder {
         return super.clear();
     }
 }
-exports.BitmapBufferBuilder = BitmapBufferBuilder;
 /** @ignore */
 class OffsetsBufferBuilder extends DataBufferBuilder {
     constructor(data = new Int32Array(1)) { super(data, 1); }
@@ -3112,11 +1633,10 @@ class OffsetsBufferBuilder extends DataBufferBuilder {
         return super.flush(length + 1);
     }
 }
-exports.OffsetsBufferBuilder = OffsetsBufferBuilder;
 /** @ignore */
 class WideBufferBuilder extends BufferBuilder {
     get ArrayType64() {
-        return this._ArrayType64 || (this._ArrayType64 = (this.buffer instanceof Int32Array ? compat_1.BigInt64Array : compat_1.BigUint64Array));
+        return this._ArrayType64 || (this._ArrayType64 = (this.buffer instanceof Int32Array ? _util_compat__WEBPACK_IMPORTED_MODULE_1__["BigInt64Array"] : _util_compat__WEBPACK_IMPORTED_MODULE_1__["BigUint64Array"]));
     }
     set(index, value) {
         this.reserve(index - this.length + 1);
@@ -3134,18 +1654,31 @@ class WideBufferBuilder extends BufferBuilder {
     _resize(newLength) {
         const data = super._resize(newLength);
         const length = data.byteLength / (this.BYTES_PER_ELEMENT * this.stride);
-        if (compat_1.BigIntAvailable) {
+        if (_util_compat__WEBPACK_IMPORTED_MODULE_1__["BigIntAvailable"]) {
             this.buffer64 = new this.ArrayType64(data.buffer, data.byteOffset, length);
         }
         return data;
     }
 }
-exports.WideBufferBuilder = WideBufferBuilder;
+
+//# sourceMappingURL=buffer.mjs.map
 
 
+/***/ }),
 
-},{"../util/buffer":59,"../util/compat":60}],11:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/date.mjs":
+/*!****************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/date.mjs ***!
+  \****************************************************/
+/*! exports provided: DateBuilder, DateDayBuilder, DateMillisecondBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DateBuilder", function() { return DateBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DateDayBuilder", function() { return DateDayBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DateMillisecondBuilder", function() { return DateMillisecondBuilder; });
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3162,25 +1695,33 @@ exports.WideBufferBuilder = WideBufferBuilder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const builder_1 = require("../builder");
+
 /** @ignore */
-class DateBuilder extends builder_1.FixedWidthBuilder {
+class DateBuilder extends _builder__WEBPACK_IMPORTED_MODULE_0__["FixedWidthBuilder"] {
 }
-exports.DateBuilder = DateBuilder;
 /** @ignore */
 class DateDayBuilder extends DateBuilder {
 }
-exports.DateDayBuilder = DateDayBuilder;
 /** @ignore */
 class DateMillisecondBuilder extends DateBuilder {
 }
-exports.DateMillisecondBuilder = DateMillisecondBuilder;
+
+//# sourceMappingURL=date.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7}],12:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/decimal.mjs":
+/*!*******************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/decimal.mjs ***!
+  \*******************************************************/
+/*! exports provided: DecimalBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DecimalBuilder", function() { return DecimalBuilder; });
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3197,17 +1738,28 @@ exports.DateMillisecondBuilder = DateMillisecondBuilder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const builder_1 = require("../builder");
+
 /** @ignore */
-class DecimalBuilder extends builder_1.FixedWidthBuilder {
+class DecimalBuilder extends _builder__WEBPACK_IMPORTED_MODULE_0__["FixedWidthBuilder"] {
 }
-exports.DecimalBuilder = DecimalBuilder;
+
+//# sourceMappingURL=decimal.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7}],13:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/dictionary.mjs":
+/*!**********************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/dictionary.mjs ***!
+  \**********************************************************/
+/*! exports provided: DictionaryBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DictionaryBuilder", function() { return DictionaryBuilder; });
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3224,18 +1776,17 @@ exports.DecimalBuilder = DecimalBuilder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const type_1 = require("../type");
-const builder_1 = require("../builder");
+
+
 /** @ignore */
-class DictionaryBuilder extends builder_1.Builder {
+class DictionaryBuilder extends _builder__WEBPACK_IMPORTED_MODULE_1__["Builder"] {
     constructor({ 'type': type, 'nullValues': nulls, 'dictionaryHashFunction': hashFn }) {
-        super({ type: new type_1.Dictionary(type.dictionary, type.indices, type.id, type.isOrdered) });
+        super({ type: new _type__WEBPACK_IMPORTED_MODULE_0__["Dictionary"](type.dictionary, type.indices, type.id, type.isOrdered) });
         this._nulls = null;
         this._dictionaryOffset = 0;
         this._keysToIndices = Object.create(null);
-        this.indices = builder_1.Builder.new({ 'type': this.type.indices, 'nullValues': nulls });
-        this.dictionary = builder_1.Builder.new({ 'type': this.type.dictionary, 'nullValues': null });
+        this.indices = _builder__WEBPACK_IMPORTED_MODULE_1__["Builder"].new({ 'type': this.type.indices, 'nullValues': nulls });
+        this.dictionary = _builder__WEBPACK_IMPORTED_MODULE_1__["Builder"].new({ 'type': this.type.dictionary, 'nullValues': null });
         if (typeof hashFn === 'function') {
             this.valueToKey = hashFn;
         }
@@ -3289,12 +1840,23 @@ class DictionaryBuilder extends builder_1.Builder {
         return typeof val === 'string' ? val : `${val}`;
     }
 }
-exports.DictionaryBuilder = DictionaryBuilder;
+
+//# sourceMappingURL=dictionary.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7,"../type":55}],14:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/fixedsizebinary.mjs":
+/*!***************************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/fixedsizebinary.mjs ***!
+  \***************************************************************/
+/*! exports provided: FixedSizeBinaryBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FixedSizeBinaryBuilder", function() { return FixedSizeBinaryBuilder; });
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3311,17 +1873,30 @@ exports.DictionaryBuilder = DictionaryBuilder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const builder_1 = require("../builder");
+
 /** @ignore */
-class FixedSizeBinaryBuilder extends builder_1.FixedWidthBuilder {
+class FixedSizeBinaryBuilder extends _builder__WEBPACK_IMPORTED_MODULE_0__["FixedWidthBuilder"] {
 }
-exports.FixedSizeBinaryBuilder = FixedSizeBinaryBuilder;
+
+//# sourceMappingURL=fixedsizebinary.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7}],15:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/fixedsizelist.mjs":
+/*!*************************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/fixedsizelist.mjs ***!
+  \*************************************************************/
+/*! exports provided: FixedSizeListBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FixedSizeListBuilder", function() { return FixedSizeListBuilder; });
+/* harmony import */ var _run__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./run */ "./node_modules/apache-arrow/builder/run.mjs");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../schema */ "./node_modules/apache-arrow/schema.mjs");
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3338,16 +1913,15 @@ exports.FixedSizeBinaryBuilder = FixedSizeBinaryBuilder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const run_1 = require("./run");
-const schema_1 = require("../schema");
-const builder_1 = require("../builder");
-const type_1 = require("../type");
+
+
+
+
 /** @ignore */
-class FixedSizeListBuilder extends builder_1.Builder {
+class FixedSizeListBuilder extends _builder__WEBPACK_IMPORTED_MODULE_2__["Builder"] {
     constructor() {
         super(...arguments);
-        this._run = new run_1.Run();
+        this._run = new _run__WEBPACK_IMPORTED_MODULE_0__["Run"]();
     }
     setValue(index, value) {
         super.setValue(index, this._run.bind(value));
@@ -3357,7 +1931,7 @@ class FixedSizeListBuilder extends builder_1.Builder {
             throw new Error('FixedSizeListBuilder can only have one child.');
         }
         const childIndex = this.children.push(child);
-        this.type = new type_1.FixedSizeList(this.type.listSize, new schema_1.Field(name, child.type, true));
+        this.type = new _type__WEBPACK_IMPORTED_MODULE_3__["FixedSizeList"](this.type.listSize, new _schema__WEBPACK_IMPORTED_MODULE_1__["Field"](name, child.type, true));
         return childIndex;
     }
     clear() {
@@ -3365,12 +1939,27 @@ class FixedSizeListBuilder extends builder_1.Builder {
         return super.clear();
     }
 }
-exports.FixedSizeListBuilder = FixedSizeListBuilder;
+
+//# sourceMappingURL=fixedsizelist.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7,"../schema":53,"../type":55,"./run":23}],16:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/float.mjs":
+/*!*****************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/float.mjs ***!
+  \*****************************************************/
+/*! exports provided: FloatBuilder, Float16Builder, Float32Builder, Float64Builder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FloatBuilder", function() { return FloatBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Float16Builder", function() { return Float16Builder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Float32Builder", function() { return Float32Builder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Float64Builder", function() { return Float64Builder; });
+/* harmony import */ var _util_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/math */ "./node_modules/apache-arrow/util/math.mjs");
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3387,40 +1976,155 @@ exports.FixedSizeListBuilder = FixedSizeListBuilder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const math_1 = require("../util/math");
-const builder_1 = require("../builder");
+
+
 /** @ignore */
-class FloatBuilder extends builder_1.FixedWidthBuilder {
+class FloatBuilder extends _builder__WEBPACK_IMPORTED_MODULE_1__["FixedWidthBuilder"] {
 }
-exports.FloatBuilder = FloatBuilder;
 /** @ignore */
 class Float16Builder extends FloatBuilder {
     setValue(index, value) {
         // convert JS float64 to a uint16
-        this._values.set(index, math_1.float64ToUint16(value));
+        this._values.set(index, Object(_util_math__WEBPACK_IMPORTED_MODULE_0__["float64ToUint16"])(value));
     }
 }
-exports.Float16Builder = Float16Builder;
 /** @ignore */
 class Float32Builder extends FloatBuilder {
     setValue(index, value) {
         this._values.set(index, value);
     }
 }
-exports.Float32Builder = Float32Builder;
 /** @ignore */
 class Float64Builder extends FloatBuilder {
     setValue(index, value) {
         this._values.set(index, value);
     }
 }
-exports.Float64Builder = Float64Builder;
+
+//# sourceMappingURL=float.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7,"../util/math":63}],17:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/index.mjs":
+/*!*****************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/index.mjs ***!
+  \*****************************************************/
+/*! exports provided: Builder, BoolBuilder, NullBuilder, DateBuilder, DateDayBuilder, DateMillisecondBuilder, DecimalBuilder, DictionaryBuilder, FixedSizeBinaryBuilder, FloatBuilder, Float16Builder, Float32Builder, Float64Builder, IntBuilder, Int8Builder, Int16Builder, Int32Builder, Int64Builder, Uint8Builder, Uint16Builder, Uint32Builder, Uint64Builder, TimeBuilder, TimeSecondBuilder, TimeMillisecondBuilder, TimeMicrosecondBuilder, TimeNanosecondBuilder, TimestampBuilder, TimestampSecondBuilder, TimestampMillisecondBuilder, TimestampMicrosecondBuilder, TimestampNanosecondBuilder, IntervalBuilder, IntervalDayTimeBuilder, IntervalYearMonthBuilder, Utf8Builder, BinaryBuilder, ListBuilder, FixedSizeListBuilder, MapBuilder, StructBuilder, UnionBuilder, SparseUnionBuilder, DenseUnionBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Builder", function() { return _builder__WEBPACK_IMPORTED_MODULE_0__["Builder"]; });
+
+/* harmony import */ var _bool__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./bool */ "./node_modules/apache-arrow/builder/bool.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoolBuilder", function() { return _bool__WEBPACK_IMPORTED_MODULE_1__["BoolBuilder"]; });
+
+/* harmony import */ var _null__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./null */ "./node_modules/apache-arrow/builder/null.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "NullBuilder", function() { return _null__WEBPACK_IMPORTED_MODULE_2__["NullBuilder"]; });
+
+/* harmony import */ var _date__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./date */ "./node_modules/apache-arrow/builder/date.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateBuilder", function() { return _date__WEBPACK_IMPORTED_MODULE_3__["DateBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateDayBuilder", function() { return _date__WEBPACK_IMPORTED_MODULE_3__["DateDayBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateMillisecondBuilder", function() { return _date__WEBPACK_IMPORTED_MODULE_3__["DateMillisecondBuilder"]; });
+
+/* harmony import */ var _decimal__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./decimal */ "./node_modules/apache-arrow/builder/decimal.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DecimalBuilder", function() { return _decimal__WEBPACK_IMPORTED_MODULE_4__["DecimalBuilder"]; });
+
+/* harmony import */ var _dictionary__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./dictionary */ "./node_modules/apache-arrow/builder/dictionary.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DictionaryBuilder", function() { return _dictionary__WEBPACK_IMPORTED_MODULE_5__["DictionaryBuilder"]; });
+
+/* harmony import */ var _fixedsizebinary__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./fixedsizebinary */ "./node_modules/apache-arrow/builder/fixedsizebinary.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FixedSizeBinaryBuilder", function() { return _fixedsizebinary__WEBPACK_IMPORTED_MODULE_6__["FixedSizeBinaryBuilder"]; });
+
+/* harmony import */ var _float__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./float */ "./node_modules/apache-arrow/builder/float.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FloatBuilder", function() { return _float__WEBPACK_IMPORTED_MODULE_7__["FloatBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float16Builder", function() { return _float__WEBPACK_IMPORTED_MODULE_7__["Float16Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float32Builder", function() { return _float__WEBPACK_IMPORTED_MODULE_7__["Float32Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float64Builder", function() { return _float__WEBPACK_IMPORTED_MODULE_7__["Float64Builder"]; });
+
+/* harmony import */ var _int__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./int */ "./node_modules/apache-arrow/builder/int.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntBuilder", function() { return _int__WEBPACK_IMPORTED_MODULE_8__["IntBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int8Builder", function() { return _int__WEBPACK_IMPORTED_MODULE_8__["Int8Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int16Builder", function() { return _int__WEBPACK_IMPORTED_MODULE_8__["Int16Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int32Builder", function() { return _int__WEBPACK_IMPORTED_MODULE_8__["Int32Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int64Builder", function() { return _int__WEBPACK_IMPORTED_MODULE_8__["Int64Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint8Builder", function() { return _int__WEBPACK_IMPORTED_MODULE_8__["Uint8Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint16Builder", function() { return _int__WEBPACK_IMPORTED_MODULE_8__["Uint16Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint32Builder", function() { return _int__WEBPACK_IMPORTED_MODULE_8__["Uint32Builder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint64Builder", function() { return _int__WEBPACK_IMPORTED_MODULE_8__["Uint64Builder"]; });
+
+/* harmony import */ var _time__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./time */ "./node_modules/apache-arrow/builder/time.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeBuilder", function() { return _time__WEBPACK_IMPORTED_MODULE_9__["TimeBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeSecondBuilder", function() { return _time__WEBPACK_IMPORTED_MODULE_9__["TimeSecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeMillisecondBuilder", function() { return _time__WEBPACK_IMPORTED_MODULE_9__["TimeMillisecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeMicrosecondBuilder", function() { return _time__WEBPACK_IMPORTED_MODULE_9__["TimeMicrosecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeNanosecondBuilder", function() { return _time__WEBPACK_IMPORTED_MODULE_9__["TimeNanosecondBuilder"]; });
+
+/* harmony import */ var _timestamp__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./timestamp */ "./node_modules/apache-arrow/builder/timestamp.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampBuilder", function() { return _timestamp__WEBPACK_IMPORTED_MODULE_10__["TimestampBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampSecondBuilder", function() { return _timestamp__WEBPACK_IMPORTED_MODULE_10__["TimestampSecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampMillisecondBuilder", function() { return _timestamp__WEBPACK_IMPORTED_MODULE_10__["TimestampMillisecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampMicrosecondBuilder", function() { return _timestamp__WEBPACK_IMPORTED_MODULE_10__["TimestampMicrosecondBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampNanosecondBuilder", function() { return _timestamp__WEBPACK_IMPORTED_MODULE_10__["TimestampNanosecondBuilder"]; });
+
+/* harmony import */ var _interval__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./interval */ "./node_modules/apache-arrow/builder/interval.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalBuilder", function() { return _interval__WEBPACK_IMPORTED_MODULE_11__["IntervalBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalDayTimeBuilder", function() { return _interval__WEBPACK_IMPORTED_MODULE_11__["IntervalDayTimeBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalYearMonthBuilder", function() { return _interval__WEBPACK_IMPORTED_MODULE_11__["IntervalYearMonthBuilder"]; });
+
+/* harmony import */ var _utf8__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./utf8 */ "./node_modules/apache-arrow/builder/utf8.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Utf8Builder", function() { return _utf8__WEBPACK_IMPORTED_MODULE_12__["Utf8Builder"]; });
+
+/* harmony import */ var _binary__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./binary */ "./node_modules/apache-arrow/builder/binary.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BinaryBuilder", function() { return _binary__WEBPACK_IMPORTED_MODULE_13__["BinaryBuilder"]; });
+
+/* harmony import */ var _list__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./list */ "./node_modules/apache-arrow/builder/list.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ListBuilder", function() { return _list__WEBPACK_IMPORTED_MODULE_14__["ListBuilder"]; });
+
+/* harmony import */ var _fixedsizelist__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./fixedsizelist */ "./node_modules/apache-arrow/builder/fixedsizelist.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FixedSizeListBuilder", function() { return _fixedsizelist__WEBPACK_IMPORTED_MODULE_15__["FixedSizeListBuilder"]; });
+
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./map */ "./node_modules/apache-arrow/builder/map.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MapBuilder", function() { return _map__WEBPACK_IMPORTED_MODULE_16__["MapBuilder"]; });
+
+/* harmony import */ var _struct__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./struct */ "./node_modules/apache-arrow/builder/struct.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "StructBuilder", function() { return _struct__WEBPACK_IMPORTED_MODULE_17__["StructBuilder"]; });
+
+/* harmony import */ var _union__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./union */ "./node_modules/apache-arrow/builder/union.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "UnionBuilder", function() { return _union__WEBPACK_IMPORTED_MODULE_18__["UnionBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SparseUnionBuilder", function() { return _union__WEBPACK_IMPORTED_MODULE_18__["SparseUnionBuilder"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DenseUnionBuilder", function() { return _union__WEBPACK_IMPORTED_MODULE_18__["DenseUnionBuilder"]; });
+
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ../enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony import */ var _visitor_set__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ../visitor/set */ "./node_modules/apache-arrow/visitor/set.mjs");
+/* harmony import */ var _visitor_builderctor__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ../visitor/builderctor */ "./node_modules/apache-arrow/visitor/builderctor.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3437,81 +2141,36 @@ exports.Float64Builder = Float64Builder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
 /** @ignore */
-var builder_1 = require("../builder");
-exports.Builder = builder_1.Builder;
-var bool_1 = require("./bool");
-exports.BoolBuilder = bool_1.BoolBuilder;
-var null_1 = require("./null");
-exports.NullBuilder = null_1.NullBuilder;
-var date_1 = require("./date");
-exports.DateBuilder = date_1.DateBuilder;
-exports.DateDayBuilder = date_1.DateDayBuilder;
-exports.DateMillisecondBuilder = date_1.DateMillisecondBuilder;
-var decimal_1 = require("./decimal");
-exports.DecimalBuilder = decimal_1.DecimalBuilder;
-var dictionary_1 = require("./dictionary");
-exports.DictionaryBuilder = dictionary_1.DictionaryBuilder;
-var fixedsizebinary_1 = require("./fixedsizebinary");
-exports.FixedSizeBinaryBuilder = fixedsizebinary_1.FixedSizeBinaryBuilder;
-var float_1 = require("./float");
-exports.FloatBuilder = float_1.FloatBuilder;
-exports.Float16Builder = float_1.Float16Builder;
-exports.Float32Builder = float_1.Float32Builder;
-exports.Float64Builder = float_1.Float64Builder;
-var int_1 = require("./int");
-exports.IntBuilder = int_1.IntBuilder;
-exports.Int8Builder = int_1.Int8Builder;
-exports.Int16Builder = int_1.Int16Builder;
-exports.Int32Builder = int_1.Int32Builder;
-exports.Int64Builder = int_1.Int64Builder;
-exports.Uint8Builder = int_1.Uint8Builder;
-exports.Uint16Builder = int_1.Uint16Builder;
-exports.Uint32Builder = int_1.Uint32Builder;
-exports.Uint64Builder = int_1.Uint64Builder;
-var time_1 = require("./time");
-exports.TimeBuilder = time_1.TimeBuilder;
-exports.TimeSecondBuilder = time_1.TimeSecondBuilder;
-exports.TimeMillisecondBuilder = time_1.TimeMillisecondBuilder;
-exports.TimeMicrosecondBuilder = time_1.TimeMicrosecondBuilder;
-exports.TimeNanosecondBuilder = time_1.TimeNanosecondBuilder;
-var timestamp_1 = require("./timestamp");
-exports.TimestampBuilder = timestamp_1.TimestampBuilder;
-exports.TimestampSecondBuilder = timestamp_1.TimestampSecondBuilder;
-exports.TimestampMillisecondBuilder = timestamp_1.TimestampMillisecondBuilder;
-exports.TimestampMicrosecondBuilder = timestamp_1.TimestampMicrosecondBuilder;
-exports.TimestampNanosecondBuilder = timestamp_1.TimestampNanosecondBuilder;
-var interval_1 = require("./interval");
-exports.IntervalBuilder = interval_1.IntervalBuilder;
-exports.IntervalDayTimeBuilder = interval_1.IntervalDayTimeBuilder;
-exports.IntervalYearMonthBuilder = interval_1.IntervalYearMonthBuilder;
-var utf8_1 = require("./utf8");
-exports.Utf8Builder = utf8_1.Utf8Builder;
-var binary_1 = require("./binary");
-exports.BinaryBuilder = binary_1.BinaryBuilder;
-var list_1 = require("./list");
-exports.ListBuilder = list_1.ListBuilder;
-var fixedsizelist_1 = require("./fixedsizelist");
-exports.FixedSizeListBuilder = fixedsizelist_1.FixedSizeListBuilder;
-var map_1 = require("./map");
-exports.MapBuilder = map_1.MapBuilder;
-var struct_1 = require("./struct");
-exports.StructBuilder = struct_1.StructBuilder;
-var union_1 = require("./union");
-exports.UnionBuilder = union_1.UnionBuilder;
-exports.SparseUnionBuilder = union_1.SparseUnionBuilder;
-exports.DenseUnionBuilder = union_1.DenseUnionBuilder;
-const enum_1 = require("../enum");
-const utf8_2 = require("./utf8");
-const builder_2 = require("../builder");
-const set_1 = require("../visitor/set");
-const builderctor_1 = require("../visitor/builderctor");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /** @nocollapse */
-builder_2.Builder.new = newBuilder;
+_builder__WEBPACK_IMPORTED_MODULE_0__["Builder"].new = newBuilder;
 function newBuilder(options) {
     const type = options.type;
-    const builder = new (builderctor_1.instance.getVisitFn(type)())(options);
+    const builder = new (_visitor_builderctor__WEBPACK_IMPORTED_MODULE_21__["instance"].getVisitFn(type)())(options);
     if (type.children && type.children.length > 0) {
         const children = options['children'] || [];
         const defaultOptions = { 'nullValues': options['nullValues'] };
@@ -3526,19 +2185,42 @@ function newBuilder(options) {
     }
     return builder;
 }
-Object.keys(enum_1.Type)
-    .map((T) => enum_1.Type[T])
-    .filter((T) => typeof T === 'number' && T !== enum_1.Type.NONE)
+Object.keys(_enum__WEBPACK_IMPORTED_MODULE_19__["Type"])
+    .map((T) => _enum__WEBPACK_IMPORTED_MODULE_19__["Type"][T])
+    .filter((T) => typeof T === 'number' && T !== _enum__WEBPACK_IMPORTED_MODULE_19__["Type"].NONE)
     .forEach((typeId) => {
-    const BuilderCtor = builderctor_1.instance.visit(typeId);
-    BuilderCtor.prototype._setValue = set_1.instance.getVisitFn(typeId);
+    const BuilderCtor = _visitor_builderctor__WEBPACK_IMPORTED_MODULE_21__["instance"].visit(typeId);
+    BuilderCtor.prototype._setValue = _visitor_set__WEBPACK_IMPORTED_MODULE_20__["instance"].getVisitFn(typeId);
 });
-utf8_2.Utf8Builder.prototype._setValue = set_1.instance.visitBinary;
+_utf8__WEBPACK_IMPORTED_MODULE_12__["Utf8Builder"].prototype._setValue = _visitor_set__WEBPACK_IMPORTED_MODULE_20__["instance"].visitBinary;
+
+//# sourceMappingURL=index.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7,"../enum":34,"../visitor/builderctor":92,"../visitor/set":99,"./binary":8,"./bool":9,"./date":11,"./decimal":12,"./dictionary":13,"./fixedsizebinary":14,"./fixedsizelist":15,"./float":16,"./int":18,"./interval":19,"./list":20,"./map":21,"./null":22,"./struct":24,"./time":25,"./timestamp":26,"./union":27,"./utf8":28}],18:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/int.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/int.mjs ***!
+  \***************************************************/
+/*! exports provided: IntBuilder, Int8Builder, Int16Builder, Int32Builder, Int64Builder, Uint8Builder, Uint16Builder, Uint32Builder, Uint64Builder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "IntBuilder", function() { return IntBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Int8Builder", function() { return Int8Builder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Int16Builder", function() { return Int16Builder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Int32Builder", function() { return Int32Builder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Int64Builder", function() { return Int64Builder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Uint8Builder", function() { return Uint8Builder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Uint16Builder", function() { return Uint16Builder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Uint32Builder", function() { return Uint32Builder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Uint64Builder", function() { return Uint64Builder; });
+/* harmony import */ var _util_bn__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/bn */ "./node_modules/apache-arrow/util/bn.mjs");
+/* harmony import */ var _buffer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./buffer */ "./node_modules/apache-arrow/builder/buffer.mjs");
+/* harmony import */ var _util_compat__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/compat */ "./node_modules/apache-arrow/util/compat.mjs");
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3555,30 +2237,25 @@ utf8_2.Utf8Builder.prototype._setValue = set_1.instance.visitBinary;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const bn_1 = require("../util/bn");
-const buffer_1 = require("./buffer");
-const compat_1 = require("../util/compat");
-const builder_1 = require("../builder");
+
+
+
+
 /** @ignore */
-class IntBuilder extends builder_1.FixedWidthBuilder {
+class IntBuilder extends _builder__WEBPACK_IMPORTED_MODULE_3__["FixedWidthBuilder"] {
     setValue(index, value) {
         this._values.set(index, value);
     }
 }
-exports.IntBuilder = IntBuilder;
 /** @ignore */
 class Int8Builder extends IntBuilder {
 }
-exports.Int8Builder = Int8Builder;
 /** @ignore */
 class Int16Builder extends IntBuilder {
 }
-exports.Int16Builder = Int16Builder;
 /** @ignore */
 class Int32Builder extends IntBuilder {
 }
-exports.Int32Builder = Int32Builder;
 /** @ignore */
 class Int64Builder extends IntBuilder {
     constructor(options) {
@@ -3586,24 +2263,20 @@ class Int64Builder extends IntBuilder {
             options['nullValues'] = options['nullValues'].map(toBigInt);
         }
         super(options);
-        this._values = new buffer_1.WideBufferBuilder(new Int32Array(0), 2);
+        this._values = new _buffer__WEBPACK_IMPORTED_MODULE_1__["WideBufferBuilder"](new Int32Array(0), 2);
     }
     get values64() { return this._values.buffer64; }
     isValid(value) { return super.isValid(toBigInt(value)); }
 }
-exports.Int64Builder = Int64Builder;
 /** @ignore */
 class Uint8Builder extends IntBuilder {
 }
-exports.Uint8Builder = Uint8Builder;
 /** @ignore */
 class Uint16Builder extends IntBuilder {
 }
-exports.Uint16Builder = Uint16Builder;
 /** @ignore */
 class Uint32Builder extends IntBuilder {
 }
-exports.Uint32Builder = Uint32Builder;
 /** @ignore */
 class Uint64Builder extends IntBuilder {
     constructor(options) {
@@ -3611,27 +2284,40 @@ class Uint64Builder extends IntBuilder {
             options['nullValues'] = options['nullValues'].map(toBigInt);
         }
         super(options);
-        this._values = new buffer_1.WideBufferBuilder(new Uint32Array(0), 2);
+        this._values = new _buffer__WEBPACK_IMPORTED_MODULE_1__["WideBufferBuilder"](new Uint32Array(0), 2);
     }
     get values64() { return this._values.buffer64; }
     isValid(value) { return super.isValid(toBigInt(value)); }
 }
-exports.Uint64Builder = Uint64Builder;
 const toBigInt = ((memo) => (value) => {
     if (ArrayBuffer.isView(value)) {
         memo.buffer = value.buffer;
         memo.byteOffset = value.byteOffset;
         memo.byteLength = value.byteLength;
-        value = bn_1.bignumToBigInt(memo);
+        value = Object(_util_bn__WEBPACK_IMPORTED_MODULE_0__["bignumToBigInt"])(memo);
         memo.buffer = null;
     }
     return value;
-})({ 'BigIntArray': compat_1.BigInt64Array });
+})({ 'BigIntArray': _util_compat__WEBPACK_IMPORTED_MODULE_2__["BigInt64Array"] });
+
+//# sourceMappingURL=int.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7,"../util/bn":58,"../util/compat":60,"./buffer":10}],19:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/interval.mjs":
+/*!********************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/interval.mjs ***!
+  \********************************************************/
+/*! exports provided: IntervalBuilder, IntervalDayTimeBuilder, IntervalYearMonthBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "IntervalBuilder", function() { return IntervalBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "IntervalDayTimeBuilder", function() { return IntervalDayTimeBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "IntervalYearMonthBuilder", function() { return IntervalYearMonthBuilder; });
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3648,25 +2334,37 @@ const toBigInt = ((memo) => (value) => {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const builder_1 = require("../builder");
+
 /** @ignore */
-class IntervalBuilder extends builder_1.FixedWidthBuilder {
+class IntervalBuilder extends _builder__WEBPACK_IMPORTED_MODULE_0__["FixedWidthBuilder"] {
 }
-exports.IntervalBuilder = IntervalBuilder;
 /** @ignore */
 class IntervalDayTimeBuilder extends IntervalBuilder {
 }
-exports.IntervalDayTimeBuilder = IntervalDayTimeBuilder;
 /** @ignore */
 class IntervalYearMonthBuilder extends IntervalBuilder {
 }
-exports.IntervalYearMonthBuilder = IntervalYearMonthBuilder;
+
+//# sourceMappingURL=interval.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7}],20:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/list.mjs":
+/*!****************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/list.mjs ***!
+  \****************************************************/
+/*! exports provided: ListBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ListBuilder", function() { return ListBuilder; });
+/* harmony import */ var _run__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./run */ "./node_modules/apache-arrow/builder/run.mjs");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../schema */ "./node_modules/apache-arrow/schema.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
+/* harmony import */ var _buffer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./buffer */ "./node_modules/apache-arrow/builder/buffer.mjs");
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3683,25 +2381,24 @@ exports.IntervalYearMonthBuilder = IntervalYearMonthBuilder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const run_1 = require("./run");
-const schema_1 = require("../schema");
-const type_1 = require("../type");
-const buffer_1 = require("./buffer");
-const builder_1 = require("../builder");
+
+
+
+
+
 /** @ignore */
-class ListBuilder extends builder_1.VariableWidthBuilder {
+class ListBuilder extends _builder__WEBPACK_IMPORTED_MODULE_4__["VariableWidthBuilder"] {
     constructor(opts) {
         super(opts);
-        this._run = new run_1.Run();
-        this._offsets = new buffer_1.OffsetsBufferBuilder();
+        this._run = new _run__WEBPACK_IMPORTED_MODULE_0__["Run"]();
+        this._offsets = new _buffer__WEBPACK_IMPORTED_MODULE_3__["OffsetsBufferBuilder"]();
     }
     addChild(child, name = '0') {
         if (this.numChildren > 0) {
             throw new Error('ListBuilder can only have one child.');
         }
         this.children[this.numChildren] = child;
-        this.type = new type_1.List(new schema_1.Field(name, child.type, true));
+        this.type = new _type__WEBPACK_IMPORTED_MODULE_2__["List"](new _schema__WEBPACK_IMPORTED_MODULE_1__["Field"](name, child.type, true));
         return this.numChildren - 1;
     }
     clear() {
@@ -3724,12 +2421,25 @@ class ListBuilder extends builder_1.VariableWidthBuilder {
         }
     }
 }
-exports.ListBuilder = ListBuilder;
+
+//# sourceMappingURL=list.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7,"../schema":53,"../type":55,"./buffer":10,"./run":23}],21:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/map.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/map.mjs ***!
+  \***************************************************/
+/*! exports provided: MapBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MapBuilder", function() { return MapBuilder; });
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../schema */ "./node_modules/apache-arrow/schema.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3746,12 +2456,11 @@ exports.ListBuilder = ListBuilder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const schema_1 = require("../schema");
-const type_1 = require("../type");
-const builder_1 = require("../builder");
+
+
+
 /** @ignore */
-class MapBuilder extends builder_1.VariableWidthBuilder {
+class MapBuilder extends _builder__WEBPACK_IMPORTED_MODULE_2__["VariableWidthBuilder"] {
     set(index, value) {
         return super.set(index, value);
     }
@@ -3768,7 +2477,7 @@ class MapBuilder extends builder_1.VariableWidthBuilder {
             throw new Error('ListBuilder can only have one child.');
         }
         this.children[this.numChildren] = child;
-        this.type = new type_1.Map_(new schema_1.Field(name, child.type, true), this.type.keysSorted);
+        this.type = new _type__WEBPACK_IMPORTED_MODULE_1__["Map_"](new _schema__WEBPACK_IMPORTED_MODULE_0__["Field"](name, child.type, true), this.type.keysSorted);
         return this.numChildren - 1;
     }
     _flushPending(pending) {
@@ -3785,12 +2494,23 @@ class MapBuilder extends builder_1.VariableWidthBuilder {
         });
     }
 }
-exports.MapBuilder = MapBuilder;
+
+//# sourceMappingURL=map.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7,"../schema":53,"../type":55}],22:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/null.mjs":
+/*!****************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/null.mjs ***!
+  \****************************************************/
+/*! exports provided: NullBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NullBuilder", function() { return NullBuilder; });
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3807,10 +2527,9 @@ exports.MapBuilder = MapBuilder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const builder_1 = require("../builder");
+
 /** @ignore */
-class NullBuilder extends builder_1.Builder {
+class NullBuilder extends _builder__WEBPACK_IMPORTED_MODULE_0__["Builder"] {
     // @ts-ignore
     setValue(index, value) { }
     setValid(index, valid) {
@@ -3818,12 +2537,23 @@ class NullBuilder extends builder_1.Builder {
         return valid;
     }
 }
-exports.NullBuilder = NullBuilder;
+
+//# sourceMappingURL=null.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7}],23:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/run.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/run.mjs ***!
+  \***************************************************/
+/*! exports provided: Run */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Run", function() { return Run; });
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../vector */ "./node_modules/apache-arrow/vector.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3840,27 +2570,39 @@ exports.NullBuilder = NullBuilder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const vector_1 = require("../vector");
+
 /** @ignore */
 class Run {
     get length() { return this._values.length; }
     get(index) { return this._values[index]; }
     clear() { this._values = null; return this; }
     bind(values) {
-        if (values instanceof vector_1.Vector) {
+        if (values instanceof _vector__WEBPACK_IMPORTED_MODULE_0__["Vector"]) {
             return values;
         }
         this._values = values;
         return this;
     }
 }
-exports.Run = Run;
+
+//# sourceMappingURL=run.mjs.map
 
 
+/***/ }),
 
-},{"../vector":68}],24:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/struct.mjs":
+/*!******************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/struct.mjs ***!
+  \******************************************************/
+/*! exports provided: StructBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "StructBuilder", function() { return StructBuilder; });
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../schema */ "./node_modules/apache-arrow/schema.mjs");
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3877,24 +2619,38 @@ exports.Run = Run;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const schema_1 = require("../schema");
-const builder_1 = require("../builder");
-const type_1 = require("../type");
+
+
+
 /** @ignore */
-class StructBuilder extends builder_1.Builder {
+class StructBuilder extends _builder__WEBPACK_IMPORTED_MODULE_1__["Builder"] {
     addChild(child, name = `${this.numChildren}`) {
         const childIndex = this.children.push(child);
-        this.type = new type_1.Struct([...this.type.children, new schema_1.Field(name, child.type, true)]);
+        this.type = new _type__WEBPACK_IMPORTED_MODULE_2__["Struct"]([...this.type.children, new _schema__WEBPACK_IMPORTED_MODULE_0__["Field"](name, child.type, true)]);
         return childIndex;
     }
 }
-exports.StructBuilder = StructBuilder;
+
+//# sourceMappingURL=struct.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7,"../schema":53,"../type":55}],25:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/time.mjs":
+/*!****************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/time.mjs ***!
+  \****************************************************/
+/*! exports provided: TimeBuilder, TimeSecondBuilder, TimeMillisecondBuilder, TimeMicrosecondBuilder, TimeNanosecondBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimeBuilder", function() { return TimeBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimeSecondBuilder", function() { return TimeSecondBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimeMillisecondBuilder", function() { return TimeMillisecondBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimeMicrosecondBuilder", function() { return TimeMicrosecondBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimeNanosecondBuilder", function() { return TimeNanosecondBuilder; });
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3911,33 +2667,43 @@ exports.StructBuilder = StructBuilder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const builder_1 = require("../builder");
+
 /** @ignore */
-class TimeBuilder extends builder_1.FixedWidthBuilder {
+class TimeBuilder extends _builder__WEBPACK_IMPORTED_MODULE_0__["FixedWidthBuilder"] {
 }
-exports.TimeBuilder = TimeBuilder;
 /** @ignore */
 class TimeSecondBuilder extends TimeBuilder {
 }
-exports.TimeSecondBuilder = TimeSecondBuilder;
 /** @ignore */
 class TimeMillisecondBuilder extends TimeBuilder {
 }
-exports.TimeMillisecondBuilder = TimeMillisecondBuilder;
 /** @ignore */
 class TimeMicrosecondBuilder extends TimeBuilder {
 }
-exports.TimeMicrosecondBuilder = TimeMicrosecondBuilder;
 /** @ignore */
 class TimeNanosecondBuilder extends TimeBuilder {
 }
-exports.TimeNanosecondBuilder = TimeNanosecondBuilder;
+
+//# sourceMappingURL=time.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7}],26:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/timestamp.mjs":
+/*!*********************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/timestamp.mjs ***!
+  \*********************************************************/
+/*! exports provided: TimestampBuilder, TimestampSecondBuilder, TimestampMillisecondBuilder, TimestampMicrosecondBuilder, TimestampNanosecondBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimestampBuilder", function() { return TimestampBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimestampSecondBuilder", function() { return TimestampSecondBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimestampMillisecondBuilder", function() { return TimestampMillisecondBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimestampMicrosecondBuilder", function() { return TimestampMicrosecondBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimestampNanosecondBuilder", function() { return TimestampNanosecondBuilder; });
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3954,33 +2720,44 @@ exports.TimeNanosecondBuilder = TimeNanosecondBuilder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const builder_1 = require("../builder");
+
 /** @ignore */
-class TimestampBuilder extends builder_1.FixedWidthBuilder {
+class TimestampBuilder extends _builder__WEBPACK_IMPORTED_MODULE_0__["FixedWidthBuilder"] {
 }
-exports.TimestampBuilder = TimestampBuilder;
 /** @ignore */
 class TimestampSecondBuilder extends TimestampBuilder {
 }
-exports.TimestampSecondBuilder = TimestampSecondBuilder;
 /** @ignore */
 class TimestampMillisecondBuilder extends TimestampBuilder {
 }
-exports.TimestampMillisecondBuilder = TimestampMillisecondBuilder;
 /** @ignore */
 class TimestampMicrosecondBuilder extends TimestampBuilder {
 }
-exports.TimestampMicrosecondBuilder = TimestampMicrosecondBuilder;
 /** @ignore */
 class TimestampNanosecondBuilder extends TimestampBuilder {
 }
-exports.TimestampNanosecondBuilder = TimestampNanosecondBuilder;
+
+//# sourceMappingURL=timestamp.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7}],27:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/union.mjs":
+/*!*****************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/union.mjs ***!
+  \*****************************************************/
+/*! exports provided: UnionBuilder, SparseUnionBuilder, DenseUnionBuilder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "UnionBuilder", function() { return UnionBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SparseUnionBuilder", function() { return SparseUnionBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DenseUnionBuilder", function() { return DenseUnionBuilder; });
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../schema */ "./node_modules/apache-arrow/schema.mjs");
+/* harmony import */ var _buffer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./buffer */ "./node_modules/apache-arrow/builder/buffer.mjs");
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3997,16 +2774,15 @@ exports.TimestampNanosecondBuilder = TimestampNanosecondBuilder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const schema_1 = require("../schema");
-const buffer_1 = require("./buffer");
-const builder_1 = require("../builder");
-const type_1 = require("../type");
+
+
+
+
 /** @ignore */
-class UnionBuilder extends builder_1.Builder {
+class UnionBuilder extends _builder__WEBPACK_IMPORTED_MODULE_2__["Builder"] {
     constructor(options) {
         super(options);
-        this._typeIds = new buffer_1.DataBufferBuilder(new Int8Array(0), 1);
+        this._typeIds = new _buffer__WEBPACK_IMPORTED_MODULE_1__["DataBufferBuilder"](new Int8Array(0), 1);
         if (typeof options['valueToChildTypeId'] === 'function') {
             this._valueToChildTypeId = options['valueToChildTypeId'];
         }
@@ -4033,8 +2809,8 @@ class UnionBuilder extends builder_1.Builder {
     addChild(child, name = `${this.children.length}`) {
         const childTypeId = this.children.push(child);
         const { type: { children, mode, typeIds } } = this;
-        const fields = [...children, new schema_1.Field(name, child.type)];
-        this.type = new type_1.Union(mode, [...typeIds, childTypeId], fields);
+        const fields = [...children, new _schema__WEBPACK_IMPORTED_MODULE_0__["Field"](name, child.type)];
+        this.type = new _type__WEBPACK_IMPORTED_MODULE_3__["Union"](mode, [...typeIds, childTypeId], fields);
         return childTypeId;
     }
     /** @ignore */
@@ -4045,16 +2821,14 @@ Pass the \`childTypeId\` as the second argument to unionBuilder.append(), \
 or supply a \`valueToChildTypeId\` function as part of the UnionBuilder constructor options.`);
     }
 }
-exports.UnionBuilder = UnionBuilder;
 /** @ignore */
 class SparseUnionBuilder extends UnionBuilder {
 }
-exports.SparseUnionBuilder = SparseUnionBuilder;
 /** @ignore */
 class DenseUnionBuilder extends UnionBuilder {
     constructor(options) {
         super(options);
-        this._offsets = new buffer_1.DataBufferBuilder(new Int32Array(0));
+        this._offsets = new _buffer__WEBPACK_IMPORTED_MODULE_1__["DataBufferBuilder"](new Int32Array(0));
     }
     /** @ignore */
     setValue(index, value, childTypeId) {
@@ -4063,12 +2837,26 @@ class DenseUnionBuilder extends UnionBuilder {
         return super.setValue(index, value, childTypeId);
     }
 }
-exports.DenseUnionBuilder = DenseUnionBuilder;
+
+//# sourceMappingURL=union.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7,"../schema":53,"../type":55,"./buffer":10}],28:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/utf8.mjs":
+/*!****************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/utf8.mjs ***!
+  \****************************************************/
+/*! exports provided: Utf8Builder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Utf8Builder", function() { return Utf8Builder; });
+/* harmony import */ var _util_utf8__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/utf8 */ "./node_modules/apache-arrow/util/utf8.mjs");
+/* harmony import */ var _binary__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./binary */ "./node_modules/apache-arrow/builder/binary.mjs");
+/* harmony import */ var _buffer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./buffer */ "./node_modules/apache-arrow/builder/buffer.mjs");
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -4085,16 +2873,15 @@ exports.DenseUnionBuilder = DenseUnionBuilder;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const utf8_1 = require("../util/utf8");
-const binary_1 = require("./binary");
-const buffer_1 = require("./buffer");
-const builder_1 = require("../builder");
+
+
+
+
 /** @ignore */
-class Utf8Builder extends builder_1.VariableWidthBuilder {
+class Utf8Builder extends _builder__WEBPACK_IMPORTED_MODULE_3__["VariableWidthBuilder"] {
     constructor(opts) {
         super(opts);
-        this._values = new buffer_1.BufferBuilder(new Uint8Array(0));
+        this._values = new _buffer__WEBPACK_IMPORTED_MODULE_2__["BufferBuilder"](new Uint8Array(0));
     }
     get byteLength() {
         let size = this._pendingLength + (this.length * 4);
@@ -4104,18 +2891,30 @@ class Utf8Builder extends builder_1.VariableWidthBuilder {
         return size;
     }
     setValue(index, value) {
-        return super.setValue(index, utf8_1.encodeUtf8(value));
+        return super.setValue(index, Object(_util_utf8__WEBPACK_IMPORTED_MODULE_0__["encodeUtf8"])(value));
     }
     // @ts-ignore
     _flushPending(pending, pendingLength) { }
 }
-exports.Utf8Builder = Utf8Builder;
-Utf8Builder.prototype._flushPending = binary_1.BinaryBuilder.prototype._flushPending;
+Utf8Builder.prototype._flushPending = _binary__WEBPACK_IMPORTED_MODULE_1__["BinaryBuilder"].prototype._flushPending;
+
+//# sourceMappingURL=utf8.mjs.map
 
 
+/***/ }),
 
-},{"../builder":7,"../util/utf8":66,"./binary":8,"./buffer":10}],29:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/builder/valid.mjs":
+/*!*****************************************************!*\
+  !*** ./node_modules/apache-arrow/builder/valid.mjs ***!
+  \*****************************************************/
+/*! exports provided: createIsValidFunction */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createIsValidFunction", function() { return createIsValidFunction; });
+/* harmony import */ var _util_pretty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/pretty */ "./node_modules/apache-arrow/util/pretty.mjs");
+/* harmony import */ var _util_compat__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/compat */ "./node_modules/apache-arrow/util/compat.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -4132,9 +2931,8 @@ Utf8Builder.prototype._flushPending = binary_1.BinaryBuilder.prototype._flushPen
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const pretty_1 = require("../util/pretty");
-const compat_1 = require("../util/compat");
+
+
 /**
  * Dynamically compile the null values into an `isValid()` function whose
  * implementation is a switch statement. Microbenchmarks in v8 indicate
@@ -4176,22 +2974,35 @@ function createIsValidFunction(nullValues) {
     }
     return new Function(`x`, `${fnBody}\nreturn true;`);
 }
-exports.createIsValidFunction = createIsValidFunction;
 /** @ignore */
 function valueToCase(x) {
     if (typeof x !== 'bigint') {
-        return pretty_1.valueToString(x);
+        return Object(_util_pretty__WEBPACK_IMPORTED_MODULE_0__["valueToString"])(x);
     }
-    else if (compat_1.BigIntAvailable) {
-        return `${pretty_1.valueToString(x)}n`;
+    else if (_util_compat__WEBPACK_IMPORTED_MODULE_1__["BigIntAvailable"]) {
+        return `${Object(_util_pretty__WEBPACK_IMPORTED_MODULE_0__["valueToString"])(x)}n`;
     }
-    return `"${pretty_1.valueToString(x)}"`;
+    return `"${Object(_util_pretty__WEBPACK_IMPORTED_MODULE_0__["valueToString"])(x)}"`;
 }
 
+//# sourceMappingURL=valid.mjs.map
 
 
-},{"../util/compat":60,"../util/pretty":64}],30:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/column.mjs":
+/*!**********************************************!*\
+  !*** ./node_modules/apache-arrow/column.mjs ***!
+  \**********************************************/
+/*! exports provided: Column */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Column", function() { return Column; });
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./schema */ "./node_modules/apache-arrow/schema.mjs");
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./vector */ "./node_modules/apache-arrow/vector.mjs");
+/* harmony import */ var _vector_chunked__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./vector/chunked */ "./node_modules/apache-arrow/vector/chunked.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -4208,13 +3019,12 @@ function valueToCase(x) {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const schema_1 = require("./schema");
-const vector_1 = require("./vector");
-const chunked_1 = require("./vector/chunked");
-class Column extends chunked_1.Chunked {
+
+
+
+class Column extends _vector_chunked__WEBPACK_IMPORTED_MODULE_2__["Chunked"] {
     constructor(field, vectors = [], offsets) {
-        vectors = chunked_1.Chunked.flatten(...vectors);
+        vectors = _vector_chunked__WEBPACK_IMPORTED_MODULE_2__["Chunked"].flatten(...vectors);
         super(field.type, vectors, offsets);
         this._field = field;
         if (vectors.length === 1 && !(this instanceof SingleChunkColumn)) {
@@ -4223,12 +3033,12 @@ class Column extends chunked_1.Chunked {
     }
     /** @nocollapse */
     static new(field, data, ...rest) {
-        const chunks = chunked_1.Chunked.flatten(Array.isArray(data) ? [...data, ...rest] :
-            data instanceof vector_1.Vector ? [data, ...rest] :
-                [vector_1.Vector.new(data, ...rest)]);
+        const chunks = _vector_chunked__WEBPACK_IMPORTED_MODULE_2__["Chunked"].flatten(Array.isArray(data) ? [...data, ...rest] :
+            data instanceof _vector__WEBPACK_IMPORTED_MODULE_1__["Vector"] ? [data, ...rest] :
+                [_vector__WEBPACK_IMPORTED_MODULE_1__["Vector"].new(data, ...rest)]);
         if (typeof field === 'string') {
             const type = chunks[0].data.type;
-            field = new schema_1.Field(field, type, true);
+            field = new _schema__WEBPACK_IMPORTED_MODULE_0__["Field"](field, type, true);
         }
         else if (!field.nullable && chunks.some(({ nullCount }) => nullCount > 0)) {
             field = field.clone({ nullable: true });
@@ -4262,7 +3072,6 @@ class Column extends chunked_1.Chunked {
         return null;
     }
 }
-exports.Column = Column;
 /** @ignore */
 class SingleChunkColumn extends Column {
     constructor(field, vector, offsets) {
@@ -4286,10 +3095,29 @@ class SingleChunkColumn extends Column {
     }
 }
 
+//# sourceMappingURL=column.mjs.map
 
 
-},{"./schema":53,"./vector":68,"./vector/chunked":72}],31:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/compute/dataframe.mjs":
+/*!*********************************************************!*\
+  !*** ./node_modules/apache-arrow/compute/dataframe.mjs ***!
+  \*********************************************************/
+/*! exports provided: DataFrame, CountByResult, FilteredDataFrame */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DataFrame", function() { return DataFrame; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CountByResult", function() { return CountByResult; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FilteredDataFrame", function() { return FilteredDataFrame; });
+/* harmony import */ var _table__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../table */ "./node_modules/apache-arrow/table.mjs");
+/* harmony import */ var _vector_int__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../vector/int */ "./node_modules/apache-arrow/vector/int.mjs");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../schema */ "./node_modules/apache-arrow/schema.mjs");
+/* harmony import */ var _predicate__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./predicate */ "./node_modules/apache-arrow/compute/predicate.mjs");
+/* harmony import */ var _recordbatch__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../recordbatch */ "./node_modules/apache-arrow/recordbatch.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -4306,18 +3134,17 @@ class SingleChunkColumn extends Column {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const table_1 = require("../table");
-const int_1 = require("../vector/int");
-const schema_1 = require("../schema");
-const predicate_1 = require("./predicate");
-const recordbatch_1 = require("../recordbatch");
-const type_1 = require("../type");
-table_1.Table.prototype.countBy = function (name) { return new DataFrame(this.chunks).countBy(name); };
-table_1.Table.prototype.scan = function (next, bind) { return new DataFrame(this.chunks).scan(next, bind); };
-table_1.Table.prototype.scanReverse = function (next, bind) { return new DataFrame(this.chunks).scanReverse(next, bind); };
-table_1.Table.prototype.filter = function (predicate) { return new DataFrame(this.chunks).filter(predicate); };
-class DataFrame extends table_1.Table {
+
+
+
+
+
+
+_table__WEBPACK_IMPORTED_MODULE_0__["Table"].prototype.countBy = function (name) { return new DataFrame(this.chunks).countBy(name); };
+_table__WEBPACK_IMPORTED_MODULE_0__["Table"].prototype.scan = function (next, bind) { return new DataFrame(this.chunks).scan(next, bind); };
+_table__WEBPACK_IMPORTED_MODULE_0__["Table"].prototype.scanReverse = function (next, bind) { return new DataFrame(this.chunks).scanReverse(next, bind); };
+_table__WEBPACK_IMPORTED_MODULE_0__["Table"].prototype.filter = function (predicate) { return new DataFrame(this.chunks).filter(predicate); };
+class DataFrame extends _table__WEBPACK_IMPORTED_MODULE_0__["Table"] {
     filter(predicate) {
         return new FilteredDataFrame(this.chunks, predicate);
     }
@@ -4351,12 +3178,12 @@ class DataFrame extends table_1.Table {
     }
     countBy(name) {
         const batches = this.chunks, numBatches = batches.length;
-        const count_by = typeof name === 'string' ? new predicate_1.Col(name) : name;
+        const count_by = typeof name === 'string' ? new _predicate__WEBPACK_IMPORTED_MODULE_3__["Col"](name) : name;
         // Assume that all dictionary batches are deltas, which means that the
         // last record batch has the most complete dictionary
         count_by.bind(batches[numBatches - 1]);
         const vector = count_by.vector;
-        if (!type_1.DataType.isDictionary(vector.type)) {
+        if (!_type__WEBPACK_IMPORTED_MODULE_5__["DataType"].isDictionary(vector.type)) {
             throw new Error('countBy currently only supports dictionary-encoded columns');
         }
         const countByteLength = Math.ceil(Math.log(vector.length) / Math.log(256));
@@ -4377,18 +3204,17 @@ class DataFrame extends table_1.Table {
                 }
             }
         }
-        return new CountByResult(vector.dictionary, int_1.IntVector.from(counts));
+        return new CountByResult(vector.dictionary, _vector_int__WEBPACK_IMPORTED_MODULE_1__["IntVector"].from(counts));
     }
 }
-exports.DataFrame = DataFrame;
 /** @ignore */
-class CountByResult extends table_1.Table {
+class CountByResult extends _table__WEBPACK_IMPORTED_MODULE_0__["Table"] {
     constructor(values, counts) {
-        const schema = new schema_1.Schema([
-            new schema_1.Field('values', values.type),
-            new schema_1.Field('counts', counts.type)
+        const schema = new _schema__WEBPACK_IMPORTED_MODULE_2__["Schema"]([
+            new _schema__WEBPACK_IMPORTED_MODULE_2__["Field"]('values', values.type),
+            new _schema__WEBPACK_IMPORTED_MODULE_2__["Field"]('counts', counts.type)
         ]);
-        super(new recordbatch_1.RecordBatch(schema, counts.length, [values, counts]));
+        super(new _recordbatch__WEBPACK_IMPORTED_MODULE_4__["RecordBatch"](schema, counts.length, [values, counts]));
     }
     toJSON() {
         const values = this.getColumnAt(0);
@@ -4400,7 +3226,6 @@ class CountByResult extends table_1.Table {
         return result;
     }
 }
-exports.CountByResult = CountByResult;
 /** @ignore */
 class FilteredDataFrame extends DataFrame {
     constructor(batches, predicate) {
@@ -4505,12 +3330,12 @@ class FilteredDataFrame extends DataFrame {
     }
     countBy(name) {
         const batches = this._chunks, numBatches = batches.length;
-        const count_by = typeof name === 'string' ? new predicate_1.Col(name) : name;
+        const count_by = typeof name === 'string' ? new _predicate__WEBPACK_IMPORTED_MODULE_3__["Col"](name) : name;
         // Assume that all dictionary batches are deltas, which means that the
         // last record batch has the most complete dictionary
         count_by.bind(batches[numBatches - 1]);
         const vector = count_by.vector;
-        if (!type_1.DataType.isDictionary(vector.type)) {
+        if (!_type__WEBPACK_IMPORTED_MODULE_5__["DataType"].isDictionary(vector.type)) {
             throw new Error('countBy currently only supports dictionary-encoded columns');
         }
         const countByteLength = Math.ceil(Math.log(vector.length) / Math.log(256));
@@ -4532,15 +3357,43 @@ class FilteredDataFrame extends DataFrame {
                 }
             }
         }
-        return new CountByResult(vector.dictionary, int_1.IntVector.from(counts));
+        return new CountByResult(vector.dictionary, _vector_int__WEBPACK_IMPORTED_MODULE_1__["IntVector"].from(counts));
     }
 }
-exports.FilteredDataFrame = FilteredDataFrame;
+
+//# sourceMappingURL=dataframe.mjs.map
 
 
+/***/ }),
 
-},{"../recordbatch":52,"../schema":53,"../table":54,"../type":55,"../vector/int":80,"./predicate":32}],32:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/compute/predicate.mjs":
+/*!*********************************************************!*\
+  !*** ./node_modules/apache-arrow/compute/predicate.mjs ***!
+  \*********************************************************/
+/*! exports provided: Value, Literal, Col, Predicate, ComparisonPredicate, CombinationPredicate, And, Or, Equals, LTeq, GTeq, Not, CustomPredicate, lit, col, and, or, custom */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Value", function() { return Value; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Literal", function() { return Literal; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Col", function() { return Col; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Predicate", function() { return Predicate; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ComparisonPredicate", function() { return ComparisonPredicate; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CombinationPredicate", function() { return CombinationPredicate; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "And", function() { return And; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Or", function() { return Or; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Equals", function() { return Equals; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "LTeq", function() { return LTeq; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GTeq", function() { return GTeq; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Not", function() { return Not; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CustomPredicate", function() { return CustomPredicate; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "lit", function() { return lit; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "col", function() { return col; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "and", function() { return and; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "or", function() { return or; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "custom", function() { return custom; });
+/* harmony import */ var _vector_dictionary__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../vector/dictionary */ "./node_modules/apache-arrow/vector/dictionary.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -4557,8 +3410,7 @@ exports.FilteredDataFrame = FilteredDataFrame;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const dictionary_1 = require("../vector/dictionary");
+
 /** @ignore */
 class Value {
     eq(other) {
@@ -4589,7 +3441,6 @@ class Value {
         return new Not(this.eq(other));
     }
 }
-exports.Value = Value;
 /** @ignore */
 class Literal extends Value {
     constructor(v) {
@@ -4597,7 +3448,6 @@ class Literal extends Value {
         this.v = v;
     }
 }
-exports.Literal = Literal;
 /** @ignore */
 class Col extends Value {
     constructor(name) {
@@ -4624,14 +3474,12 @@ class Col extends Value {
         return (idx) => vec.get(idx);
     }
 }
-exports.Col = Col;
 /** @ignore */
 class Predicate {
     and(...expr) { return new And(this, ...expr); }
     or(...expr) { return new Or(this, ...expr); }
     not() { return new Not(this); }
 }
-exports.Predicate = Predicate;
 /** @ignore */
 class ComparisonPredicate extends Predicate {
     constructor(left, right) {
@@ -4658,7 +3506,6 @@ class ComparisonPredicate extends Predicate {
         }
     }
 }
-exports.ComparisonPredicate = ComparisonPredicate;
 /** @ignore */
 class CombinationPredicate extends Predicate {
     constructor(...children) {
@@ -4666,7 +3513,6 @@ class CombinationPredicate extends Predicate {
         this.children = children;
     }
 }
-exports.CombinationPredicate = CombinationPredicate;
 // add children to prototype so it doesn't get mangled in es2015/umd
 CombinationPredicate.prototype.children = Object.freeze([]); // freeze for safety
 /** @ignore */
@@ -4683,7 +3529,6 @@ class And extends CombinationPredicate {
         return (idx, batch) => bound.every((p) => p(idx, batch));
     }
 }
-exports.And = And;
 /** @ignore */
 class Or extends CombinationPredicate {
     constructor(...children) {
@@ -4698,7 +3543,6 @@ class Or extends CombinationPredicate {
         return (idx, batch) => bound.some((p) => p(idx, batch));
     }
 }
-exports.Or = Or;
 /** @ignore */
 class Equals extends ComparisonPredicate {
     _bindLitLit(_batch, left, right) {
@@ -4712,7 +3556,7 @@ class Equals extends ComparisonPredicate {
     }
     _bindColLit(batch, col, lit) {
         const col_func = col.bind(batch);
-        if (col.vector instanceof dictionary_1.DictionaryVector) {
+        if (col.vector instanceof _vector_dictionary__WEBPACK_IMPORTED_MODULE_0__["DictionaryVector"]) {
             let key;
             const vector = col.vector;
             if (vector.dictionary !== this.lastDictionary) {
@@ -4746,7 +3590,6 @@ class Equals extends ComparisonPredicate {
         return this._bindColLit(batch, col, lit);
     }
 }
-exports.Equals = Equals;
 /** @ignore */
 class LTeq extends ComparisonPredicate {
     _bindLitLit(_batch, left, right) {
@@ -4767,7 +3610,6 @@ class LTeq extends ComparisonPredicate {
         return (idx, cols) => lit.v <= col_func(idx, cols);
     }
 }
-exports.LTeq = LTeq;
 /** @ignore */
 class GTeq extends ComparisonPredicate {
     _bindLitLit(_batch, left, right) {
@@ -4788,7 +3630,6 @@ class GTeq extends ComparisonPredicate {
         return (idx, cols) => lit.v >= col_func(idx, cols);
     }
 }
-exports.GTeq = GTeq;
 /** @ignore */
 class Not extends Predicate {
     constructor(child) {
@@ -4800,7 +3641,6 @@ class Not extends Predicate {
         return (idx, batch) => !func(idx, batch);
     }
 }
-exports.Not = Not;
 /** @ignore */
 class CustomPredicate extends Predicate {
     constructor(next, bind_) {
@@ -4813,24 +3653,34 @@ class CustomPredicate extends Predicate {
         return this.next;
     }
 }
-exports.CustomPredicate = CustomPredicate;
 function lit(v) { return new Literal(v); }
-exports.lit = lit;
 function col(n) { return new Col(n); }
-exports.col = col;
 function and(...p) { return new And(...p); }
-exports.and = and;
 function or(...p) { return new Or(...p); }
-exports.or = or;
 function custom(next, bind) {
     return new CustomPredicate(next, bind);
 }
-exports.custom = custom;
+
+//# sourceMappingURL=predicate.mjs.map
 
 
+/***/ }),
 
-},{"../vector/dictionary":75}],33:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/data.mjs":
+/*!********************************************!*\
+  !*** ./node_modules/apache-arrow/data.mjs ***!
+  \********************************************/
+/*! exports provided: kUnknownNullCount, Data */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "kUnknownNullCount", function() { return kUnknownNullCount; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Data", function() { return Data; });
+/* harmony import */ var _util_bit__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./util/bit */ "./node_modules/apache-arrow/util/bit.mjs");
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./type */ "./node_modules/apache-arrow/type.mjs");
+/* harmony import */ var _util_buffer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./util/buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -4847,13 +3697,12 @@ exports.custom = custom;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const bit_1 = require("./util/bit");
-const bit_2 = require("./util/bit");
-const enum_1 = require("./enum");
-const type_1 = require("./type");
-const buffer_1 = require("./util/buffer");
-/** @ignore */ exports.kUnknownNullCount = -1;
+
+
+
+
+
+/** @ignore */ const kUnknownNullCount = -1;
 /** @ignore */
 class Data {
     constructor(type, offset, length, nullCount, buffers, childData, dictionary) {
@@ -4872,7 +3721,7 @@ class Data {
             this.valueOffsets = buffers.valueOffsets;
         }
         else {
-            this.stride = type_1.strideForType(type);
+            this.stride = Object(_type__WEBPACK_IMPORTED_MODULE_2__["strideForType"])(type);
             if (buffers) {
                 (buffer = buffers[0]) && (this.valueOffsets = buffer);
                 (buffer = buffers[1]) && (this.values = buffer);
@@ -4898,8 +3747,8 @@ class Data {
     get nullCount() {
         let nullCount = this._nullCount;
         let nullBitmap;
-        if (nullCount <= exports.kUnknownNullCount && (nullBitmap = this.nullBitmap)) {
-            this._nullCount = nullCount = this.length - bit_2.popcnt_bit_range(nullBitmap, this.offset, this.offset + this.length);
+        if (nullCount <= kUnknownNullCount && (nullBitmap = this.nullBitmap)) {
+            this._nullCount = nullCount = this.length - Object(_util_bit__WEBPACK_IMPORTED_MODULE_0__["popcnt_bit_range"])(nullBitmap, this.offset, this.offset + this.length);
         }
         return nullCount;
     }
@@ -4919,7 +3768,7 @@ class Data {
         (!childData.length || this.valueOffsets) ? childData : this._sliceChildren(childData, childStride * offset, childStride * length));
     }
     _changeLengthAndBackfillNullBitmap(newLength) {
-        if (this.typeId === enum_1.Type.Null) {
+        if (this.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Null) {
             return this.clone(this.type, 0, newLength, 0);
         }
         const { length, nullCount } = this;
@@ -4929,20 +3778,20 @@ class Data {
         bitmap[length >> 3] = (1 << (length - (length & ~7))) - 1;
         // if we have a nullBitmap, truncate + slice and set it over the pre-filled 1s
         if (nullCount > 0) {
-            bitmap.set(bit_1.truncateBitmap(this.offset, length, this.nullBitmap), 0);
+            bitmap.set(Object(_util_bit__WEBPACK_IMPORTED_MODULE_0__["truncateBitmap"])(this.offset, length, this.nullBitmap), 0);
         }
         const buffers = this.buffers;
-        buffers[enum_1.BufferType.VALIDITY] = bitmap;
+        buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY] = bitmap;
         return this.clone(this.type, 0, newLength, nullCount + (newLength - length), buffers);
     }
     _sliceBuffers(offset, length, stride, typeId) {
         let arr, { buffers } = this;
         // If typeIds exist, slice the typeIds buffer
-        (arr = buffers[enum_1.BufferType.TYPE]) && (buffers[enum_1.BufferType.TYPE] = arr.subarray(offset, offset + length));
+        (arr = buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].TYPE]) && (buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].TYPE] = arr.subarray(offset, offset + length));
         // If offsets exist, only slice the offsets buffer
-        (arr = buffers[enum_1.BufferType.OFFSET]) && (buffers[enum_1.BufferType.OFFSET] = arr.subarray(offset, offset + length + 1)) ||
+        (arr = buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].OFFSET]) && (buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].OFFSET] = arr.subarray(offset, offset + length + 1)) ||
             // Otherwise if no offsets, slice the data buffer. Don't slice the data vector for Booleans, since the offset goes by bits not bytes
-            (arr = buffers[enum_1.BufferType.DATA]) && (buffers[enum_1.BufferType.DATA] = typeId === 6 ? arr : arr.subarray(stride * offset, stride * (offset + length)));
+            (arr = buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].DATA]) && (buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].DATA] = typeId === 6 ? arr : arr.subarray(stride * offset, stride * (offset + length)));
         return buffers;
     }
     _sliceChildren(childData, offset, length) {
@@ -4960,24 +3809,24 @@ class Data {
             buffers = [];
         }
         switch (type.typeId) {
-            case enum_1.Type.Null: return Data.Null(type, offset, length);
-            case enum_1.Type.Int: return Data.Int(type, offset, length, nullCount || 0, buffers[enum_1.BufferType.VALIDITY], buffers[enum_1.BufferType.DATA] || []);
-            case enum_1.Type.Dictionary: return Data.Dictionary(type, offset, length, nullCount || 0, buffers[enum_1.BufferType.VALIDITY], buffers[enum_1.BufferType.DATA] || [], dictionary);
-            case enum_1.Type.Float: return Data.Float(type, offset, length, nullCount || 0, buffers[enum_1.BufferType.VALIDITY], buffers[enum_1.BufferType.DATA] || []);
-            case enum_1.Type.Bool: return Data.Bool(type, offset, length, nullCount || 0, buffers[enum_1.BufferType.VALIDITY], buffers[enum_1.BufferType.DATA] || []);
-            case enum_1.Type.Decimal: return Data.Decimal(type, offset, length, nullCount || 0, buffers[enum_1.BufferType.VALIDITY], buffers[enum_1.BufferType.DATA] || []);
-            case enum_1.Type.Date: return Data.Date(type, offset, length, nullCount || 0, buffers[enum_1.BufferType.VALIDITY], buffers[enum_1.BufferType.DATA] || []);
-            case enum_1.Type.Time: return Data.Time(type, offset, length, nullCount || 0, buffers[enum_1.BufferType.VALIDITY], buffers[enum_1.BufferType.DATA] || []);
-            case enum_1.Type.Timestamp: return Data.Timestamp(type, offset, length, nullCount || 0, buffers[enum_1.BufferType.VALIDITY], buffers[enum_1.BufferType.DATA] || []);
-            case enum_1.Type.Interval: return Data.Interval(type, offset, length, nullCount || 0, buffers[enum_1.BufferType.VALIDITY], buffers[enum_1.BufferType.DATA] || []);
-            case enum_1.Type.FixedSizeBinary: return Data.FixedSizeBinary(type, offset, length, nullCount || 0, buffers[enum_1.BufferType.VALIDITY], buffers[enum_1.BufferType.DATA] || []);
-            case enum_1.Type.Binary: return Data.Binary(type, offset, length, nullCount || 0, buffers[enum_1.BufferType.VALIDITY], buffers[enum_1.BufferType.OFFSET] || [], buffers[enum_1.BufferType.DATA] || []);
-            case enum_1.Type.Utf8: return Data.Utf8(type, offset, length, nullCount || 0, buffers[enum_1.BufferType.VALIDITY], buffers[enum_1.BufferType.OFFSET] || [], buffers[enum_1.BufferType.DATA] || []);
-            case enum_1.Type.List: return Data.List(type, offset, length, nullCount || 0, buffers[enum_1.BufferType.VALIDITY], buffers[enum_1.BufferType.OFFSET] || [], (childData || [])[0]);
-            case enum_1.Type.FixedSizeList: return Data.FixedSizeList(type, offset, length, nullCount || 0, buffers[enum_1.BufferType.VALIDITY], (childData || [])[0]);
-            case enum_1.Type.Struct: return Data.Struct(type, offset, length, nullCount || 0, buffers[enum_1.BufferType.VALIDITY], childData || []);
-            case enum_1.Type.Map: return Data.Map(type, offset, length, nullCount || 0, buffers[enum_1.BufferType.VALIDITY], buffers[enum_1.BufferType.OFFSET] || [], (childData || [])[0]);
-            case enum_1.Type.Union: return Data.Union(type, offset, length, nullCount || 0, buffers[enum_1.BufferType.VALIDITY], buffers[enum_1.BufferType.TYPE] || [], buffers[enum_1.BufferType.OFFSET] || childData, childData);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Null: return Data.Null(type, offset, length);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Int: return Data.Int(type, offset, length, nullCount || 0, buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].DATA] || []);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Dictionary: return Data.Dictionary(type, offset, length, nullCount || 0, buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].DATA] || [], dictionary);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Float: return Data.Float(type, offset, length, nullCount || 0, buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].DATA] || []);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Bool: return Data.Bool(type, offset, length, nullCount || 0, buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].DATA] || []);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Decimal: return Data.Decimal(type, offset, length, nullCount || 0, buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].DATA] || []);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Date: return Data.Date(type, offset, length, nullCount || 0, buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].DATA] || []);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Time: return Data.Time(type, offset, length, nullCount || 0, buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].DATA] || []);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Timestamp: return Data.Timestamp(type, offset, length, nullCount || 0, buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].DATA] || []);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Interval: return Data.Interval(type, offset, length, nullCount || 0, buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].DATA] || []);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].FixedSizeBinary: return Data.FixedSizeBinary(type, offset, length, nullCount || 0, buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].DATA] || []);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Binary: return Data.Binary(type, offset, length, nullCount || 0, buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].OFFSET] || [], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].DATA] || []);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Utf8: return Data.Utf8(type, offset, length, nullCount || 0, buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].OFFSET] || [], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].DATA] || []);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].List: return Data.List(type, offset, length, nullCount || 0, buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].OFFSET] || [], (childData || [])[0]);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].FixedSizeList: return Data.FixedSizeList(type, offset, length, nullCount || 0, buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY], (childData || [])[0]);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Struct: return Data.Struct(type, offset, length, nullCount || 0, buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY], childData || []);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Map: return Data.Map(type, offset, length, nullCount || 0, buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].OFFSET] || [], (childData || [])[0]);
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Union: return Data.Union(type, offset, length, nullCount || 0, buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].VALIDITY], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].TYPE] || [], buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].OFFSET] || childData, childData);
         }
         throw new Error(`Unrecognized typeId ${type.typeId}`);
     }
@@ -4987,89 +3836,110 @@ class Data {
     }
     /** @nocollapse */
     static Int(type, offset, length, nullCount, nullBitmap, data) {
-        return new Data(type, offset, length, nullCount, [undefined, buffer_1.toArrayBufferView(type.ArrayType, data), buffer_1.toUint8Array(nullBitmap)]);
+        return new Data(type, offset, length, nullCount, [undefined, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toArrayBufferView"])(type.ArrayType, data), Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(nullBitmap)]);
     }
     /** @nocollapse */
     static Dictionary(type, offset, length, nullCount, nullBitmap, data, dictionary) {
-        return new Data(type, offset, length, nullCount, [undefined, buffer_1.toArrayBufferView(type.indices.ArrayType, data), buffer_1.toUint8Array(nullBitmap)], [], dictionary);
+        return new Data(type, offset, length, nullCount, [undefined, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toArrayBufferView"])(type.indices.ArrayType, data), Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(nullBitmap)], [], dictionary);
     }
     /** @nocollapse */
     static Float(type, offset, length, nullCount, nullBitmap, data) {
-        return new Data(type, offset, length, nullCount, [undefined, buffer_1.toArrayBufferView(type.ArrayType, data), buffer_1.toUint8Array(nullBitmap)]);
+        return new Data(type, offset, length, nullCount, [undefined, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toArrayBufferView"])(type.ArrayType, data), Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(nullBitmap)]);
     }
     /** @nocollapse */
     static Bool(type, offset, length, nullCount, nullBitmap, data) {
-        return new Data(type, offset, length, nullCount, [undefined, buffer_1.toArrayBufferView(type.ArrayType, data), buffer_1.toUint8Array(nullBitmap)]);
+        return new Data(type, offset, length, nullCount, [undefined, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toArrayBufferView"])(type.ArrayType, data), Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(nullBitmap)]);
     }
     /** @nocollapse */
     static Decimal(type, offset, length, nullCount, nullBitmap, data) {
-        return new Data(type, offset, length, nullCount, [undefined, buffer_1.toArrayBufferView(type.ArrayType, data), buffer_1.toUint8Array(nullBitmap)]);
+        return new Data(type, offset, length, nullCount, [undefined, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toArrayBufferView"])(type.ArrayType, data), Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(nullBitmap)]);
     }
     /** @nocollapse */
     static Date(type, offset, length, nullCount, nullBitmap, data) {
-        return new Data(type, offset, length, nullCount, [undefined, buffer_1.toArrayBufferView(type.ArrayType, data), buffer_1.toUint8Array(nullBitmap)]);
+        return new Data(type, offset, length, nullCount, [undefined, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toArrayBufferView"])(type.ArrayType, data), Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(nullBitmap)]);
     }
     /** @nocollapse */
     static Time(type, offset, length, nullCount, nullBitmap, data) {
-        return new Data(type, offset, length, nullCount, [undefined, buffer_1.toArrayBufferView(type.ArrayType, data), buffer_1.toUint8Array(nullBitmap)]);
+        return new Data(type, offset, length, nullCount, [undefined, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toArrayBufferView"])(type.ArrayType, data), Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(nullBitmap)]);
     }
     /** @nocollapse */
     static Timestamp(type, offset, length, nullCount, nullBitmap, data) {
-        return new Data(type, offset, length, nullCount, [undefined, buffer_1.toArrayBufferView(type.ArrayType, data), buffer_1.toUint8Array(nullBitmap)]);
+        return new Data(type, offset, length, nullCount, [undefined, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toArrayBufferView"])(type.ArrayType, data), Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(nullBitmap)]);
     }
     /** @nocollapse */
     static Interval(type, offset, length, nullCount, nullBitmap, data) {
-        return new Data(type, offset, length, nullCount, [undefined, buffer_1.toArrayBufferView(type.ArrayType, data), buffer_1.toUint8Array(nullBitmap)]);
+        return new Data(type, offset, length, nullCount, [undefined, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toArrayBufferView"])(type.ArrayType, data), Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(nullBitmap)]);
     }
     /** @nocollapse */
     static FixedSizeBinary(type, offset, length, nullCount, nullBitmap, data) {
-        return new Data(type, offset, length, nullCount, [undefined, buffer_1.toArrayBufferView(type.ArrayType, data), buffer_1.toUint8Array(nullBitmap)]);
+        return new Data(type, offset, length, nullCount, [undefined, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toArrayBufferView"])(type.ArrayType, data), Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(nullBitmap)]);
     }
     /** @nocollapse */
     static Binary(type, offset, length, nullCount, nullBitmap, valueOffsets, data) {
-        return new Data(type, offset, length, nullCount, [buffer_1.toInt32Array(valueOffsets), buffer_1.toUint8Array(data), buffer_1.toUint8Array(nullBitmap)]);
+        return new Data(type, offset, length, nullCount, [Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toInt32Array"])(valueOffsets), Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(data), Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(nullBitmap)]);
     }
     /** @nocollapse */
     static Utf8(type, offset, length, nullCount, nullBitmap, valueOffsets, data) {
-        return new Data(type, offset, length, nullCount, [buffer_1.toInt32Array(valueOffsets), buffer_1.toUint8Array(data), buffer_1.toUint8Array(nullBitmap)]);
+        return new Data(type, offset, length, nullCount, [Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toInt32Array"])(valueOffsets), Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(data), Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(nullBitmap)]);
     }
     /** @nocollapse */
     static List(type, offset, length, nullCount, nullBitmap, valueOffsets, child) {
-        return new Data(type, offset, length, nullCount, [buffer_1.toInt32Array(valueOffsets), undefined, buffer_1.toUint8Array(nullBitmap)], [child]);
+        return new Data(type, offset, length, nullCount, [Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toInt32Array"])(valueOffsets), undefined, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(nullBitmap)], [child]);
     }
     /** @nocollapse */
     static FixedSizeList(type, offset, length, nullCount, nullBitmap, child) {
-        return new Data(type, offset, length, nullCount, [undefined, undefined, buffer_1.toUint8Array(nullBitmap)], [child]);
+        return new Data(type, offset, length, nullCount, [undefined, undefined, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(nullBitmap)], [child]);
     }
     /** @nocollapse */
     static Struct(type, offset, length, nullCount, nullBitmap, children) {
-        return new Data(type, offset, length, nullCount, [undefined, undefined, buffer_1.toUint8Array(nullBitmap)], children);
+        return new Data(type, offset, length, nullCount, [undefined, undefined, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(nullBitmap)], children);
     }
     /** @nocollapse */
     static Map(type, offset, length, nullCount, nullBitmap, valueOffsets, child) {
-        return new Data(type, offset, length, nullCount, [buffer_1.toInt32Array(valueOffsets), undefined, buffer_1.toUint8Array(nullBitmap)], [child]);
+        return new Data(type, offset, length, nullCount, [Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toInt32Array"])(valueOffsets), undefined, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(nullBitmap)], [child]);
     }
     /** @nocollapse */
     static Union(type, offset, length, nullCount, nullBitmap, typeIds, valueOffsetsOrChildren, children) {
         const buffers = [
             undefined, undefined,
-            buffer_1.toUint8Array(nullBitmap),
-            buffer_1.toArrayBufferView(type.ArrayType, typeIds)
+            Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(nullBitmap),
+            Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toArrayBufferView"])(type.ArrayType, typeIds)
         ];
-        if (type.mode === enum_1.UnionMode.Sparse) {
+        if (type.mode === _enum__WEBPACK_IMPORTED_MODULE_1__["UnionMode"].Sparse) {
             return new Data(type, offset, length, nullCount, buffers, valueOffsetsOrChildren);
         }
-        buffers[enum_1.BufferType.OFFSET] = buffer_1.toInt32Array(valueOffsetsOrChildren);
+        buffers[_enum__WEBPACK_IMPORTED_MODULE_1__["BufferType"].OFFSET] = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toInt32Array"])(valueOffsetsOrChildren);
         return new Data(type, offset, length, nullCount, buffers, children);
     }
 }
-exports.Data = Data;
 Data.prototype.childData = Object.freeze([]);
 
+//# sourceMappingURL=data.mjs.map
 
 
-},{"./enum":34,"./type":55,"./util/bit":57,"./util/buffer":59}],34:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/enum.mjs":
+/*!********************************************!*\
+  !*** ./node_modules/apache-arrow/enum.mjs ***!
+  \********************************************/
+/*! exports provided: ArrowType, DateUnit, TimeUnit, Precision, UnionMode, IntervalUnit, MessageHeader, MetadataVersion, Type, BufferType */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ArrowType", function() { return ArrowType; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DateUnit", function() { return DateUnit; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimeUnit", function() { return TimeUnit; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Precision", function() { return Precision; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "UnionMode", function() { return UnionMode; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "IntervalUnit", function() { return IntervalUnit; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MessageHeader", function() { return MessageHeader; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MetadataVersion", function() { return MetadataVersion; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Type", function() { return Type; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BufferType", function() { return BufferType; });
+/* harmony import */ var _fb_Schema__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./fb/Schema */ "./node_modules/apache-arrow/fb/Schema.mjs");
+/* harmony import */ var _fb_Message__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./fb/Message */ "./node_modules/apache-arrow/fb/Message.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -5086,17 +3956,16 @@ Data.prototype.childData = Object.freeze([]);
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const Schema_ = require("./fb/Schema");
-const Message_ = require("./fb/Message");
-exports.ArrowType = Schema_.org.apache.arrow.flatbuf.Type;
-exports.DateUnit = Schema_.org.apache.arrow.flatbuf.DateUnit;
-exports.TimeUnit = Schema_.org.apache.arrow.flatbuf.TimeUnit;
-exports.Precision = Schema_.org.apache.arrow.flatbuf.Precision;
-exports.UnionMode = Schema_.org.apache.arrow.flatbuf.UnionMode;
-exports.IntervalUnit = Schema_.org.apache.arrow.flatbuf.IntervalUnit;
-exports.MessageHeader = Message_.org.apache.arrow.flatbuf.MessageHeader;
-exports.MetadataVersion = Schema_.org.apache.arrow.flatbuf.MetadataVersion;
+
+
+var ArrowType = _fb_Schema__WEBPACK_IMPORTED_MODULE_0__["org"].apache.arrow.flatbuf.Type;
+var DateUnit = _fb_Schema__WEBPACK_IMPORTED_MODULE_0__["org"].apache.arrow.flatbuf.DateUnit;
+var TimeUnit = _fb_Schema__WEBPACK_IMPORTED_MODULE_0__["org"].apache.arrow.flatbuf.TimeUnit;
+var Precision = _fb_Schema__WEBPACK_IMPORTED_MODULE_0__["org"].apache.arrow.flatbuf.Precision;
+var UnionMode = _fb_Schema__WEBPACK_IMPORTED_MODULE_0__["org"].apache.arrow.flatbuf.UnionMode;
+var IntervalUnit = _fb_Schema__WEBPACK_IMPORTED_MODULE_0__["org"].apache.arrow.flatbuf.IntervalUnit;
+var MessageHeader = _fb_Message__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.MessageHeader;
+var MetadataVersion = _fb_Schema__WEBPACK_IMPORTED_MODULE_0__["org"].apache.arrow.flatbuf.MetadataVersion;
 /**
  * Main data type enumeration.
  *
@@ -5188,7 +4057,7 @@ var Type;
     Type[Type["SparseUnion"] = -24] = "SparseUnion";
     Type[Type["IntervalDayTime"] = -25] = "IntervalDayTime";
     Type[Type["IntervalYearMonth"] = -26] = "IntervalYearMonth";
-})(Type = exports.Type || (exports.Type = {}));
+})(Type || (Type = {}));
 var BufferType;
 (function (BufferType) {
     /**
@@ -5207,15 +4076,26 @@ var BufferType;
      * Type vector used in Union type
      */
     BufferType[BufferType["TYPE"] = 3] = "TYPE";
-})(BufferType = exports.BufferType || (exports.BufferType = {}));
+})(BufferType || (BufferType = {}));
+
+//# sourceMappingURL=enum.mjs.map
 
 
+/***/ }),
 
-},{"./fb/Message":36,"./fb/Schema":37}],35:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/fb/File.mjs":
+/*!***********************************************!*\
+  !*** ./node_modules/apache-arrow/fb/File.mjs ***!
+  \***********************************************/
+/*! exports provided: org */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "org", function() { return org; });
+/* harmony import */ var _Schema__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Schema */ "./node_modules/apache-arrow/fb/Schema.mjs");
 // automatically generated by the FlatBuffers compiler, do not modify
-Object.defineProperty(exports, "__esModule", { value: true });
-const NS7624605610262437867 = require("./Schema");
+
 /**
  * ----------------------------------------------------------------------
  * Arrow File metadata
@@ -5259,7 +4139,7 @@ var org;
                      */
                     version() {
                         let offset = this.bb.__offset(this.bb_pos, 4);
-                        return offset ? /**  */ (this.bb.readInt16(this.bb_pos + offset)) : NS7624605610262437867.org.apache.arrow.flatbuf.MetadataVersion.V1;
+                        return offset ? /**  */ (this.bb.readInt16(this.bb_pos + offset)) : _Schema__WEBPACK_IMPORTED_MODULE_0__["org"].apache.arrow.flatbuf.MetadataVersion.V1;
                     }
                     /**
                      * @param org.apache.arrow.flatbuf.Schema= obj
@@ -5267,7 +4147,7 @@ var org;
                      */
                     schema(obj) {
                         let offset = this.bb.__offset(this.bb_pos, 6);
-                        return offset ? (obj || new NS7624605610262437867.org.apache.arrow.flatbuf.Schema).__init(this.bb.__indirect(this.bb_pos + offset), this.bb) : null;
+                        return offset ? (obj || new _Schema__WEBPACK_IMPORTED_MODULE_0__["org"].apache.arrow.flatbuf.Schema).__init(this.bb.__indirect(this.bb_pos + offset), this.bb) : null;
                     }
                     /**
                      * @param number index
@@ -5312,7 +4192,7 @@ var org;
                      * @param org.apache.arrow.flatbuf.MetadataVersion version
                      */
                     static addVersion(builder, version) {
-                        builder.addFieldInt16(0, version, NS7624605610262437867.org.apache.arrow.flatbuf.MetadataVersion.V1);
+                        builder.addFieldInt16(0, version, _Schema__WEBPACK_IMPORTED_MODULE_0__["org"].apache.arrow.flatbuf.MetadataVersion.V1);
                     }
                     /**
                      * @param flatbuffers.Builder builder
@@ -5377,7 +4257,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * @constructor
  */
@@ -5448,15 +4328,26 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
+
+//# sourceMappingURL=File.mjs.map
 
 
+/***/ }),
 
-},{"./Schema":37}],36:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/fb/Message.mjs":
+/*!**************************************************!*\
+  !*** ./node_modules/apache-arrow/fb/Message.mjs ***!
+  \**************************************************/
+/*! exports provided: org */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "org", function() { return org; });
+/* harmony import */ var _Schema__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Schema */ "./node_modules/apache-arrow/fb/Schema.mjs");
 // automatically generated by the FlatBuffers compiler, do not modify
-Object.defineProperty(exports, "__esModule", { value: true });
-const NS7624605610262437867 = require("./Schema");
+
 var org;
 (function (org) {
     var apache;
@@ -5465,11 +4356,11 @@ var org;
         (function (arrow) {
             var flatbuf;
             (function (flatbuf) {
-                flatbuf.Schema = NS7624605610262437867.org.apache.arrow.flatbuf.Schema;
+                flatbuf.Schema = _Schema__WEBPACK_IMPORTED_MODULE_0__["org"].apache.arrow.flatbuf.Schema;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * ----------------------------------------------------------------------
  * The root Message type
@@ -5501,7 +4392,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * ----------------------------------------------------------------------
  * Data structures for describing a table row batch (a collection of
@@ -5573,7 +4464,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * A data header describing the shared memory layout of a "record" or "row"
  * batch. Some systems call this a "row batch" internally and others a "record
@@ -5653,7 +4544,7 @@ var org;
                      */
                     buffers(index, obj) {
                         let offset = this.bb.__offset(this.bb_pos, 8);
-                        return offset ? (obj || new NS7624605610262437867.org.apache.arrow.flatbuf.Buffer).__init(this.bb.__vector(this.bb_pos + offset) + index * 16, this.bb) : null;
+                        return offset ? (obj || new _Schema__WEBPACK_IMPORTED_MODULE_0__["org"].apache.arrow.flatbuf.Buffer).__init(this.bb.__vector(this.bb_pos + offset) + index * 16, this.bb) : null;
                     }
                     /**
                      * @returns number
@@ -5723,7 +4614,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * For sending dictionary encoding information. Any Field can be
  * dictionary-encoded, but in this case none of its children may be
@@ -5836,7 +4727,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * @constructor
  */
@@ -5875,7 +4766,7 @@ var org;
                      */
                     version() {
                         let offset = this.bb.__offset(this.bb_pos, 4);
-                        return offset ? /**  */ (this.bb.readInt16(this.bb_pos + offset)) : NS7624605610262437867.org.apache.arrow.flatbuf.MetadataVersion.V1;
+                        return offset ? /**  */ (this.bb.readInt16(this.bb_pos + offset)) : _Schema__WEBPACK_IMPORTED_MODULE_0__["org"].apache.arrow.flatbuf.MetadataVersion.V1;
                     }
                     /**
                      * @returns org.apache.arrow.flatbuf.MessageHeader
@@ -5906,7 +4797,7 @@ var org;
                      */
                     customMetadata(index, obj) {
                         let offset = this.bb.__offset(this.bb_pos, 12);
-                        return offset ? (obj || new NS7624605610262437867.org.apache.arrow.flatbuf.KeyValue).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
+                        return offset ? (obj || new _Schema__WEBPACK_IMPORTED_MODULE_0__["org"].apache.arrow.flatbuf.KeyValue).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
                     }
                     /**
                      * @returns number
@@ -5926,7 +4817,7 @@ var org;
                      * @param org.apache.arrow.flatbuf.MetadataVersion version
                      */
                     static addVersion(builder, version) {
-                        builder.addFieldInt16(0, version, NS7624605610262437867.org.apache.arrow.flatbuf.MetadataVersion.V1);
+                        builder.addFieldInt16(0, version, _Schema__WEBPACK_IMPORTED_MODULE_0__["org"].apache.arrow.flatbuf.MetadataVersion.V1);
                     }
                     /**
                      * @param flatbuffers.Builder builder
@@ -6004,14 +4895,24 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
+
+//# sourceMappingURL=Message.mjs.map
 
 
+/***/ }),
 
-},{"./Schema":37}],37:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/fb/Schema.mjs":
+/*!*************************************************!*\
+  !*** ./node_modules/apache-arrow/fb/Schema.mjs ***!
+  \*************************************************/
+/*! exports provided: org */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "org", function() { return org; });
 /* tslint:disable:class-name */
-Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * @enum {number}
  */
@@ -6045,7 +4946,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * @enum {number}
  */
@@ -6064,7 +4965,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * @enum {number}
  */
@@ -6084,7 +4985,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * @enum {number}
  */
@@ -6103,7 +5004,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * @enum {number}
  */
@@ -6124,7 +5025,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * @enum {number}
  */
@@ -6143,7 +5044,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * ----------------------------------------------------------------------
  * Top-level Type value, enabling extensible type-specific metadata. We can
@@ -6186,7 +5087,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * ----------------------------------------------------------------------
  * Endianness of the platform producing the data
@@ -6208,7 +5109,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * These are stored in the flatbuffer in the Type union below
  *
@@ -6267,7 +5168,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * A Struct_ in the flatbuffer metadata is the same as an Arrow Struct
  * (according to the physical memory layout). We used Struct_ here as
@@ -6328,7 +5229,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * @constructor
  */
@@ -6385,7 +5286,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * Same as List, but with 64-bit offsets, allowing to represent
  * extremely large data values.
@@ -6445,7 +5346,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * @constructor
  */
@@ -6519,7 +5420,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * A Map is a logical nested type that is represented as
  *
@@ -6618,7 +5519,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * A union is a complex type with children in Field
  * By default ids in the type vector refer to the offsets in the children
@@ -6744,7 +5645,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * @constructor
  */
@@ -6831,7 +5732,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * @constructor
  */
@@ -6903,7 +5804,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * Unicode with UTF-8 encoding
  *
@@ -6962,7 +5863,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * Opaque binary data
  *
@@ -7021,7 +5922,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * Same as Utf8, but with 64-bit offsets, allowing to represent
  * extremely large data values.
@@ -7081,7 +5982,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * Same as Binary, but with 64-bit offsets, allowing to represent
  * extremely large data values.
@@ -7141,7 +6042,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * @constructor
  */
@@ -7215,7 +6116,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * @constructor
  */
@@ -7272,7 +6173,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * @constructor
  */
@@ -7363,7 +6264,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * Date is either a 32-bit or 64-bit type representing elapsed time since UNIX
  * epoch (1970-01-01), stored in either of two units:
@@ -7442,7 +6343,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * Time type. The physical storage type depends on the unit
  * - SECOND and MILLISECOND: 32 bits
@@ -7533,7 +6434,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * Time elapsed from the Unix epoch, 00:00:00.000 on 1 January 1970, excluding
  * leap seconds, as a 64-bit integer. Note that UNIX time does not include
@@ -7624,7 +6525,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * @constructor
  */
@@ -7696,7 +6597,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * @constructor
  */
@@ -7768,7 +6669,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * ----------------------------------------------------------------------
  * user defined key value pairs to add custom metadata to arrow
@@ -7853,7 +6754,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * ----------------------------------------------------------------------
  * Dictionary encoding metadata
@@ -7971,7 +6872,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * ----------------------------------------------------------------------
  * A field represents a named column in a record / row batch or child of a
@@ -8203,7 +7104,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * ----------------------------------------------------------------------
  * A Buffer represents a single contiguous memory segment
@@ -8267,7 +7168,7 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
 /**
  * ----------------------------------------------------------------------
  * A Schema describes the columns in a row batch
@@ -8439,12 +7340,23 @@ var org;
             })(flatbuf = arrow.flatbuf || (arrow.flatbuf = {}));
         })(arrow = apache.arrow || (apache.arrow = {}));
     })(apache = org.apache || (org.apache = {}));
-})(org = exports.org || (exports.org = {}));
+})(org || (org = {}));
+
+//# sourceMappingURL=Schema.mjs.map
 
 
+/***/ }),
 
-},{}],38:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/io/adapters.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/io/adapters.mjs ***!
+  \***************************************************/
+/*! exports provided: default */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _util_buffer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -8461,10 +7373,9 @@ var org;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const buffer_1 = require("../util/buffer");
+
 /** @ignore */
-exports.default = {
+/* harmony default export */ __webpack_exports__["default"] = ({
     fromIterable(source) {
         return pump(fromIterable(source));
     },
@@ -8485,7 +7396,7 @@ exports.default = {
     toNodeStream(source, options) {
         throw new Error(`"toNodeStream" not available in this environment`);
     },
-};
+});
 /** @ignore */
 const pump = (iterator) => { iterator.next(); return iterator; };
 /** @ignore */
@@ -8495,15 +7406,15 @@ function* fromIterable(source) {
     let cmd, size, bufferLength = 0;
     function byteRange() {
         if (cmd === 'peek') {
-            return buffer_1.joinUint8Arrays(buffers, size)[0];
+            return Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["joinUint8Arrays"])(buffers, size)[0];
         }
-        [buffer, buffers, bufferLength] = buffer_1.joinUint8Arrays(buffers, size);
+        [buffer, buffers, bufferLength] = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["joinUint8Arrays"])(buffers, size);
         return buffer;
     }
     // Yield so the caller can inject the read command before creating the source Iterator
     ({ cmd, size } = yield null);
     // initialize the iterator
-    let it = buffer_1.toUint8ArrayIterator(source)[Symbol.iterator]();
+    let it = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["toUint8ArrayIterator"])(source)[Symbol.iterator]();
     try {
         do {
             // read the next value
@@ -8536,15 +7447,15 @@ async function* fromAsyncIterable(source) {
     let cmd, size, bufferLength = 0;
     function byteRange() {
         if (cmd === 'peek') {
-            return buffer_1.joinUint8Arrays(buffers, size)[0];
+            return Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["joinUint8Arrays"])(buffers, size)[0];
         }
-        [buffer, buffers, bufferLength] = buffer_1.joinUint8Arrays(buffers, size);
+        [buffer, buffers, bufferLength] = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["joinUint8Arrays"])(buffers, size);
         return buffer;
     }
     // Yield so the caller can inject the read command before creating the source AsyncIterator
     ({ cmd, size } = yield null);
     // initialize the iterator
-    let it = buffer_1.toUint8ArrayAsyncIterator(source)[Symbol.asyncIterator]();
+    let it = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["toUint8ArrayAsyncIterator"])(source)[Symbol.asyncIterator]();
     try {
         do {
             // read the next value
@@ -8581,9 +7492,9 @@ async function* fromDOMStream(source) {
     let cmd, size, bufferLength = 0;
     function byteRange() {
         if (cmd === 'peek') {
-            return buffer_1.joinUint8Arrays(buffers, size)[0];
+            return Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["joinUint8Arrays"])(buffers, size)[0];
         }
-        [buffer, buffers, bufferLength] = buffer_1.joinUint8Arrays(buffers, size);
+        [buffer, buffers, bufferLength] = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["joinUint8Arrays"])(buffers, size);
         return buffer;
     }
     // Yield so the caller can inject the read command before we establish the ReadableStream lock
@@ -8598,7 +7509,7 @@ async function* fromDOMStream(source) {
                 : await it['read'](size - bufferLength));
             // if chunk is not null or empty, push it onto the queue
             if (!done && buffer.byteLength > 0) {
-                buffers.push(buffer_1.toUint8Array(buffer));
+                buffers.push(Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["toUint8Array"])(buffer));
                 bufferLength += buffer.byteLength;
             }
             // If we have enough bytes in our buffer, yield chunks until we don't
@@ -8651,7 +7562,7 @@ class AdaptiveByteReader {
         const result = !this.supportsBYOB || typeof size !== 'number'
             ? await this.getDefaultReader().read()
             : await this.readFromBYOBReader(size);
-        !result.done && (result.value = buffer_1.toUint8Array(result));
+        !result.done && (result.value = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["toUint8Array"])(result));
         return result;
     }
     getDefaultReader() {
@@ -8716,9 +7627,9 @@ async function* fromNodeStream(stream) {
     let buffers = [], buffer;
     function byteRange() {
         if (cmd === 'peek') {
-            return buffer_1.joinUint8Arrays(buffers, size)[0];
+            return Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["joinUint8Arrays"])(buffers, size)[0];
         }
-        [buffer, buffers, bufferLength] = buffer_1.joinUint8Arrays(buffers, size);
+        [buffer, buffers, bufferLength] = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["joinUint8Arrays"])(buffers, size);
         return buffer;
     }
     // Yield so the caller can inject the read command before we
@@ -8743,16 +7654,16 @@ async function* fromNodeStream(stream) {
             if (!(done = event === 'end')) {
                 // If the size is NaN, request to read everything in the stream's internal buffer
                 if (!isFinite(size - bufferLength)) {
-                    buffer = buffer_1.toUint8Array(stream['read'](undefined));
+                    buffer = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["toUint8Array"])(stream['read'](undefined));
                 }
                 else {
-                    buffer = buffer_1.toUint8Array(stream['read'](size - bufferLength));
+                    buffer = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["toUint8Array"])(stream['read'](size - bufferLength));
                     // If the byteLength is 0, then the requested amount is more than the stream has
                     // in its internal buffer. In this case the stream needs a "kick" to tell it to
                     // continue emitting readable events, so request to read everything the stream
                     // has in its internal buffer right now.
                     if (buffer.byteLength < (size - bufferLength)) {
-                        buffer = buffer_1.toUint8Array(stream['read'](undefined));
+                        buffer = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["toUint8Array"])(stream['read'](undefined));
                     }
                 }
                 // if chunk is not null or empty, push it onto the queue
@@ -8796,10 +7707,24 @@ async function* fromNodeStream(stream) {
     }
 }
 
+//# sourceMappingURL=adapters.mjs.map
 
 
-},{"../util/buffer":59}],39:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/io/file.mjs":
+/*!***********************************************!*\
+  !*** ./node_modules/apache-arrow/io/file.mjs ***!
+  \***********************************************/
+/*! exports provided: RandomAccessFile, AsyncRandomAccessFile */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RandomAccessFile", function() { return RandomAccessFile; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AsyncRandomAccessFile", function() { return AsyncRandomAccessFile; });
+/* harmony import */ var _stream__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./stream */ "./node_modules/apache-arrow/io/stream.mjs");
+/* harmony import */ var _util_buffer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -8816,15 +7741,14 @@ async function* fromNodeStream(stream) {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const stream_1 = require("./stream");
-const buffer_1 = require("../util/buffer");
+
+
 /** @ignore */
-class RandomAccessFile extends stream_1.ByteStream {
+class RandomAccessFile extends _stream__WEBPACK_IMPORTED_MODULE_0__["ByteStream"] {
     constructor(buffer, byteLength) {
         super();
         this.position = 0;
-        this.buffer = buffer_1.toUint8Array(buffer);
+        this.buffer = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_1__["toUint8Array"])(buffer);
         this.size = typeof byteLength === 'undefined' ? this.buffer.byteLength : byteLength;
     }
     readInt32(position) {
@@ -8855,9 +7779,8 @@ class RandomAccessFile extends stream_1.ByteStream {
     throw(value) { this.close(); return { done: true, value }; }
     return(value) { this.close(); return { done: true, value }; }
 }
-exports.RandomAccessFile = RandomAccessFile;
 /** @ignore */
-class AsyncRandomAccessFile extends stream_1.AsyncByteStream {
+class AsyncRandomAccessFile extends _stream__WEBPACK_IMPORTED_MODULE_0__["AsyncByteStream"] {
     constructor(file, byteLength) {
         super();
         this.position = 0;
@@ -8912,12 +7835,26 @@ class AsyncRandomAccessFile extends stream_1.AsyncByteStream {
     async throw(value) { await this.close(); return { done: true, value }; }
     async return(value) { await this.close(); return { done: true, value }; }
 }
-exports.AsyncRandomAccessFile = AsyncRandomAccessFile;
+
+//# sourceMappingURL=file.mjs.map
 
 
+/***/ }),
 
-},{"../util/buffer":59,"./stream":41}],40:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/io/interfaces.mjs":
+/*!*****************************************************!*\
+  !*** ./node_modules/apache-arrow/io/interfaces.mjs ***!
+  \*****************************************************/
+/*! exports provided: ITERATOR_DONE, ArrowJSON, ReadableInterop, AsyncQueue */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ITERATOR_DONE", function() { return ITERATOR_DONE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ArrowJSON", function() { return ArrowJSON; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ReadableInterop", function() { return ReadableInterop; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AsyncQueue", function() { return AsyncQueue; });
+/* harmony import */ var _adapters__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./adapters */ "./node_modules/apache-arrow/io/adapters.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -8934,10 +7871,9 @@ exports.AsyncRandomAccessFile = AsyncRandomAccessFile;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const adapters_1 = require("./adapters");
+
 /** @ignore */
-exports.ITERATOR_DONE = Object.freeze({ done: true, value: void (0) });
+const ITERATOR_DONE = Object.freeze({ done: true, value: void (0) });
 /** @ignore */
 class ArrowJSON {
     // @ts-ignore
@@ -8948,7 +7884,6 @@ class ArrowJSON {
     get batches() { return (this._json['batches'] || []); }
     get dictionaries() { return (this._json['dictionaries'] || []); }
 }
-exports.ArrowJSON = ArrowJSON;
 /** @ignore */
 class ReadableInterop {
     tee() {
@@ -8968,7 +7903,6 @@ class ReadableInterop {
         return this._nodeStream || (this._nodeStream = this.toNodeStream());
     }
 }
-exports.ReadableInterop = ReadableInterop;
 /** @ignore */
 class AsyncQueue extends ReadableInterop {
     constructor() {
@@ -8997,7 +7931,7 @@ class AsyncQueue extends ReadableInterop {
         if (this._closedPromiseResolve) {
             const { resolvers } = this;
             while (resolvers.length > 0) {
-                resolvers.shift().resolve(exports.ITERATOR_DONE);
+                resolvers.shift().resolve(ITERATOR_DONE);
             }
             this._closedPromiseResolve();
             this._closedPromiseResolve = undefined;
@@ -9005,17 +7939,17 @@ class AsyncQueue extends ReadableInterop {
     }
     [Symbol.asyncIterator]() { return this; }
     toDOMStream(options) {
-        return adapters_1.default.toDOMStream((this._closedPromiseResolve || this._error)
+        return _adapters__WEBPACK_IMPORTED_MODULE_0__["default"].toDOMStream((this._closedPromiseResolve || this._error)
             ? this
             : this._values, options);
     }
     toNodeStream(options) {
-        return adapters_1.default.toNodeStream((this._closedPromiseResolve || this._error)
+        return _adapters__WEBPACK_IMPORTED_MODULE_0__["default"].toNodeStream((this._closedPromiseResolve || this._error)
             ? this
             : this._values, options);
     }
-    async throw(_) { await this.abort(_); return exports.ITERATOR_DONE; }
-    async return(_) { await this.close(); return exports.ITERATOR_DONE; }
+    async throw(_) { await this.abort(_); return ITERATOR_DONE; }
+    async return(_) { await this.close(); return ITERATOR_DONE; }
     async read(size) { return (await this.next(size, 'read')).value; }
     async peek(size) { return (await this.next(size, 'peek')).value; }
     next(..._args) {
@@ -9026,7 +7960,7 @@ class AsyncQueue extends ReadableInterop {
             return Promise.reject({ done: true, value: this._error.error });
         }
         else if (!this._closedPromiseResolve) {
-            return Promise.resolve(exports.ITERATOR_DONE);
+            return Promise.resolve(ITERATOR_DONE);
         }
         else {
             return new Promise((resolve, reject) => {
@@ -9041,12 +7975,29 @@ class AsyncQueue extends ReadableInterop {
         throw new Error(`${this} is closed`);
     }
 }
-exports.AsyncQueue = AsyncQueue;
+
+//# sourceMappingURL=interfaces.mjs.map
 
 
+/***/ }),
 
-},{"./adapters":38}],41:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/io/stream.mjs":
+/*!*************************************************!*\
+  !*** ./node_modules/apache-arrow/io/stream.mjs ***!
+  \*************************************************/
+/*! exports provided: AsyncByteQueue, ByteStream, AsyncByteStream */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AsyncByteQueue", function() { return AsyncByteQueue; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ByteStream", function() { return ByteStream; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AsyncByteStream", function() { return AsyncByteStream; });
+/* harmony import */ var _adapters__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./adapters */ "./node_modules/apache-arrow/io/adapters.mjs");
+/* harmony import */ var _util_utf8__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/utf8 */ "./node_modules/apache-arrow/util/utf8.mjs");
+/* harmony import */ var _interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./interfaces */ "./node_modules/apache-arrow/io/interfaces.mjs");
+/* harmony import */ var _util_buffer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../util/buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
+/* harmony import */ var _util_compat__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../util/compat */ "./node_modules/apache-arrow/util/compat.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -9063,41 +8014,39 @@ exports.AsyncQueue = AsyncQueue;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const adapters_1 = require("./adapters");
-const utf8_1 = require("../util/utf8");
-const interfaces_1 = require("./interfaces");
-const buffer_1 = require("../util/buffer");
-const compat_1 = require("../util/compat");
+
+
+
+
+
 /** @ignore */
-class AsyncByteQueue extends interfaces_1.AsyncQueue {
+class AsyncByteQueue extends _interfaces__WEBPACK_IMPORTED_MODULE_2__["AsyncQueue"] {
     write(value) {
-        if ((value = buffer_1.toUint8Array(value)).byteLength > 0) {
+        if ((value = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["toUint8Array"])(value)).byteLength > 0) {
             return super.write(value);
         }
     }
     toString(sync = false) {
         return sync
-            ? utf8_1.decodeUtf8(this.toUint8Array(true))
-            : this.toUint8Array(false).then(utf8_1.decodeUtf8);
+            ? Object(_util_utf8__WEBPACK_IMPORTED_MODULE_1__["decodeUtf8"])(this.toUint8Array(true))
+            : this.toUint8Array(false).then(_util_utf8__WEBPACK_IMPORTED_MODULE_1__["decodeUtf8"]);
     }
     toUint8Array(sync = false) {
-        return sync ? buffer_1.joinUint8Arrays(this._values)[0] : (async () => {
+        return sync ? Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["joinUint8Arrays"])(this._values)[0] : (async () => {
             let buffers = [], byteLength = 0;
             for await (const chunk of this) {
                 buffers.push(chunk);
                 byteLength += chunk.byteLength;
             }
-            return buffer_1.joinUint8Arrays(buffers, byteLength)[0];
+            return Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["joinUint8Arrays"])(buffers, byteLength)[0];
         })();
     }
 }
-exports.AsyncByteQueue = AsyncByteQueue;
 /** @ignore */
 class ByteStream {
     constructor(source) {
         if (source) {
-            this.source = new ByteStreamSource(adapters_1.default.fromIterable(source));
+            this.source = new ByteStreamSource(_adapters__WEBPACK_IMPORTED_MODULE_0__["default"].fromIterable(source));
         }
     }
     [Symbol.iterator]() { return this; }
@@ -9107,7 +8056,6 @@ class ByteStream {
     peek(size) { return this.source.peek(size); }
     read(size) { return this.source.read(size); }
 }
-exports.ByteStream = ByteStream;
 /** @ignore */
 class AsyncByteStream {
     constructor(source) {
@@ -9115,25 +8063,25 @@ class AsyncByteStream {
             this.source = source.source;
         }
         else if (source instanceof AsyncByteQueue) {
-            this.source = new AsyncByteStreamSource(adapters_1.default.fromAsyncIterable(source));
+            this.source = new AsyncByteStreamSource(_adapters__WEBPACK_IMPORTED_MODULE_0__["default"].fromAsyncIterable(source));
         }
-        else if (compat_1.isReadableNodeStream(source)) {
-            this.source = new AsyncByteStreamSource(adapters_1.default.fromNodeStream(source));
+        else if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_4__["isReadableNodeStream"])(source)) {
+            this.source = new AsyncByteStreamSource(_adapters__WEBPACK_IMPORTED_MODULE_0__["default"].fromNodeStream(source));
         }
-        else if (compat_1.isReadableDOMStream(source)) {
-            this.source = new AsyncByteStreamSource(adapters_1.default.fromDOMStream(source));
+        else if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_4__["isReadableDOMStream"])(source)) {
+            this.source = new AsyncByteStreamSource(_adapters__WEBPACK_IMPORTED_MODULE_0__["default"].fromDOMStream(source));
         }
-        else if (compat_1.isFetchResponse(source)) {
-            this.source = new AsyncByteStreamSource(adapters_1.default.fromDOMStream(source.body));
+        else if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_4__["isFetchResponse"])(source)) {
+            this.source = new AsyncByteStreamSource(_adapters__WEBPACK_IMPORTED_MODULE_0__["default"].fromDOMStream(source.body));
         }
-        else if (compat_1.isIterable(source)) {
-            this.source = new AsyncByteStreamSource(adapters_1.default.fromIterable(source));
+        else if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_4__["isIterable"])(source)) {
+            this.source = new AsyncByteStreamSource(_adapters__WEBPACK_IMPORTED_MODULE_0__["default"].fromIterable(source));
         }
-        else if (compat_1.isPromise(source)) {
-            this.source = new AsyncByteStreamSource(adapters_1.default.fromAsyncIterable(source));
+        else if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_4__["isPromise"])(source)) {
+            this.source = new AsyncByteStreamSource(_adapters__WEBPACK_IMPORTED_MODULE_0__["default"].fromAsyncIterable(source));
         }
-        else if (compat_1.isAsyncIterable(source)) {
-            this.source = new AsyncByteStreamSource(adapters_1.default.fromAsyncIterable(source));
+        else if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_4__["isAsyncIterable"])(source)) {
+            this.source = new AsyncByteStreamSource(_adapters__WEBPACK_IMPORTED_MODULE_0__["default"].fromAsyncIterable(source));
         }
     }
     [Symbol.asyncIterator]() { return this; }
@@ -9145,7 +8093,6 @@ class AsyncByteStream {
     peek(size) { return this.source.peek(size); }
     read(size) { return this.source.read(size); }
 }
-exports.AsyncByteStream = AsyncByteStream;
 /** @ignore */
 class ByteStreamSource {
     constructor(source) {
@@ -9155,8 +8102,8 @@ class ByteStreamSource {
     peek(size) { return this.next(size, 'peek').value; }
     read(size) { return this.next(size, 'read').value; }
     next(size, cmd = 'read') { return this.source.next({ cmd, size }); }
-    throw(value) { return Object.create((this.source.throw && this.source.throw(value)) || interfaces_1.ITERATOR_DONE); }
-    return(value) { return Object.create((this.source.return && this.source.return(value)) || interfaces_1.ITERATOR_DONE); }
+    throw(value) { return Object.create((this.source.throw && this.source.throw(value)) || _interfaces__WEBPACK_IMPORTED_MODULE_2__["ITERATOR_DONE"]); }
+    return(value) { return Object.create((this.source.return && this.source.return(value)) || _interfaces__WEBPACK_IMPORTED_MODULE_2__["ITERATOR_DONE"]); }
 }
 /** @ignore */
 class AsyncByteStreamSource {
@@ -9170,23 +8117,36 @@ class AsyncByteStreamSource {
     async peek(size) { return (await this.next(size, 'peek')).value; }
     async next(size, cmd = 'read') { return (await this.source.next({ cmd, size })); }
     async throw(value) {
-        const result = (this.source.throw && await this.source.throw(value)) || interfaces_1.ITERATOR_DONE;
+        const result = (this.source.throw && await this.source.throw(value)) || _interfaces__WEBPACK_IMPORTED_MODULE_2__["ITERATOR_DONE"];
         this._closedPromiseResolve && this._closedPromiseResolve();
         this._closedPromiseResolve = undefined;
         return Object.create(result);
     }
     async return(value) {
-        const result = (this.source.return && await this.source.return(value)) || interfaces_1.ITERATOR_DONE;
+        const result = (this.source.return && await this.source.return(value)) || _interfaces__WEBPACK_IMPORTED_MODULE_2__["ITERATOR_DONE"];
         this._closedPromiseResolve && this._closedPromiseResolve();
         this._closedPromiseResolve = undefined;
         return Object.create(result);
     }
 }
 
+//# sourceMappingURL=stream.mjs.map
 
 
-},{"../util/buffer":59,"../util/compat":60,"../util/utf8":66,"./adapters":38,"./interfaces":40}],42:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/io/whatwg/builder.mjs":
+/*!*********************************************************!*\
+  !*** ./node_modules/apache-arrow/io/whatwg/builder.mjs ***!
+  \*********************************************************/
+/*! exports provided: builderThroughDOMStream, BuilderTransform */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "builderThroughDOMStream", function() { return builderThroughDOMStream; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BuilderTransform", function() { return BuilderTransform; });
+/* harmony import */ var _builder_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../builder/index */ "./node_modules/apache-arrow/builder/index.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -9203,13 +8163,11 @@ class AsyncByteStreamSource {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const index_1 = require("../../builder/index");
+
 /** @ignore */
 function builderThroughDOMStream(options) {
     return new BuilderTransform(options);
 }
-exports.builderThroughDOMStream = builderThroughDOMStream;
 /** @ignore */
 class BuilderTransform {
     constructor(options) {
@@ -9219,7 +8177,7 @@ class BuilderTransform {
         this._bufferedSize = 0;
         const { ['readableStrategy']: readableStrategy, ['writableStrategy']: writableStrategy, ['queueingStrategy']: queueingStrategy = 'count', ...builderOptions } = options;
         this._controller = null;
-        this._builder = index_1.Builder.new(builderOptions);
+        this._builder = _builder_index__WEBPACK_IMPORTED_MODULE_0__["Builder"].new(builderOptions);
         this._getSize = queueingStrategy !== 'bytes' ? chunkLength : chunkByteLength;
         const { ['highWaterMark']: readableHighWaterMark = queueingStrategy === 'bytes' ? 2 ** 14 : 1000 } = { ...readableStrategy };
         const { ['highWaterMark']: writableHighWaterMark = queueingStrategy === 'bytes' ? 2 ** 14 : 1000 } = { ...writableStrategy };
@@ -9267,14 +8225,26 @@ class BuilderTransform {
         chunk === null ? controller.close() : controller.enqueue(chunk);
     }
 }
-exports.BuilderTransform = BuilderTransform;
 /** @ignore */ const chunkLength = (chunk) => chunk.length;
 /** @ignore */ const chunkByteLength = (chunk) => chunk.byteLength;
 
+//# sourceMappingURL=builder.mjs.map
 
 
-},{"../../builder/index":17}],43:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/io/whatwg/iterable.mjs":
+/*!**********************************************************!*\
+  !*** ./node_modules/apache-arrow/io/whatwg/iterable.mjs ***!
+  \**********************************************************/
+/*! exports provided: toDOMStream */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toDOMStream", function() { return toDOMStream; });
+/* harmony import */ var _util_buffer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../util/buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
+/* harmony import */ var _util_compat__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../util/compat */ "./node_modules/apache-arrow/util/compat.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -9291,21 +8261,19 @@ exports.BuilderTransform = BuilderTransform;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const buffer_1 = require("../../util/buffer");
-const compat_1 = require("../../util/compat");
+
+
 /** @ignore */
 function toDOMStream(source, options) {
-    if (compat_1.isAsyncIterable(source)) {
+    if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_1__["isAsyncIterable"])(source)) {
         return asyncIterableAsReadableDOMStream(source, options);
     }
-    if (compat_1.isIterable(source)) {
+    if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_1__["isIterable"])(source)) {
         return iterableAsReadableDOMStream(source, options);
     }
     /* istanbul ignore next */
     throw new Error(`toDOMStream() must be called with an Iterable or AsyncIterable`);
 }
-exports.toDOMStream = toDOMStream;
 /** @ignore */
 function iterableAsReadableDOMStream(source, options) {
     let it = null;
@@ -9322,7 +8290,7 @@ function iterableAsReadableDOMStream(source, options) {
         let r = null;
         let size = controller.desiredSize || null;
         while (!(r = it.next(bm ? size : null)).done) {
-            if (ArrayBuffer.isView(r.value) && (buf = buffer_1.toUint8Array(r.value))) {
+            if (ArrayBuffer.isView(r.value) && (buf = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["toUint8Array"])(r.value))) {
                 size != null && bm && (size = size - buf.byteLength + 1);
                 r.value = buf;
             }
@@ -9350,7 +8318,7 @@ function asyncIterableAsReadableDOMStream(source, options) {
         let r = null;
         let size = controller.desiredSize || null;
         while (!(r = await it.next(bm ? size : null)).done) {
-            if (ArrayBuffer.isView(r.value) && (buf = buffer_1.toUint8Array(r.value))) {
+            if (ArrayBuffer.isView(r.value) && (buf = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_0__["toUint8Array"])(r.value))) {
                 size != null && bm && (size = size - buf.byteLength + 1);
                 r.value = buf;
             }
@@ -9363,10 +8331,23 @@ function asyncIterableAsReadableDOMStream(source, options) {
     }
 }
 
+//# sourceMappingURL=iterable.mjs.map
 
 
-},{"../../util/buffer":59,"../../util/compat":60}],44:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/io/whatwg/reader.mjs":
+/*!********************************************************!*\
+  !*** ./node_modules/apache-arrow/io/whatwg/reader.mjs ***!
+  \********************************************************/
+/*! exports provided: recordBatchReaderThroughDOMStream */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "recordBatchReaderThroughDOMStream", function() { return recordBatchReaderThroughDOMStream; });
+/* harmony import */ var _io_stream__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../io/stream */ "./node_modules/apache-arrow/io/stream.mjs");
+/* harmony import */ var _ipc_reader__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../ipc/reader */ "./node_modules/apache-arrow/ipc/reader.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -9383,12 +8364,11 @@ function asyncIterableAsReadableDOMStream(source, options) {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const stream_1 = require("../../io/stream");
-const reader_1 = require("../../ipc/reader");
+
+
 /** @ignore */
 function recordBatchReaderThroughDOMStream(writableStrategy, readableStrategy) {
-    const queue = new stream_1.AsyncByteQueue();
+    const queue = new _io_stream__WEBPACK_IMPORTED_MODULE_0__["AsyncByteQueue"]();
     let reader = null;
     const readable = new ReadableStream({
         async cancel() { await queue.close(); },
@@ -9397,7 +8377,7 @@ function recordBatchReaderThroughDOMStream(writableStrategy, readableStrategy) {
     });
     return { writable: new WritableStream(queue, { 'highWaterMark': 2 ** 14, ...writableStrategy }), readable };
     async function open() {
-        return await (await reader_1.RecordBatchReader.from(queue)).open(readableStrategy);
+        return await (await _ipc_reader__WEBPACK_IMPORTED_MODULE_1__["RecordBatchReader"].from(queue)).open(readableStrategy);
     }
     async function next(controller, reader) {
         let size = controller.desiredSize;
@@ -9411,12 +8391,23 @@ function recordBatchReaderThroughDOMStream(writableStrategy, readableStrategy) {
         controller.close();
     }
 }
-exports.recordBatchReaderThroughDOMStream = recordBatchReaderThroughDOMStream;
+
+//# sourceMappingURL=reader.mjs.map
 
 
+/***/ }),
 
-},{"../../io/stream":41,"../../ipc/reader":50}],45:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/io/whatwg/writer.mjs":
+/*!********************************************************!*\
+  !*** ./node_modules/apache-arrow/io/whatwg/writer.mjs ***!
+  \********************************************************/
+/*! exports provided: recordBatchWriterThroughDOMStream */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "recordBatchWriterThroughDOMStream", function() { return recordBatchWriterThroughDOMStream; });
+/* harmony import */ var _io_stream__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../io/stream */ "./node_modules/apache-arrow/io/stream.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -9433,12 +8424,11 @@ exports.recordBatchReaderThroughDOMStream = recordBatchReaderThroughDOMStream;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const stream_1 = require("../../io/stream");
+
 /** @ignore */
 function recordBatchWriterThroughDOMStream(writableStrategy, readableStrategy) {
     const writer = new this(writableStrategy);
-    const reader = new stream_1.AsyncByteStream(writer);
+    const reader = new _io_stream__WEBPACK_IMPORTED_MODULE_0__["AsyncByteStream"](writer);
     const readable = new ReadableStream({
         type: 'bytes',
         async cancel() { await reader.cancel(); },
@@ -9458,12 +8448,39 @@ function recordBatchWriterThroughDOMStream(writableStrategy, readableStrategy) {
         controller.close();
     }
 }
-exports.recordBatchWriterThroughDOMStream = recordBatchWriterThroughDOMStream;
+
+//# sourceMappingURL=writer.mjs.map
 
 
+/***/ }),
 
-},{"../../io/stream":41}],46:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/ipc/message.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/ipc/message.mjs ***!
+  \***************************************************/
+/*! exports provided: MessageReader, AsyncMessageReader, JSONMessageReader, PADDING, MAGIC_STR, MAGIC, checkForMagicArrowString, magicLength, magicAndPadding, magicX2AndPadding */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MessageReader", function() { return MessageReader; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AsyncMessageReader", function() { return AsyncMessageReader; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "JSONMessageReader", function() { return JSONMessageReader; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PADDING", function() { return PADDING; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MAGIC_STR", function() { return MAGIC_STR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MAGIC", function() { return MAGIC; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "checkForMagicArrowString", function() { return checkForMagicArrowString; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "magicLength", function() { return magicLength; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "magicAndPadding", function() { return magicAndPadding; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "magicX2AndPadding", function() { return magicX2AndPadding; });
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony import */ var flatbuffers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! flatbuffers */ "./node_modules/flatbuffers/js/flatbuffers.mjs");
+/* harmony import */ var _metadata_message__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./metadata/message */ "./node_modules/apache-arrow/ipc/metadata/message.mjs");
+/* harmony import */ var _util_compat__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../util/compat */ "./node_modules/apache-arrow/util/compat.mjs");
+/* harmony import */ var _io_file__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../io/file */ "./node_modules/apache-arrow/io/file.mjs");
+/* harmony import */ var _util_buffer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../util/buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
+/* harmony import */ var _io_stream__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../io/stream */ "./node_modules/apache-arrow/io/stream.mjs");
+/* harmony import */ var _io_interfaces__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../io/interfaces */ "./node_modules/apache-arrow/io/interfaces.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -9480,40 +8497,39 @@ exports.recordBatchWriterThroughDOMStream = recordBatchWriterThroughDOMStream;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const enum_1 = require("../enum");
-const flatbuffers_1 = require("flatbuffers");
-var ByteBuffer = flatbuffers_1.flatbuffers.ByteBuffer;
-const message_1 = require("./metadata/message");
-const compat_1 = require("../util/compat");
-const file_1 = require("../io/file");
-const buffer_1 = require("../util/buffer");
-const stream_1 = require("../io/stream");
-const interfaces_1 = require("../io/interfaces");
-/** @ignore */ const invalidMessageType = (type) => `Expected ${enum_1.MessageHeader[type]} Message in stream, but was null or length 0.`;
-/** @ignore */ const nullMessage = (type) => `Header pointer of flatbuffer-encoded ${enum_1.MessageHeader[type]} Message is null or length 0.`;
+
+
+var ByteBuffer = flatbuffers__WEBPACK_IMPORTED_MODULE_1__["flatbuffers"].ByteBuffer;
+
+
+
+
+
+
+/** @ignore */ const invalidMessageType = (type) => `Expected ${_enum__WEBPACK_IMPORTED_MODULE_0__["MessageHeader"][type]} Message in stream, but was null or length 0.`;
+/** @ignore */ const nullMessage = (type) => `Header pointer of flatbuffer-encoded ${_enum__WEBPACK_IMPORTED_MODULE_0__["MessageHeader"][type]} Message is null or length 0.`;
 /** @ignore */ const invalidMessageMetadata = (expected, actual) => `Expected to read ${expected} metadata bytes, but only read ${actual}.`;
 /** @ignore */ const invalidMessageBodyLength = (expected, actual) => `Expected to read ${expected} bytes for message body, but only read ${actual}.`;
 /** @ignore */
 class MessageReader {
     constructor(source) {
-        this.source = source instanceof stream_1.ByteStream ? source : new stream_1.ByteStream(source);
+        this.source = source instanceof _io_stream__WEBPACK_IMPORTED_MODULE_6__["ByteStream"] ? source : new _io_stream__WEBPACK_IMPORTED_MODULE_6__["ByteStream"](source);
     }
     [Symbol.iterator]() { return this; }
     next() {
         let r;
         if ((r = this.readMetadataLength()).done) {
-            return interfaces_1.ITERATOR_DONE;
+            return _io_interfaces__WEBPACK_IMPORTED_MODULE_7__["ITERATOR_DONE"];
         }
         // ARROW-6313: If the first 4 bytes are continuation indicator (-1), read
         // the next 4 for the 32-bit metadata length. Otherwise, assume this is a
         // pre-v0.15 message, where the first 4 bytes are the metadata length.
         if ((r.value === -1) &&
             (r = this.readMetadataLength()).done) {
-            return interfaces_1.ITERATOR_DONE;
+            return _io_interfaces__WEBPACK_IMPORTED_MODULE_7__["ITERATOR_DONE"];
         }
         if ((r = this.readMetadata(r.value)).done) {
-            return interfaces_1.ITERATOR_DONE;
+            return _io_interfaces__WEBPACK_IMPORTED_MODULE_7__["ITERATOR_DONE"];
         }
         return r;
     }
@@ -9533,7 +8549,7 @@ class MessageReader {
         if (bodyLength <= 0) {
             return new Uint8Array(0);
         }
-        const buf = buffer_1.toUint8Array(this.source.read(bodyLength));
+        const buf = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_5__["toUint8Array"])(this.source.read(bodyLength));
         if (buf.byteLength < bodyLength) {
             throw new Error(invalidMessageBodyLength(bodyLength, buf.byteLength));
         }
@@ -9543,7 +8559,7 @@ class MessageReader {
             /* 2. */ (buf.byteOffset + buf.byteLength) <= buf.buffer.byteLength ? buf : buf.slice();
     }
     readSchema(throwIfNull = false) {
-        const type = enum_1.MessageHeader.Schema;
+        const type = _enum__WEBPACK_IMPORTED_MODULE_0__["MessageHeader"].Schema;
         const message = this.readMessage(type);
         const schema = message && message.header();
         if (throwIfNull && !schema) {
@@ -9552,7 +8568,7 @@ class MessageReader {
         return schema;
     }
     readMetadataLength() {
-        const buf = this.source.read(exports.PADDING);
+        const buf = this.source.read(PADDING);
         const bb = buf && new ByteBuffer(buf);
         const len = bb && bb.readInt32(0) || 0;
         return { done: len === 0, value: len };
@@ -9560,38 +8576,37 @@ class MessageReader {
     readMetadata(metadataLength) {
         const buf = this.source.read(metadataLength);
         if (!buf) {
-            return interfaces_1.ITERATOR_DONE;
+            return _io_interfaces__WEBPACK_IMPORTED_MODULE_7__["ITERATOR_DONE"];
         }
         if (buf.byteLength < metadataLength) {
             throw new Error(invalidMessageMetadata(metadataLength, buf.byteLength));
         }
-        return { done: false, value: message_1.Message.decode(buf) };
+        return { done: false, value: _metadata_message__WEBPACK_IMPORTED_MODULE_2__["Message"].decode(buf) };
     }
 }
-exports.MessageReader = MessageReader;
 /** @ignore */
 class AsyncMessageReader {
     constructor(source, byteLength) {
-        this.source = source instanceof stream_1.AsyncByteStream ? source
-            : compat_1.isFileHandle(source)
-                ? new file_1.AsyncRandomAccessFile(source, byteLength)
-                : new stream_1.AsyncByteStream(source);
+        this.source = source instanceof _io_stream__WEBPACK_IMPORTED_MODULE_6__["AsyncByteStream"] ? source
+            : Object(_util_compat__WEBPACK_IMPORTED_MODULE_3__["isFileHandle"])(source)
+                ? new _io_file__WEBPACK_IMPORTED_MODULE_4__["AsyncRandomAccessFile"](source, byteLength)
+                : new _io_stream__WEBPACK_IMPORTED_MODULE_6__["AsyncByteStream"](source);
     }
     [Symbol.asyncIterator]() { return this; }
     async next() {
         let r;
         if ((r = await this.readMetadataLength()).done) {
-            return interfaces_1.ITERATOR_DONE;
+            return _io_interfaces__WEBPACK_IMPORTED_MODULE_7__["ITERATOR_DONE"];
         }
         // ARROW-6313: If the first 4 bytes are continuation indicator (-1), read
         // the next 4 for the 32-bit metadata length. Otherwise, assume this is a
         // pre-v0.15 message, where the first 4 bytes are the metadata length.
         if ((r.value === -1) &&
             (r = await this.readMetadataLength()).done) {
-            return interfaces_1.ITERATOR_DONE;
+            return _io_interfaces__WEBPACK_IMPORTED_MODULE_7__["ITERATOR_DONE"];
         }
         if ((r = await this.readMetadata(r.value)).done) {
-            return interfaces_1.ITERATOR_DONE;
+            return _io_interfaces__WEBPACK_IMPORTED_MODULE_7__["ITERATOR_DONE"];
         }
         return r;
     }
@@ -9611,7 +8626,7 @@ class AsyncMessageReader {
         if (bodyLength <= 0) {
             return new Uint8Array(0);
         }
-        const buf = buffer_1.toUint8Array(await this.source.read(bodyLength));
+        const buf = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_5__["toUint8Array"])(await this.source.read(bodyLength));
         if (buf.byteLength < bodyLength) {
             throw new Error(invalidMessageBodyLength(bodyLength, buf.byteLength));
         }
@@ -9621,7 +8636,7 @@ class AsyncMessageReader {
             /* 2. */ (buf.byteOffset + buf.byteLength) <= buf.buffer.byteLength ? buf : buf.slice();
     }
     async readSchema(throwIfNull = false) {
-        const type = enum_1.MessageHeader.Schema;
+        const type = _enum__WEBPACK_IMPORTED_MODULE_0__["MessageHeader"].Schema;
         const message = await this.readMessage(type);
         const schema = message && message.header();
         if (throwIfNull && !schema) {
@@ -9630,7 +8645,7 @@ class AsyncMessageReader {
         return schema;
     }
     async readMetadataLength() {
-        const buf = await this.source.read(exports.PADDING);
+        const buf = await this.source.read(PADDING);
         const bb = buf && new ByteBuffer(buf);
         const len = bb && bb.readInt32(0) || 0;
         return { done: len === 0, value: len };
@@ -9638,15 +8653,14 @@ class AsyncMessageReader {
     async readMetadata(metadataLength) {
         const buf = await this.source.read(metadataLength);
         if (!buf) {
-            return interfaces_1.ITERATOR_DONE;
+            return _io_interfaces__WEBPACK_IMPORTED_MODULE_7__["ITERATOR_DONE"];
         }
         if (buf.byteLength < metadataLength) {
             throw new Error(invalidMessageMetadata(metadataLength, buf.byteLength));
         }
-        return { done: false, value: message_1.Message.decode(buf) };
+        return { done: false, value: _metadata_message__WEBPACK_IMPORTED_MODULE_2__["Message"].decode(buf) };
     }
 }
-exports.AsyncMessageReader = AsyncMessageReader;
 /** @ignore */
 class JSONMessageReader extends MessageReader {
     constructor(source) {
@@ -9655,29 +8669,29 @@ class JSONMessageReader extends MessageReader {
         this._body = [];
         this._batchIndex = 0;
         this._dictionaryIndex = 0;
-        this._json = source instanceof interfaces_1.ArrowJSON ? source : new interfaces_1.ArrowJSON(source);
+        this._json = source instanceof _io_interfaces__WEBPACK_IMPORTED_MODULE_7__["ArrowJSON"] ? source : new _io_interfaces__WEBPACK_IMPORTED_MODULE_7__["ArrowJSON"](source);
     }
     next() {
         const { _json } = this;
         if (!this._schema) {
             this._schema = true;
-            const message = message_1.Message.fromJSON(_json.schema, enum_1.MessageHeader.Schema);
+            const message = _metadata_message__WEBPACK_IMPORTED_MODULE_2__["Message"].fromJSON(_json.schema, _enum__WEBPACK_IMPORTED_MODULE_0__["MessageHeader"].Schema);
             return { done: false, value: message };
         }
         if (this._dictionaryIndex < _json.dictionaries.length) {
             const batch = _json.dictionaries[this._dictionaryIndex++];
             this._body = batch['data']['columns'];
-            const message = message_1.Message.fromJSON(batch, enum_1.MessageHeader.DictionaryBatch);
+            const message = _metadata_message__WEBPACK_IMPORTED_MODULE_2__["Message"].fromJSON(batch, _enum__WEBPACK_IMPORTED_MODULE_0__["MessageHeader"].DictionaryBatch);
             return { done: false, value: message };
         }
         if (this._batchIndex < _json.batches.length) {
             const batch = _json.batches[this._batchIndex++];
             this._body = batch['columns'];
-            const message = message_1.Message.fromJSON(batch, enum_1.MessageHeader.RecordBatch);
+            const message = _metadata_message__WEBPACK_IMPORTED_MODULE_2__["Message"].fromJSON(batch, _enum__WEBPACK_IMPORTED_MODULE_0__["MessageHeader"].RecordBatch);
             return { done: false, value: message };
         }
         this._body = [];
-        return interfaces_1.ITERATOR_DONE;
+        return _io_interfaces__WEBPACK_IMPORTED_MODULE_7__["ITERATOR_DONE"];
     }
     readMessageBody(_bodyLength) {
         return flattenDataSources(this._body);
@@ -9703,7 +8717,7 @@ class JSONMessageReader extends MessageReader {
         return r.value;
     }
     readSchema() {
-        const type = enum_1.MessageHeader.Schema;
+        const type = _enum__WEBPACK_IMPORTED_MODULE_0__["MessageHeader"].Schema;
         const message = this.readMessage(type);
         const schema = message && message.header();
         if (!message || !schema) {
@@ -9712,37 +8726,52 @@ class JSONMessageReader extends MessageReader {
         return schema;
     }
 }
-exports.JSONMessageReader = JSONMessageReader;
 /** @ignore */
-exports.PADDING = 4;
+const PADDING = 4;
 /** @ignore */
-exports.MAGIC_STR = 'ARROW1';
+const MAGIC_STR = 'ARROW1';
 /** @ignore */
-exports.MAGIC = new Uint8Array(exports.MAGIC_STR.length);
-for (let i = 0; i < exports.MAGIC_STR.length; i += 1 | 0) {
-    exports.MAGIC[i] = exports.MAGIC_STR.charCodeAt(i);
+const MAGIC = new Uint8Array(MAGIC_STR.length);
+for (let i = 0; i < MAGIC_STR.length; i += 1 | 0) {
+    MAGIC[i] = MAGIC_STR.charCodeAt(i);
 }
 /** @ignore */
 function checkForMagicArrowString(buffer, index = 0) {
-    for (let i = -1, n = exports.MAGIC.length; ++i < n;) {
-        if (exports.MAGIC[i] !== buffer[index + i]) {
+    for (let i = -1, n = MAGIC.length; ++i < n;) {
+        if (MAGIC[i] !== buffer[index + i]) {
             return false;
         }
     }
     return true;
 }
-exports.checkForMagicArrowString = checkForMagicArrowString;
 /** @ignore */
-exports.magicLength = exports.MAGIC.length;
+const magicLength = MAGIC.length;
 /** @ignore */
-exports.magicAndPadding = exports.magicLength + exports.PADDING;
+const magicAndPadding = magicLength + PADDING;
 /** @ignore */
-exports.magicX2AndPadding = exports.magicLength * 2 + exports.PADDING;
+const magicX2AndPadding = magicLength * 2 + PADDING;
+
+//# sourceMappingURL=message.mjs.map
 
 
+/***/ }),
 
-},{"../enum":34,"../io/file":39,"../io/interfaces":40,"../io/stream":41,"../util/buffer":59,"../util/compat":60,"./metadata/message":49,"flatbuffers":106}],47:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/ipc/metadata/file.mjs":
+/*!*********************************************************!*\
+  !*** ./node_modules/apache-arrow/ipc/metadata/file.mjs ***!
+  \*********************************************************/
+/*! exports provided: Footer, FileBlock */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Footer", function() { return Footer_; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FileBlock", function() { return FileBlock; });
+/* harmony import */ var _fb_File__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../fb/File */ "./node_modules/apache-arrow/fb/File.mjs");
+/* harmony import */ var flatbuffers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! flatbuffers */ "./node_modules/flatbuffers/js/flatbuffers.mjs");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../schema */ "./node_modules/apache-arrow/schema.mjs");
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony import */ var _util_buffer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../util/buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -9759,21 +8788,20 @@ exports.magicX2AndPadding = exports.magicLength * 2 + exports.PADDING;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
 /* tslint:disable:class-name */
-const File_ = require("../../fb/File");
-const flatbuffers_1 = require("flatbuffers");
-var Long = flatbuffers_1.flatbuffers.Long;
-var Builder = flatbuffers_1.flatbuffers.Builder;
-var ByteBuffer = flatbuffers_1.flatbuffers.ByteBuffer;
-var _Block = File_.org.apache.arrow.flatbuf.Block;
-var _Footer = File_.org.apache.arrow.flatbuf.Footer;
-const schema_1 = require("../../schema");
-const enum_1 = require("../../enum");
-const buffer_1 = require("../../util/buffer");
+
+
+var Long = flatbuffers__WEBPACK_IMPORTED_MODULE_1__["flatbuffers"].Long;
+var Builder = flatbuffers__WEBPACK_IMPORTED_MODULE_1__["flatbuffers"].Builder;
+var ByteBuffer = flatbuffers__WEBPACK_IMPORTED_MODULE_1__["flatbuffers"].ByteBuffer;
+var _Block = _fb_File__WEBPACK_IMPORTED_MODULE_0__["org"].apache.arrow.flatbuf.Block;
+var _Footer = _fb_File__WEBPACK_IMPORTED_MODULE_0__["org"].apache.arrow.flatbuf.Footer;
+
+
+
 /** @ignore */
 class Footer_ {
-    constructor(schema, version = enum_1.MetadataVersion.V4, recordBatches, dictionaryBatches) {
+    constructor(schema, version = _enum__WEBPACK_IMPORTED_MODULE_3__["MetadataVersion"].V4, recordBatches, dictionaryBatches) {
         this.schema = schema;
         this.version = version;
         recordBatches && (this._recordBatches = recordBatches);
@@ -9781,15 +8809,15 @@ class Footer_ {
     }
     /** @nocollapse */
     static decode(buf) {
-        buf = new ByteBuffer(buffer_1.toUint8Array(buf));
+        buf = new ByteBuffer(Object(_util_buffer__WEBPACK_IMPORTED_MODULE_4__["toUint8Array"])(buf));
         const footer = _Footer.getRootAsFooter(buf);
-        const schema = schema_1.Schema.decode(footer.schema());
+        const schema = _schema__WEBPACK_IMPORTED_MODULE_2__["Schema"].decode(footer.schema());
         return new OffHeapFooter(schema, footer);
     }
     /** @nocollapse */
     static encode(footer) {
         const b = new Builder();
-        const schemaOffset = schema_1.Schema.encode(b, footer.schema);
+        const schemaOffset = _schema__WEBPACK_IMPORTED_MODULE_2__["Schema"].encode(b, footer.schema);
         _Footer.startRecordBatchesVector(b, footer.numRecordBatches);
         [...footer.recordBatches()].slice().reverse().forEach((rb) => FileBlock.encode(b, rb));
         const recordBatchesOffset = b.endVector();
@@ -9798,7 +8826,7 @@ class Footer_ {
         const dictionaryBatchesOffset = b.endVector();
         _Footer.startFooter(b);
         _Footer.addSchema(b, schemaOffset);
-        _Footer.addVersion(b, enum_1.MetadataVersion.V4);
+        _Footer.addVersion(b, _enum__WEBPACK_IMPORTED_MODULE_3__["MetadataVersion"].V4);
         _Footer.addRecordBatches(b, recordBatchesOffset);
         _Footer.addDictionaries(b, dictionaryBatchesOffset);
         _Footer.finishFooterBuffer(b, _Footer.endFooter(b));
@@ -9831,7 +8859,7 @@ class Footer_ {
             && this._dictionaryBatches[index] || null;
     }
 }
-exports.Footer = Footer_;
+
 /** @ignore */
 class OffHeapFooter extends Footer_ {
     constructor(schema, _footer) {
@@ -9878,12 +8906,29 @@ class FileBlock {
         this.bodyLength = typeof bodyLength === 'number' ? bodyLength : bodyLength.low;
     }
 }
-exports.FileBlock = FileBlock;
+
+//# sourceMappingURL=file.mjs.map
 
 
+/***/ }),
 
-},{"../../enum":34,"../../fb/File":35,"../../schema":53,"../../util/buffer":59,"flatbuffers":106}],48:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/ipc/metadata/json.mjs":
+/*!*********************************************************!*\
+  !*** ./node_modules/apache-arrow/ipc/metadata/json.mjs ***!
+  \*********************************************************/
+/*! exports provided: schemaFromJSON, recordBatchFromJSON, dictionaryBatchFromJSON, fieldFromJSON */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "schemaFromJSON", function() { return schemaFromJSON; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "recordBatchFromJSON", function() { return recordBatchFromJSON; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dictionaryBatchFromJSON", function() { return dictionaryBatchFromJSON; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fieldFromJSON", function() { return fieldFromJSON; });
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../schema */ "./node_modules/apache-arrow/schema.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../type */ "./node_modules/apache-arrow/type.mjs");
+/* harmony import */ var _message__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./message */ "./node_modules/apache-arrow/ipc/metadata/message.mjs");
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../enum */ "./node_modules/apache-arrow/enum.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -9900,39 +8945,35 @@ exports.FileBlock = FileBlock;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const schema_1 = require("../../schema");
-const type_1 = require("../../type");
-const message_1 = require("./message");
-const enum_1 = require("../../enum");
+
+
+
+
 /** @ignore */
 function schemaFromJSON(_schema, dictionaries = new Map()) {
-    return new schema_1.Schema(schemaFieldsFromJSON(_schema, dictionaries), customMetadataFromJSON(_schema['customMetadata']), dictionaries);
+    return new _schema__WEBPACK_IMPORTED_MODULE_0__["Schema"](schemaFieldsFromJSON(_schema, dictionaries), customMetadataFromJSON(_schema['customMetadata']), dictionaries);
 }
-exports.schemaFromJSON = schemaFromJSON;
 /** @ignore */
 function recordBatchFromJSON(b) {
-    return new message_1.RecordBatch(b['count'], fieldNodesFromJSON(b['columns']), buffersFromJSON(b['columns']));
+    return new _message__WEBPACK_IMPORTED_MODULE_2__["RecordBatch"](b['count'], fieldNodesFromJSON(b['columns']), buffersFromJSON(b['columns']));
 }
-exports.recordBatchFromJSON = recordBatchFromJSON;
 /** @ignore */
 function dictionaryBatchFromJSON(b) {
-    return new message_1.DictionaryBatch(recordBatchFromJSON(b['data']), b['id'], b['isDelta']);
+    return new _message__WEBPACK_IMPORTED_MODULE_2__["DictionaryBatch"](recordBatchFromJSON(b['data']), b['id'], b['isDelta']);
 }
-exports.dictionaryBatchFromJSON = dictionaryBatchFromJSON;
 /** @ignore */
 function schemaFieldsFromJSON(_schema, dictionaries) {
-    return (_schema['fields'] || []).filter(Boolean).map((f) => schema_1.Field.fromJSON(f, dictionaries));
+    return (_schema['fields'] || []).filter(Boolean).map((f) => _schema__WEBPACK_IMPORTED_MODULE_0__["Field"].fromJSON(f, dictionaries));
 }
 /** @ignore */
 function fieldChildrenFromJSON(_field, dictionaries) {
-    return (_field['children'] || []).filter(Boolean).map((f) => schema_1.Field.fromJSON(f, dictionaries));
+    return (_field['children'] || []).filter(Boolean).map((f) => _schema__WEBPACK_IMPORTED_MODULE_0__["Field"].fromJSON(f, dictionaries));
 }
 /** @ignore */
 function fieldNodesFromJSON(xs) {
     return (xs || []).reduce((fieldNodes, column) => [
         ...fieldNodes,
-        new message_1.FieldNode(column['count'], nullCountFromJSON(column['VALIDITY'])),
+        new _message__WEBPACK_IMPORTED_MODULE_2__["FieldNode"](column['count'], nullCountFromJSON(column['VALIDITY'])),
         ...fieldNodesFromJSON(column['children'])
     ], []);
 }
@@ -9940,10 +8981,10 @@ function fieldNodesFromJSON(xs) {
 function buffersFromJSON(xs, buffers = []) {
     for (let i = -1, n = (xs || []).length; ++i < n;) {
         const column = xs[i];
-        column['VALIDITY'] && buffers.push(new message_1.BufferRegion(buffers.length, column['VALIDITY'].length));
-        column['TYPE'] && buffers.push(new message_1.BufferRegion(buffers.length, column['TYPE'].length));
-        column['OFFSET'] && buffers.push(new message_1.BufferRegion(buffers.length, column['OFFSET'].length));
-        column['DATA'] && buffers.push(new message_1.BufferRegion(buffers.length, column['DATA'].length));
+        column['VALIDITY'] && buffers.push(new _message__WEBPACK_IMPORTED_MODULE_2__["BufferRegion"](buffers.length, column['VALIDITY'].length));
+        column['TYPE'] && buffers.push(new _message__WEBPACK_IMPORTED_MODULE_2__["BufferRegion"](buffers.length, column['TYPE'].length));
+        column['OFFSET'] && buffers.push(new _message__WEBPACK_IMPORTED_MODULE_2__["BufferRegion"](buffers.length, column['OFFSET'].length));
+        column['DATA'] && buffers.push(new _message__WEBPACK_IMPORTED_MODULE_2__["BufferRegion"](buffers.length, column['DATA'].length));
         buffers = buffersFromJSON(column['children'], buffers);
     }
     return buffers;
@@ -9963,7 +9004,7 @@ function fieldFromJSON(_field, dictionaries) {
     // If no dictionary encoding
     if (!dictionaries || !(dictMeta = _field['dictionary'])) {
         type = typeFromJSON(_field, fieldChildrenFromJSON(_field, dictionaries));
-        field = new schema_1.Field(_field['name'], type, _field['nullable'], customMetadataFromJSON(_field['customMetadata']));
+        field = new _schema__WEBPACK_IMPORTED_MODULE_0__["Field"](_field['name'], type, _field['nullable'], customMetadataFromJSON(_field['customMetadata']));
     }
     // tslint:disable
     // If dictionary encoded and the first time we've seen this dictionary id, decode
@@ -9971,96 +9012,119 @@ function fieldFromJSON(_field, dictionaries) {
     // data type into the dictionary types map.
     else if (!dictionaries.has(id = dictMeta['id'])) {
         // a dictionary index defaults to signed 32 bit int if unspecified
-        keys = (keys = dictMeta['indexType']) ? indexTypeFromJSON(keys) : new type_1.Int32();
+        keys = (keys = dictMeta['indexType']) ? indexTypeFromJSON(keys) : new _type__WEBPACK_IMPORTED_MODULE_1__["Int32"]();
         dictionaries.set(id, type = typeFromJSON(_field, fieldChildrenFromJSON(_field, dictionaries)));
-        dictType = new type_1.Dictionary(type, keys, id, dictMeta['isOrdered']);
-        field = new schema_1.Field(_field['name'], dictType, _field['nullable'], customMetadataFromJSON(_field['customMetadata']));
+        dictType = new _type__WEBPACK_IMPORTED_MODULE_1__["Dictionary"](type, keys, id, dictMeta['isOrdered']);
+        field = new _schema__WEBPACK_IMPORTED_MODULE_0__["Field"](_field['name'], dictType, _field['nullable'], customMetadataFromJSON(_field['customMetadata']));
     }
     // If dictionary encoded, and have already seen this dictionary Id in the schema, then reuse the
     // data type and wrap in a new Dictionary type and field.
     else {
         // a dictionary index defaults to signed 32 bit int if unspecified
-        keys = (keys = dictMeta['indexType']) ? indexTypeFromJSON(keys) : new type_1.Int32();
-        dictType = new type_1.Dictionary(dictionaries.get(id), keys, id, dictMeta['isOrdered']);
-        field = new schema_1.Field(_field['name'], dictType, _field['nullable'], customMetadataFromJSON(_field['customMetadata']));
+        keys = (keys = dictMeta['indexType']) ? indexTypeFromJSON(keys) : new _type__WEBPACK_IMPORTED_MODULE_1__["Int32"]();
+        dictType = new _type__WEBPACK_IMPORTED_MODULE_1__["Dictionary"](dictionaries.get(id), keys, id, dictMeta['isOrdered']);
+        field = new _schema__WEBPACK_IMPORTED_MODULE_0__["Field"](_field['name'], dictType, _field['nullable'], customMetadataFromJSON(_field['customMetadata']));
     }
     return field || null;
 }
-exports.fieldFromJSON = fieldFromJSON;
 /** @ignore */
 function customMetadataFromJSON(_metadata) {
     return new Map(Object.entries(_metadata || {}));
 }
 /** @ignore */
 function indexTypeFromJSON(_type) {
-    return new type_1.Int(_type['isSigned'], _type['bitWidth']);
+    return new _type__WEBPACK_IMPORTED_MODULE_1__["Int"](_type['isSigned'], _type['bitWidth']);
 }
 /** @ignore */
 function typeFromJSON(f, children) {
     const typeId = f['type']['name'];
     switch (typeId) {
-        case 'NONE': return new type_1.Null();
-        case 'null': return new type_1.Null();
-        case 'binary': return new type_1.Binary();
-        case 'utf8': return new type_1.Utf8();
-        case 'bool': return new type_1.Bool();
-        case 'list': return new type_1.List((children || [])[0]);
-        case 'struct': return new type_1.Struct(children || []);
-        case 'struct_': return new type_1.Struct(children || []);
+        case 'NONE': return new _type__WEBPACK_IMPORTED_MODULE_1__["Null"]();
+        case 'null': return new _type__WEBPACK_IMPORTED_MODULE_1__["Null"]();
+        case 'binary': return new _type__WEBPACK_IMPORTED_MODULE_1__["Binary"]();
+        case 'utf8': return new _type__WEBPACK_IMPORTED_MODULE_1__["Utf8"]();
+        case 'bool': return new _type__WEBPACK_IMPORTED_MODULE_1__["Bool"]();
+        case 'list': return new _type__WEBPACK_IMPORTED_MODULE_1__["List"]((children || [])[0]);
+        case 'struct': return new _type__WEBPACK_IMPORTED_MODULE_1__["Struct"](children || []);
+        case 'struct_': return new _type__WEBPACK_IMPORTED_MODULE_1__["Struct"](children || []);
     }
     switch (typeId) {
         case 'int': {
             const t = f['type'];
-            return new type_1.Int(t['isSigned'], t['bitWidth']);
+            return new _type__WEBPACK_IMPORTED_MODULE_1__["Int"](t['isSigned'], t['bitWidth']);
         }
         case 'floatingpoint': {
             const t = f['type'];
-            return new type_1.Float(enum_1.Precision[t['precision']]);
+            return new _type__WEBPACK_IMPORTED_MODULE_1__["Float"](_enum__WEBPACK_IMPORTED_MODULE_3__["Precision"][t['precision']]);
         }
         case 'decimal': {
             const t = f['type'];
-            return new type_1.Decimal(t['scale'], t['precision']);
+            return new _type__WEBPACK_IMPORTED_MODULE_1__["Decimal"](t['scale'], t['precision']);
         }
         case 'date': {
             const t = f['type'];
-            return new type_1.Date_(enum_1.DateUnit[t['unit']]);
+            return new _type__WEBPACK_IMPORTED_MODULE_1__["Date_"](_enum__WEBPACK_IMPORTED_MODULE_3__["DateUnit"][t['unit']]);
         }
         case 'time': {
             const t = f['type'];
-            return new type_1.Time(enum_1.TimeUnit[t['unit']], t['bitWidth']);
+            return new _type__WEBPACK_IMPORTED_MODULE_1__["Time"](_enum__WEBPACK_IMPORTED_MODULE_3__["TimeUnit"][t['unit']], t['bitWidth']);
         }
         case 'timestamp': {
             const t = f['type'];
-            return new type_1.Timestamp(enum_1.TimeUnit[t['unit']], t['timezone']);
+            return new _type__WEBPACK_IMPORTED_MODULE_1__["Timestamp"](_enum__WEBPACK_IMPORTED_MODULE_3__["TimeUnit"][t['unit']], t['timezone']);
         }
         case 'interval': {
             const t = f['type'];
-            return new type_1.Interval(enum_1.IntervalUnit[t['unit']]);
+            return new _type__WEBPACK_IMPORTED_MODULE_1__["Interval"](_enum__WEBPACK_IMPORTED_MODULE_3__["IntervalUnit"][t['unit']]);
         }
         case 'union': {
             const t = f['type'];
-            return new type_1.Union(enum_1.UnionMode[t['mode']], (t['typeIds'] || []), children || []);
+            return new _type__WEBPACK_IMPORTED_MODULE_1__["Union"](_enum__WEBPACK_IMPORTED_MODULE_3__["UnionMode"][t['mode']], (t['typeIds'] || []), children || []);
         }
         case 'fixedsizebinary': {
             const t = f['type'];
-            return new type_1.FixedSizeBinary(t['byteWidth']);
+            return new _type__WEBPACK_IMPORTED_MODULE_1__["FixedSizeBinary"](t['byteWidth']);
         }
         case 'fixedsizelist': {
             const t = f['type'];
-            return new type_1.FixedSizeList(t['listSize'], (children || [])[0]);
+            return new _type__WEBPACK_IMPORTED_MODULE_1__["FixedSizeList"](t['listSize'], (children || [])[0]);
         }
         case 'map': {
             const t = f['type'];
-            return new type_1.Map_((children || [])[0], t['keysSorted']);
+            return new _type__WEBPACK_IMPORTED_MODULE_1__["Map_"]((children || [])[0], t['keysSorted']);
         }
     }
     throw new Error(`Unrecognized type: "${typeId}"`);
 }
 
+//# sourceMappingURL=json.mjs.map
 
 
-},{"../../enum":34,"../../schema":53,"../../type":55,"./message":49}],49:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/ipc/metadata/message.mjs":
+/*!************************************************************!*\
+  !*** ./node_modules/apache-arrow/ipc/metadata/message.mjs ***!
+  \************************************************************/
+/*! exports provided: Message, RecordBatch, DictionaryBatch, BufferRegion, FieldNode */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Message", function() { return Message; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RecordBatch", function() { return RecordBatch; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DictionaryBatch", function() { return DictionaryBatch; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BufferRegion", function() { return BufferRegion; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FieldNode", function() { return FieldNode; });
+/* harmony import */ var flatbuffers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! flatbuffers */ "./node_modules/flatbuffers/js/flatbuffers.mjs");
+/* harmony import */ var _fb_Schema__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../fb/Schema */ "./node_modules/apache-arrow/fb/Schema.mjs");
+/* harmony import */ var _fb_Message__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../fb/Message */ "./node_modules/apache-arrow/fb/Message.mjs");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../schema */ "./node_modules/apache-arrow/schema.mjs");
+/* harmony import */ var _util_buffer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../util/buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony import */ var _visitor_typeassembler__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../visitor/typeassembler */ "./node_modules/apache-arrow/visitor/typeassembler.mjs");
+/* harmony import */ var _json__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./json */ "./node_modules/apache-arrow/ipc/metadata/json.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../type */ "./node_modules/apache-arrow/type.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -10077,29 +9141,28 @@ function typeFromJSON(f, children) {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const flatbuffers_1 = require("flatbuffers");
-const Schema_ = require("../../fb/Schema");
-const Message_ = require("../../fb/Message");
-const schema_1 = require("../../schema");
-const buffer_1 = require("../../util/buffer");
-const enum_1 = require("../../enum");
-const typeassembler_1 = require("../../visitor/typeassembler");
-const json_1 = require("./json");
-var Long = flatbuffers_1.flatbuffers.Long;
-var Builder = flatbuffers_1.flatbuffers.Builder;
-var ByteBuffer = flatbuffers_1.flatbuffers.ByteBuffer;
-var Type = Schema_.org.apache.arrow.flatbuf.Type;
-var _Field = Schema_.org.apache.arrow.flatbuf.Field;
-var _Schema = Schema_.org.apache.arrow.flatbuf.Schema;
-var _Buffer = Schema_.org.apache.arrow.flatbuf.Buffer;
-var _Message = Message_.org.apache.arrow.flatbuf.Message;
-var _KeyValue = Schema_.org.apache.arrow.flatbuf.KeyValue;
-var _FieldNode = Message_.org.apache.arrow.flatbuf.FieldNode;
-var _Endianness = Schema_.org.apache.arrow.flatbuf.Endianness;
-var _RecordBatch = Message_.org.apache.arrow.flatbuf.RecordBatch;
-var _DictionaryBatch = Message_.org.apache.arrow.flatbuf.DictionaryBatch;
-const type_1 = require("../../type");
+
+
+
+
+
+
+
+
+var Long = flatbuffers__WEBPACK_IMPORTED_MODULE_0__["flatbuffers"].Long;
+var Builder = flatbuffers__WEBPACK_IMPORTED_MODULE_0__["flatbuffers"].Builder;
+var ByteBuffer = flatbuffers__WEBPACK_IMPORTED_MODULE_0__["flatbuffers"].ByteBuffer;
+var Type = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Type;
+var _Field = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Field;
+var _Schema = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Schema;
+var _Buffer = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Buffer;
+var _Message = _fb_Message__WEBPACK_IMPORTED_MODULE_2__["org"].apache.arrow.flatbuf.Message;
+var _KeyValue = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.KeyValue;
+var _FieldNode = _fb_Message__WEBPACK_IMPORTED_MODULE_2__["org"].apache.arrow.flatbuf.FieldNode;
+var _Endianness = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Endianness;
+var _RecordBatch = _fb_Message__WEBPACK_IMPORTED_MODULE_2__["org"].apache.arrow.flatbuf.RecordBatch;
+var _DictionaryBatch = _fb_Message__WEBPACK_IMPORTED_MODULE_2__["org"].apache.arrow.flatbuf.DictionaryBatch;
+
 /**
  * @ignore
  * @private
@@ -10114,13 +9177,13 @@ class Message {
     }
     /** @nocollapse */
     static fromJSON(msg, headerType) {
-        const message = new Message(0, enum_1.MetadataVersion.V4, headerType);
+        const message = new Message(0, _enum__WEBPACK_IMPORTED_MODULE_5__["MetadataVersion"].V4, headerType);
         message._createHeader = messageHeaderFromJSON(msg, headerType);
         return message;
     }
     /** @nocollapse */
     static decode(buf) {
-        buf = new ByteBuffer(buffer_1.toUint8Array(buf));
+        buf = new ByteBuffer(Object(_util_buffer__WEBPACK_IMPORTED_MODULE_4__["toUint8Array"])(buf));
         const _message = _Message.getRootAsMessage(buf);
         const bodyLength = _message.bodyLength();
         const version = _message.version();
@@ -10133,7 +9196,7 @@ class Message {
     static encode(message) {
         let b = new Builder(), headerOffset = -1;
         if (message.isSchema()) {
-            headerOffset = schema_1.Schema.encode(b, message.header());
+            headerOffset = _schema__WEBPACK_IMPORTED_MODULE_3__["Schema"].encode(b, message.header());
         }
         else if (message.isRecordBatch()) {
             headerOffset = RecordBatch.encode(b, message.header());
@@ -10142,7 +9205,7 @@ class Message {
             headerOffset = DictionaryBatch.encode(b, message.header());
         }
         _Message.startMessage(b);
-        _Message.addVersion(b, enum_1.MetadataVersion.V4);
+        _Message.addVersion(b, _enum__WEBPACK_IMPORTED_MODULE_5__["MetadataVersion"].V4);
         _Message.addHeader(b, headerOffset);
         _Message.addHeaderType(b, message.headerType);
         _Message.addBodyLength(b, new Long(message.bodyLength, 0));
@@ -10151,14 +9214,14 @@ class Message {
     }
     /** @nocollapse */
     static from(header, bodyLength = 0) {
-        if (header instanceof schema_1.Schema) {
-            return new Message(0, enum_1.MetadataVersion.V4, enum_1.MessageHeader.Schema, header);
+        if (header instanceof _schema__WEBPACK_IMPORTED_MODULE_3__["Schema"]) {
+            return new Message(0, _enum__WEBPACK_IMPORTED_MODULE_5__["MetadataVersion"].V4, _enum__WEBPACK_IMPORTED_MODULE_5__["MessageHeader"].Schema, header);
         }
         if (header instanceof RecordBatch) {
-            return new Message(bodyLength, enum_1.MetadataVersion.V4, enum_1.MessageHeader.RecordBatch, header);
+            return new Message(bodyLength, _enum__WEBPACK_IMPORTED_MODULE_5__["MetadataVersion"].V4, _enum__WEBPACK_IMPORTED_MODULE_5__["MessageHeader"].RecordBatch, header);
         }
         if (header instanceof DictionaryBatch) {
-            return new Message(bodyLength, enum_1.MetadataVersion.V4, enum_1.MessageHeader.DictionaryBatch, header);
+            return new Message(bodyLength, _enum__WEBPACK_IMPORTED_MODULE_5__["MetadataVersion"].V4, _enum__WEBPACK_IMPORTED_MODULE_5__["MessageHeader"].DictionaryBatch, header);
         }
         throw new Error(`Unrecognized Message header: ${header}`);
     }
@@ -10167,11 +9230,10 @@ class Message {
     get headerType() { return this._headerType; }
     get bodyLength() { return this._bodyLength; }
     header() { return this._createHeader(); }
-    isSchema() { return this.headerType === enum_1.MessageHeader.Schema; }
-    isRecordBatch() { return this.headerType === enum_1.MessageHeader.RecordBatch; }
-    isDictionaryBatch() { return this.headerType === enum_1.MessageHeader.DictionaryBatch; }
+    isSchema() { return this.headerType === _enum__WEBPACK_IMPORTED_MODULE_5__["MessageHeader"].Schema; }
+    isRecordBatch() { return this.headerType === _enum__WEBPACK_IMPORTED_MODULE_5__["MessageHeader"].RecordBatch; }
+    isDictionaryBatch() { return this.headerType === _enum__WEBPACK_IMPORTED_MODULE_5__["MessageHeader"].DictionaryBatch; }
 }
-exports.Message = Message;
 /**
  * @ignore
  * @private
@@ -10186,7 +9248,6 @@ class RecordBatch {
         this._length = typeof length === 'number' ? length : length.low;
     }
 }
-exports.RecordBatch = RecordBatch;
 /**
  * @ignore
  * @private
@@ -10204,7 +9265,6 @@ class DictionaryBatch {
         this._id = typeof id === 'number' ? id : id.low;
     }
 }
-exports.DictionaryBatch = DictionaryBatch;
 /**
  * @ignore
  * @private
@@ -10215,7 +9275,6 @@ class BufferRegion {
         this.length = typeof length === 'number' ? length : length.low;
     }
 }
-exports.BufferRegion = BufferRegion;
 /**
  * @ignore
  * @private
@@ -10226,41 +9285,40 @@ class FieldNode {
         this.nullCount = typeof nullCount === 'number' ? nullCount : nullCount.low;
     }
 }
-exports.FieldNode = FieldNode;
 /** @ignore */
 function messageHeaderFromJSON(message, type) {
     return (() => {
         switch (type) {
-            case enum_1.MessageHeader.Schema: return schema_1.Schema.fromJSON(message);
-            case enum_1.MessageHeader.RecordBatch: return RecordBatch.fromJSON(message);
-            case enum_1.MessageHeader.DictionaryBatch: return DictionaryBatch.fromJSON(message);
+            case _enum__WEBPACK_IMPORTED_MODULE_5__["MessageHeader"].Schema: return _schema__WEBPACK_IMPORTED_MODULE_3__["Schema"].fromJSON(message);
+            case _enum__WEBPACK_IMPORTED_MODULE_5__["MessageHeader"].RecordBatch: return RecordBatch.fromJSON(message);
+            case _enum__WEBPACK_IMPORTED_MODULE_5__["MessageHeader"].DictionaryBatch: return DictionaryBatch.fromJSON(message);
         }
-        throw new Error(`Unrecognized Message type: { name: ${enum_1.MessageHeader[type]}, type: ${type} }`);
+        throw new Error(`Unrecognized Message type: { name: ${_enum__WEBPACK_IMPORTED_MODULE_5__["MessageHeader"][type]}, type: ${type} }`);
     });
 }
 /** @ignore */
 function decodeMessageHeader(message, type) {
     return (() => {
         switch (type) {
-            case enum_1.MessageHeader.Schema: return schema_1.Schema.decode(message.header(new _Schema()));
-            case enum_1.MessageHeader.RecordBatch: return RecordBatch.decode(message.header(new _RecordBatch()), message.version());
-            case enum_1.MessageHeader.DictionaryBatch: return DictionaryBatch.decode(message.header(new _DictionaryBatch()), message.version());
+            case _enum__WEBPACK_IMPORTED_MODULE_5__["MessageHeader"].Schema: return _schema__WEBPACK_IMPORTED_MODULE_3__["Schema"].decode(message.header(new _Schema()));
+            case _enum__WEBPACK_IMPORTED_MODULE_5__["MessageHeader"].RecordBatch: return RecordBatch.decode(message.header(new _RecordBatch()), message.version());
+            case _enum__WEBPACK_IMPORTED_MODULE_5__["MessageHeader"].DictionaryBatch: return DictionaryBatch.decode(message.header(new _DictionaryBatch()), message.version());
         }
-        throw new Error(`Unrecognized Message type: { name: ${enum_1.MessageHeader[type]}, type: ${type} }`);
+        throw new Error(`Unrecognized Message type: { name: ${_enum__WEBPACK_IMPORTED_MODULE_5__["MessageHeader"][type]}, type: ${type} }`);
     });
 }
-schema_1.Field['encode'] = encodeField;
-schema_1.Field['decode'] = decodeField;
-schema_1.Field['fromJSON'] = json_1.fieldFromJSON;
-schema_1.Schema['encode'] = encodeSchema;
-schema_1.Schema['decode'] = decodeSchema;
-schema_1.Schema['fromJSON'] = json_1.schemaFromJSON;
+_schema__WEBPACK_IMPORTED_MODULE_3__["Field"]['encode'] = encodeField;
+_schema__WEBPACK_IMPORTED_MODULE_3__["Field"]['decode'] = decodeField;
+_schema__WEBPACK_IMPORTED_MODULE_3__["Field"]['fromJSON'] = _json__WEBPACK_IMPORTED_MODULE_7__["fieldFromJSON"];
+_schema__WEBPACK_IMPORTED_MODULE_3__["Schema"]['encode'] = encodeSchema;
+_schema__WEBPACK_IMPORTED_MODULE_3__["Schema"]['decode'] = decodeSchema;
+_schema__WEBPACK_IMPORTED_MODULE_3__["Schema"]['fromJSON'] = _json__WEBPACK_IMPORTED_MODULE_7__["schemaFromJSON"];
 RecordBatch['encode'] = encodeRecordBatch;
 RecordBatch['decode'] = decodeRecordBatch;
-RecordBatch['fromJSON'] = json_1.recordBatchFromJSON;
+RecordBatch['fromJSON'] = _json__WEBPACK_IMPORTED_MODULE_7__["recordBatchFromJSON"];
 DictionaryBatch['encode'] = encodeDictionaryBatch;
 DictionaryBatch['decode'] = decodeDictionaryBatch;
-DictionaryBatch['fromJSON'] = json_1.dictionaryBatchFromJSON;
+DictionaryBatch['fromJSON'] = _json__WEBPACK_IMPORTED_MODULE_7__["dictionaryBatchFromJSON"];
 FieldNode['encode'] = encodeFieldNode;
 FieldNode['decode'] = decodeFieldNode;
 BufferRegion['encode'] = encodeBufferRegion;
@@ -10268,14 +9326,14 @@ BufferRegion['decode'] = decodeBufferRegion;
 /** @ignore */
 function decodeSchema(_schema, dictionaries = new Map()) {
     const fields = decodeSchemaFields(_schema, dictionaries);
-    return new schema_1.Schema(fields, decodeCustomMetadata(_schema), dictionaries);
+    return new _schema__WEBPACK_IMPORTED_MODULE_3__["Schema"](fields, decodeCustomMetadata(_schema), dictionaries);
 }
 /** @ignore */
-function decodeRecordBatch(batch, version = enum_1.MetadataVersion.V4) {
+function decodeRecordBatch(batch, version = _enum__WEBPACK_IMPORTED_MODULE_5__["MetadataVersion"].V4) {
     return new RecordBatch(batch.length(), decodeFieldNodes(batch), decodeBuffers(batch, version));
 }
 /** @ignore */
-function decodeDictionaryBatch(batch, version = enum_1.MetadataVersion.V4) {
+function decodeDictionaryBatch(batch, version = _enum__WEBPACK_IMPORTED_MODULE_5__["MetadataVersion"].V4) {
     return new DictionaryBatch(RecordBatch.decode(batch.data(), version), batch.id(), batch.isDelta());
 }
 /** @ignore */
@@ -10304,7 +9362,7 @@ function decodeBuffers(batch, version) {
             // If this Arrow buffer was written before version 4,
             // advance the buffer's bb_pos 8 bytes to skip past
             // the now-removed page_id field
-            if (version < enum_1.MetadataVersion.V4) {
+            if (version < _enum__WEBPACK_IMPORTED_MODULE_5__["MetadataVersion"].V4) {
                 b.bb_pos += (8 * (i + 1));
             }
             bufferRegions[++j] = BufferRegion.decode(b);
@@ -10317,7 +9375,7 @@ function decodeSchemaFields(schema, dictionaries) {
     const fields = [];
     for (let f, i = -1, j = -1, n = schema.fieldsLength(); ++i < n;) {
         if (f = schema.fields(i)) {
-            fields[++j] = schema_1.Field.decode(f, dictionaries);
+            fields[++j] = _schema__WEBPACK_IMPORTED_MODULE_3__["Field"].decode(f, dictionaries);
         }
     }
     return fields;
@@ -10327,7 +9385,7 @@ function decodeFieldChildren(field, dictionaries) {
     const children = [];
     for (let f, i = -1, j = -1, n = field.childrenLength(); ++i < n;) {
         if (f = field.children(i)) {
-            children[++j] = schema_1.Field.decode(f, dictionaries);
+            children[++j] = _schema__WEBPACK_IMPORTED_MODULE_3__["Field"].decode(f, dictionaries);
         }
     }
     return children;
@@ -10343,7 +9401,7 @@ function decodeField(f, dictionaries) {
     // If no dictionary encoding
     if (!dictionaries || !(dictMeta = f.dictionary())) {
         type = decodeFieldType(f, decodeFieldChildren(f, dictionaries));
-        field = new schema_1.Field(f.name(), type, f.nullable(), decodeCustomMetadata(f));
+        field = new _schema__WEBPACK_IMPORTED_MODULE_3__["Field"](f.name(), type, f.nullable(), decodeCustomMetadata(f));
     }
     // tslint:disable
     // If dictionary encoded and the first time we've seen this dictionary id, decode
@@ -10351,18 +9409,18 @@ function decodeField(f, dictionaries) {
     // data type into the dictionary types map.
     else if (!dictionaries.has(id = dictMeta.id().low)) {
         // a dictionary index defaults to signed 32 bit int if unspecified
-        keys = (keys = dictMeta.indexType()) ? decodeIndexType(keys) : new type_1.Int32();
+        keys = (keys = dictMeta.indexType()) ? decodeIndexType(keys) : new _type__WEBPACK_IMPORTED_MODULE_8__["Int32"]();
         dictionaries.set(id, type = decodeFieldType(f, decodeFieldChildren(f, dictionaries)));
-        dictType = new type_1.Dictionary(type, keys, id, dictMeta.isOrdered());
-        field = new schema_1.Field(f.name(), dictType, f.nullable(), decodeCustomMetadata(f));
+        dictType = new _type__WEBPACK_IMPORTED_MODULE_8__["Dictionary"](type, keys, id, dictMeta.isOrdered());
+        field = new _schema__WEBPACK_IMPORTED_MODULE_3__["Field"](f.name(), dictType, f.nullable(), decodeCustomMetadata(f));
     }
     // If dictionary encoded, and have already seen this dictionary Id in the schema, then reuse the
     // data type and wrap in a new Dictionary type and field.
     else {
         // a dictionary index defaults to signed 32 bit int if unspecified
-        keys = (keys = dictMeta.indexType()) ? decodeIndexType(keys) : new type_1.Int32();
-        dictType = new type_1.Dictionary(dictionaries.get(id), keys, id, dictMeta.isOrdered());
-        field = new schema_1.Field(f.name(), dictType, f.nullable(), decodeCustomMetadata(f));
+        keys = (keys = dictMeta.indexType()) ? decodeIndexType(keys) : new _type__WEBPACK_IMPORTED_MODULE_8__["Int32"]();
+        dictType = new _type__WEBPACK_IMPORTED_MODULE_8__["Dictionary"](dictionaries.get(id), keys, id, dictMeta.isOrdered());
+        field = new _schema__WEBPACK_IMPORTED_MODULE_3__["Field"](f.name(), dictType, f.nullable(), decodeCustomMetadata(f));
     }
     return field || null;
 }
@@ -10380,71 +9438,71 @@ function decodeCustomMetadata(parent) {
 }
 /** @ignore */
 function decodeIndexType(_type) {
-    return new type_1.Int(_type.isSigned(), _type.bitWidth());
+    return new _type__WEBPACK_IMPORTED_MODULE_8__["Int"](_type.isSigned(), _type.bitWidth());
 }
 /** @ignore */
 function decodeFieldType(f, children) {
     const typeId = f.typeType();
     switch (typeId) {
-        case Type.NONE: return new type_1.Null();
-        case Type.Null: return new type_1.Null();
-        case Type.Binary: return new type_1.Binary();
-        case Type.Utf8: return new type_1.Utf8();
-        case Type.Bool: return new type_1.Bool();
-        case Type.List: return new type_1.List((children || [])[0]);
-        case Type.Struct_: return new type_1.Struct(children || []);
+        case Type.NONE: return new _type__WEBPACK_IMPORTED_MODULE_8__["Null"]();
+        case Type.Null: return new _type__WEBPACK_IMPORTED_MODULE_8__["Null"]();
+        case Type.Binary: return new _type__WEBPACK_IMPORTED_MODULE_8__["Binary"]();
+        case Type.Utf8: return new _type__WEBPACK_IMPORTED_MODULE_8__["Utf8"]();
+        case Type.Bool: return new _type__WEBPACK_IMPORTED_MODULE_8__["Bool"]();
+        case Type.List: return new _type__WEBPACK_IMPORTED_MODULE_8__["List"]((children || [])[0]);
+        case Type.Struct_: return new _type__WEBPACK_IMPORTED_MODULE_8__["Struct"](children || []);
     }
     switch (typeId) {
         case Type.Int: {
-            const t = f.type(new Schema_.org.apache.arrow.flatbuf.Int());
-            return new type_1.Int(t.isSigned(), t.bitWidth());
+            const t = f.type(new _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Int());
+            return new _type__WEBPACK_IMPORTED_MODULE_8__["Int"](t.isSigned(), t.bitWidth());
         }
         case Type.FloatingPoint: {
-            const t = f.type(new Schema_.org.apache.arrow.flatbuf.FloatingPoint());
-            return new type_1.Float(t.precision());
+            const t = f.type(new _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.FloatingPoint());
+            return new _type__WEBPACK_IMPORTED_MODULE_8__["Float"](t.precision());
         }
         case Type.Decimal: {
-            const t = f.type(new Schema_.org.apache.arrow.flatbuf.Decimal());
-            return new type_1.Decimal(t.scale(), t.precision());
+            const t = f.type(new _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Decimal());
+            return new _type__WEBPACK_IMPORTED_MODULE_8__["Decimal"](t.scale(), t.precision());
         }
         case Type.Date: {
-            const t = f.type(new Schema_.org.apache.arrow.flatbuf.Date());
-            return new type_1.Date_(t.unit());
+            const t = f.type(new _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Date());
+            return new _type__WEBPACK_IMPORTED_MODULE_8__["Date_"](t.unit());
         }
         case Type.Time: {
-            const t = f.type(new Schema_.org.apache.arrow.flatbuf.Time());
-            return new type_1.Time(t.unit(), t.bitWidth());
+            const t = f.type(new _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Time());
+            return new _type__WEBPACK_IMPORTED_MODULE_8__["Time"](t.unit(), t.bitWidth());
         }
         case Type.Timestamp: {
-            const t = f.type(new Schema_.org.apache.arrow.flatbuf.Timestamp());
-            return new type_1.Timestamp(t.unit(), t.timezone());
+            const t = f.type(new _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Timestamp());
+            return new _type__WEBPACK_IMPORTED_MODULE_8__["Timestamp"](t.unit(), t.timezone());
         }
         case Type.Interval: {
-            const t = f.type(new Schema_.org.apache.arrow.flatbuf.Interval());
-            return new type_1.Interval(t.unit());
+            const t = f.type(new _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Interval());
+            return new _type__WEBPACK_IMPORTED_MODULE_8__["Interval"](t.unit());
         }
         case Type.Union: {
-            const t = f.type(new Schema_.org.apache.arrow.flatbuf.Union());
-            return new type_1.Union(t.mode(), t.typeIdsArray() || [], children || []);
+            const t = f.type(new _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Union());
+            return new _type__WEBPACK_IMPORTED_MODULE_8__["Union"](t.mode(), t.typeIdsArray() || [], children || []);
         }
         case Type.FixedSizeBinary: {
-            const t = f.type(new Schema_.org.apache.arrow.flatbuf.FixedSizeBinary());
-            return new type_1.FixedSizeBinary(t.byteWidth());
+            const t = f.type(new _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.FixedSizeBinary());
+            return new _type__WEBPACK_IMPORTED_MODULE_8__["FixedSizeBinary"](t.byteWidth());
         }
         case Type.FixedSizeList: {
-            const t = f.type(new Schema_.org.apache.arrow.flatbuf.FixedSizeList());
-            return new type_1.FixedSizeList(t.listSize(), (children || [])[0]);
+            const t = f.type(new _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.FixedSizeList());
+            return new _type__WEBPACK_IMPORTED_MODULE_8__["FixedSizeList"](t.listSize(), (children || [])[0]);
         }
         case Type.Map: {
-            const t = f.type(new Schema_.org.apache.arrow.flatbuf.Map());
-            return new type_1.Map_((children || [])[0], t.keysSorted());
+            const t = f.type(new _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Map());
+            return new _type__WEBPACK_IMPORTED_MODULE_8__["Map_"]((children || [])[0], t.keysSorted());
         }
     }
     throw new Error(`Unrecognized type: "${Type[typeId]}" (${typeId})`);
 }
 /** @ignore */
 function encodeSchema(b, schema) {
-    const fieldOffsets = schema.fields.map((f) => schema_1.Field.encode(b, f));
+    const fieldOffsets = schema.fields.map((f) => _schema__WEBPACK_IMPORTED_MODULE_3__["Field"].encode(b, f));
     _Schema.startFieldsVector(b, fieldOffsets.length);
     const fieldsVectorOffset = _Schema.createFieldsVector(b, fieldOffsets);
     const metadataOffset = !(schema.metadata && schema.metadata.size > 0) ? -1 :
@@ -10471,15 +9529,15 @@ function encodeField(b, field) {
     let dictionaryOffset = -1;
     let type = field.type;
     let typeId = field.typeId;
-    if (!type_1.DataType.isDictionary(type)) {
-        typeOffset = typeassembler_1.instance.visit(type, b);
+    if (!_type__WEBPACK_IMPORTED_MODULE_8__["DataType"].isDictionary(type)) {
+        typeOffset = _visitor_typeassembler__WEBPACK_IMPORTED_MODULE_6__["instance"].visit(type, b);
     }
     else {
         typeId = type.dictionary.typeId;
-        dictionaryOffset = typeassembler_1.instance.visit(type, b);
-        typeOffset = typeassembler_1.instance.visit(type.dictionary, b);
+        dictionaryOffset = _visitor_typeassembler__WEBPACK_IMPORTED_MODULE_6__["instance"].visit(type, b);
+        typeOffset = _visitor_typeassembler__WEBPACK_IMPORTED_MODULE_6__["instance"].visit(type.dictionary, b);
     }
-    const childOffsets = (type.children || []).map((f) => schema_1.Field.encode(b, f));
+    const childOffsets = (type.children || []).map((f) => _schema__WEBPACK_IMPORTED_MODULE_3__["Field"].encode(b, f));
     const childrenVectorOffset = _Field.createChildrenVector(b, childOffsets);
     const metadataOffset = !(field.metadata && field.metadata.size > 0) ? -1 :
         _Field.createCustomMetadataVector(b, [...field.metadata].map(([k, v]) => {
@@ -10550,10 +9608,36 @@ const platformIsLittleEndian = (function () {
     return new Int16Array(buffer)[0] === 256;
 })();
 
+//# sourceMappingURL=message.mjs.map
 
 
-},{"../../enum":34,"../../fb/Message":36,"../../fb/Schema":37,"../../schema":53,"../../type":55,"../../util/buffer":59,"../../visitor/typeassembler":101,"./json":48,"flatbuffers":106}],50:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/ipc/reader.mjs":
+/*!**************************************************!*\
+  !*** ./node_modules/apache-arrow/ipc/reader.mjs ***!
+  \**************************************************/
+/*! exports provided: RecordBatchReader, RecordBatchStreamReader, AsyncRecordBatchStreamReader, RecordBatchFileReader, AsyncRecordBatchFileReader */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RecordBatchReader", function() { return RecordBatchReader; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RecordBatchStreamReader", function() { return RecordBatchStreamReader; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AsyncRecordBatchStreamReader", function() { return AsyncRecordBatchStreamReader; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RecordBatchFileReader", function() { return RecordBatchFileReader; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AsyncRecordBatchFileReader", function() { return AsyncRecordBatchFileReader; });
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../vector */ "./node_modules/apache-arrow/vector.mjs");
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony import */ var _metadata_file__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./metadata/file */ "./node_modules/apache-arrow/ipc/metadata/file.mjs");
+/* harmony import */ var _io_adapters__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../io/adapters */ "./node_modules/apache-arrow/io/adapters.mjs");
+/* harmony import */ var _io_stream__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../io/stream */ "./node_modules/apache-arrow/io/stream.mjs");
+/* harmony import */ var _io_file__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../io/file */ "./node_modules/apache-arrow/io/file.mjs");
+/* harmony import */ var _visitor_vectorloader__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../visitor/vectorloader */ "./node_modules/apache-arrow/visitor/vectorloader.mjs");
+/* harmony import */ var _recordbatch__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../recordbatch */ "./node_modules/apache-arrow/recordbatch.mjs");
+/* harmony import */ var _io_interfaces__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../io/interfaces */ "./node_modules/apache-arrow/io/interfaces.mjs");
+/* harmony import */ var _message__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./message */ "./node_modules/apache-arrow/ipc/message.mjs");
+/* harmony import */ var _util_compat__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../util/compat */ "./node_modules/apache-arrow/util/compat.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -10570,19 +9654,18 @@ const platformIsLittleEndian = (function () {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const vector_1 = require("../vector");
-const enum_1 = require("../enum");
-const file_1 = require("./metadata/file");
-const adapters_1 = require("../io/adapters");
-const stream_1 = require("../io/stream");
-const file_2 = require("../io/file");
-const vectorloader_1 = require("../visitor/vectorloader");
-const recordbatch_1 = require("../recordbatch");
-const interfaces_1 = require("../io/interfaces");
-const message_1 = require("./message");
-const compat_1 = require("../util/compat");
-class RecordBatchReader extends interfaces_1.ReadableInterop {
+
+
+
+
+
+
+
+
+
+
+
+class RecordBatchReader extends _io_interfaces__WEBPACK_IMPORTED_MODULE_8__["ReadableInterop"] {
     constructor(impl) {
         super();
         this._impl = impl;
@@ -10618,7 +9701,7 @@ class RecordBatchReader extends interfaces_1.ReadableInterop {
     }
     open(options) {
         const opening = this._impl.open(options);
-        return compat_1.isPromise(opening) ? opening.then(() => this) : this;
+        return Object(_util_compat__WEBPACK_IMPORTED_MODULE_10__["isPromise"])(opening) ? opening.then(() => this) : this;
     }
     readRecordBatch(index) {
         return this._impl.isFile() ? this._impl.readRecordBatch(index) : null;
@@ -10630,12 +9713,12 @@ class RecordBatchReader extends interfaces_1.ReadableInterop {
         return this._impl[Symbol.asyncIterator]();
     }
     toDOMStream() {
-        return adapters_1.default.toDOMStream((this.isSync()
+        return _io_adapters__WEBPACK_IMPORTED_MODULE_3__["default"].toDOMStream((this.isSync()
             ? { [Symbol.iterator]: () => this }
             : { [Symbol.asyncIterator]: () => this }));
     }
     toNodeStream() {
-        return adapters_1.default.toNodeStream((this.isSync()
+        return _io_adapters__WEBPACK_IMPORTED_MODULE_3__["default"].toNodeStream((this.isSync()
             ? { [Symbol.iterator]: () => this }
             : { [Symbol.asyncIterator]: () => this }), { objectMode: true });
     }
@@ -10657,32 +9740,31 @@ class RecordBatchReader extends interfaces_1.ReadableInterop {
         if (source instanceof RecordBatchReader) {
             return source;
         }
-        else if (compat_1.isArrowJSON(source)) {
+        else if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_10__["isArrowJSON"])(source)) {
             return fromArrowJSON(source);
         }
-        else if (compat_1.isFileHandle(source)) {
+        else if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_10__["isFileHandle"])(source)) {
             return fromFileHandle(source);
         }
-        else if (compat_1.isPromise(source)) {
+        else if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_10__["isPromise"])(source)) {
             return (async () => await RecordBatchReader.from(await source))();
         }
-        else if (compat_1.isFetchResponse(source) || compat_1.isReadableDOMStream(source) || compat_1.isReadableNodeStream(source) || compat_1.isAsyncIterable(source)) {
-            return fromAsyncByteStream(new stream_1.AsyncByteStream(source));
+        else if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_10__["isFetchResponse"])(source) || Object(_util_compat__WEBPACK_IMPORTED_MODULE_10__["isReadableDOMStream"])(source) || Object(_util_compat__WEBPACK_IMPORTED_MODULE_10__["isReadableNodeStream"])(source) || Object(_util_compat__WEBPACK_IMPORTED_MODULE_10__["isAsyncIterable"])(source)) {
+            return fromAsyncByteStream(new _io_stream__WEBPACK_IMPORTED_MODULE_4__["AsyncByteStream"](source));
         }
-        return fromByteStream(new stream_1.ByteStream(source));
+        return fromByteStream(new _io_stream__WEBPACK_IMPORTED_MODULE_4__["ByteStream"](source));
     }
     /** @nocollapse */
     static readAll(source) {
         if (source instanceof RecordBatchReader) {
             return source.isSync() ? readAllSync(source) : readAllAsync(source);
         }
-        else if (compat_1.isArrowJSON(source) || ArrayBuffer.isView(source) || compat_1.isIterable(source) || compat_1.isIteratorResult(source)) {
+        else if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_10__["isArrowJSON"])(source) || ArrayBuffer.isView(source) || Object(_util_compat__WEBPACK_IMPORTED_MODULE_10__["isIterable"])(source) || Object(_util_compat__WEBPACK_IMPORTED_MODULE_10__["isIteratorResult"])(source)) {
             return readAllSync(source);
         }
         return readAllAsync(source);
     }
 }
-exports.RecordBatchReader = RecordBatchReader;
 //
 // Since TS is a structural type system, we define the following subclass stubs
 // so that concrete types exist to associate with with the interfaces below.
@@ -10711,7 +9793,6 @@ class RecordBatchStreamReader extends RecordBatchReader {
     [Symbol.iterator]() { return this._impl[Symbol.iterator](); }
     async *[Symbol.asyncIterator]() { yield* this[Symbol.iterator](); }
 }
-exports.RecordBatchStreamReader = RecordBatchStreamReader;
 /** @ignore */
 class AsyncRecordBatchStreamReader extends RecordBatchReader {
     constructor(_impl) {
@@ -10721,7 +9802,6 @@ class AsyncRecordBatchStreamReader extends RecordBatchReader {
     [Symbol.iterator]() { throw new Error(`AsyncRecordBatchStreamReader is not Iterable`); }
     [Symbol.asyncIterator]() { return this._impl[Symbol.asyncIterator](); }
 }
-exports.AsyncRecordBatchStreamReader = AsyncRecordBatchStreamReader;
 /** @ignore */
 class RecordBatchFileReader extends RecordBatchStreamReader {
     constructor(_impl) {
@@ -10729,7 +9809,6 @@ class RecordBatchFileReader extends RecordBatchStreamReader {
         this._impl = _impl;
     }
 }
-exports.RecordBatchFileReader = RecordBatchFileReader;
 /** @ignore */
 class AsyncRecordBatchFileReader extends AsyncRecordBatchStreamReader {
     constructor(_impl) {
@@ -10737,7 +9816,6 @@ class AsyncRecordBatchFileReader extends AsyncRecordBatchStreamReader {
         this._impl = _impl;
     }
 }
-exports.AsyncRecordBatchFileReader = AsyncRecordBatchFileReader;
 /** @ignore */
 class RecordBatchReaderImpl {
     constructor(dictionaries = new Map()) {
@@ -10761,7 +9839,7 @@ class RecordBatchReaderImpl {
         return this;
     }
     _loadRecordBatch(header, body) {
-        return new recordbatch_1.RecordBatch(this.schema, header.length, this._loadVectors(header, body, this.schema.fields));
+        return new _recordbatch__WEBPACK_IMPORTED_MODULE_7__["RecordBatch"](this.schema, header.length, this._loadVectors(header, body, this.schema.fields));
     }
     _loadDictionaryBatch(header, body) {
         const { id, isDelta, data } = header;
@@ -10769,22 +9847,22 @@ class RecordBatchReaderImpl {
         const dictionary = dictionaries.get(id);
         if (isDelta || !dictionary) {
             const type = schema.dictionaries.get(id);
-            return (dictionary && isDelta ? dictionary.concat(vector_1.Vector.new(this._loadVectors(data, body, [type])[0])) :
-                vector_1.Vector.new(this._loadVectors(data, body, [type])[0]));
+            return (dictionary && isDelta ? dictionary.concat(_vector__WEBPACK_IMPORTED_MODULE_0__["Vector"].new(this._loadVectors(data, body, [type])[0])) :
+                _vector__WEBPACK_IMPORTED_MODULE_0__["Vector"].new(this._loadVectors(data, body, [type])[0]));
         }
         return dictionary;
     }
     _loadVectors(header, body, types) {
-        return new vectorloader_1.VectorLoader(body, header.nodes, header.buffers, this.dictionaries).visitMany(types);
+        return new _visitor_vectorloader__WEBPACK_IMPORTED_MODULE_6__["VectorLoader"](body, header.nodes, header.buffers, this.dictionaries).visitMany(types);
     }
 }
 /** @ignore */
 class RecordBatchStreamReaderImpl extends RecordBatchReaderImpl {
     constructor(source, dictionaries) {
         super(dictionaries);
-        this._reader = !compat_1.isArrowJSON(source)
-            ? new message_1.MessageReader(this._handle = source)
-            : new message_1.JSONMessageReader(this._handle = source);
+        this._reader = !Object(_util_compat__WEBPACK_IMPORTED_MODULE_10__["isArrowJSON"])(source)
+            ? new _message__WEBPACK_IMPORTED_MODULE_9__["MessageReader"](this._handle = source)
+            : new _message__WEBPACK_IMPORTED_MODULE_9__["JSONMessageReader"](this._handle = source);
     }
     isSync() { return true; }
     isStream() { return true; }
@@ -10811,17 +9889,17 @@ class RecordBatchStreamReaderImpl extends RecordBatchReaderImpl {
         if (!this.closed && this.autoDestroy && (this.closed = true)) {
             return this.reset()._reader.throw(value);
         }
-        return interfaces_1.ITERATOR_DONE;
+        return _io_interfaces__WEBPACK_IMPORTED_MODULE_8__["ITERATOR_DONE"];
     }
     return(value) {
         if (!this.closed && this.autoDestroy && (this.closed = true)) {
             return this.reset()._reader.return(value);
         }
-        return interfaces_1.ITERATOR_DONE;
+        return _io_interfaces__WEBPACK_IMPORTED_MODULE_8__["ITERATOR_DONE"];
     }
     next() {
         if (this.closed) {
-            return interfaces_1.ITERATOR_DONE;
+            return _io_interfaces__WEBPACK_IMPORTED_MODULE_8__["ITERATOR_DONE"];
         }
         let message, { _reader: reader } = this;
         while (message = this._readNextMessageAndValidate()) {
@@ -10845,7 +9923,7 @@ class RecordBatchStreamReaderImpl extends RecordBatchReaderImpl {
         }
         if (this.schema && this._recordBatchIndex === 0) {
             this._recordBatchIndex++;
-            return { done: false, value: new recordbatch_1._InternalEmptyPlaceholderRecordBatch(this.schema) };
+            return { done: false, value: new _recordbatch__WEBPACK_IMPORTED_MODULE_7__["_InternalEmptyPlaceholderRecordBatch"](this.schema) };
         }
         return this.return();
     }
@@ -10857,7 +9935,7 @@ class RecordBatchStreamReaderImpl extends RecordBatchReaderImpl {
 class AsyncRecordBatchStreamReaderImpl extends RecordBatchReaderImpl {
     constructor(source, dictionaries) {
         super(dictionaries);
-        this._reader = new message_1.AsyncMessageReader(this._handle = source);
+        this._reader = new _message__WEBPACK_IMPORTED_MODULE_9__["AsyncMessageReader"](this._handle = source);
     }
     isAsync() { return true; }
     isStream() { return true; }
@@ -10884,17 +9962,17 @@ class AsyncRecordBatchStreamReaderImpl extends RecordBatchReaderImpl {
         if (!this.closed && this.autoDestroy && (this.closed = true)) {
             return await this.reset()._reader.throw(value);
         }
-        return interfaces_1.ITERATOR_DONE;
+        return _io_interfaces__WEBPACK_IMPORTED_MODULE_8__["ITERATOR_DONE"];
     }
     async return(value) {
         if (!this.closed && this.autoDestroy && (this.closed = true)) {
             return await this.reset()._reader.return(value);
         }
-        return interfaces_1.ITERATOR_DONE;
+        return _io_interfaces__WEBPACK_IMPORTED_MODULE_8__["ITERATOR_DONE"];
     }
     async next() {
         if (this.closed) {
-            return interfaces_1.ITERATOR_DONE;
+            return _io_interfaces__WEBPACK_IMPORTED_MODULE_8__["ITERATOR_DONE"];
         }
         let message, { _reader: reader } = this;
         while (message = await this._readNextMessageAndValidate()) {
@@ -10918,7 +9996,7 @@ class AsyncRecordBatchStreamReaderImpl extends RecordBatchReaderImpl {
         }
         if (this.schema && this._recordBatchIndex === 0) {
             this._recordBatchIndex++;
-            return { done: false, value: new recordbatch_1._InternalEmptyPlaceholderRecordBatch(this.schema) };
+            return { done: false, value: new _recordbatch__WEBPACK_IMPORTED_MODULE_7__["_InternalEmptyPlaceholderRecordBatch"](this.schema) };
         }
         return await this.return();
     }
@@ -10929,7 +10007,7 @@ class AsyncRecordBatchStreamReaderImpl extends RecordBatchReaderImpl {
 /** @ignore */
 class RecordBatchFileReaderImpl extends RecordBatchStreamReaderImpl {
     constructor(source, dictionaries) {
-        super(source instanceof file_2.RandomAccessFile ? source : new file_2.RandomAccessFile(source), dictionaries);
+        super(source instanceof _io_file__WEBPACK_IMPORTED_MODULE_5__["RandomAccessFile"] ? source : new _io_file__WEBPACK_IMPORTED_MODULE_5__["RandomAccessFile"](source), dictionaries);
     }
     get footer() { return this._footer; }
     get numDictionaries() { return this._footer ? this._footer.numDictionaries : 0; }
@@ -10954,7 +10032,7 @@ class RecordBatchFileReaderImpl extends RecordBatchStreamReaderImpl {
         }
         const block = this._footer && this._footer.getRecordBatch(index);
         if (block && this._handle.seek(block.offset)) {
-            const message = this._reader.readMessage(enum_1.MessageHeader.RecordBatch);
+            const message = this._reader.readMessage(_enum__WEBPACK_IMPORTED_MODULE_1__["MessageHeader"].RecordBatch);
             if (message && message.isRecordBatch()) {
                 const header = message.header();
                 const buffer = this._reader.readMessageBody(message.bodyLength);
@@ -10967,7 +10045,7 @@ class RecordBatchFileReaderImpl extends RecordBatchStreamReaderImpl {
     _readDictionaryBatch(index) {
         const block = this._footer && this._footer.getDictionaryBatch(index);
         if (block && this._handle.seek(block.offset)) {
-            const message = this._reader.readMessage(enum_1.MessageHeader.DictionaryBatch);
+            const message = this._reader.readMessage(_enum__WEBPACK_IMPORTED_MODULE_1__["MessageHeader"].DictionaryBatch);
             if (message && message.isDictionaryBatch()) {
                 const header = message.header();
                 const buffer = this._reader.readMessageBody(message.bodyLength);
@@ -10978,10 +10056,10 @@ class RecordBatchFileReaderImpl extends RecordBatchStreamReaderImpl {
     }
     _readFooter() {
         const { _handle } = this;
-        const offset = _handle.size - message_1.magicAndPadding;
+        const offset = _handle.size - _message__WEBPACK_IMPORTED_MODULE_9__["magicAndPadding"];
         const length = _handle.readInt32(offset);
         const buffer = _handle.readAt(offset - length, length);
-        return file_1.Footer.decode(buffer);
+        return _metadata_file__WEBPACK_IMPORTED_MODULE_2__["Footer"].decode(buffer);
     }
     _readNextMessageAndValidate(type) {
         if (!this._footer) {
@@ -11001,7 +10079,7 @@ class AsyncRecordBatchFileReaderImpl extends AsyncRecordBatchStreamReaderImpl {
     constructor(source, ...rest) {
         const byteLength = typeof rest[0] !== 'number' ? rest.shift() : undefined;
         const dictionaries = rest[0] instanceof Map ? rest.shift() : undefined;
-        super(source instanceof file_2.AsyncRandomAccessFile ? source : new file_2.AsyncRandomAccessFile(source, byteLength), dictionaries);
+        super(source instanceof _io_file__WEBPACK_IMPORTED_MODULE_5__["AsyncRandomAccessFile"] ? source : new _io_file__WEBPACK_IMPORTED_MODULE_5__["AsyncRandomAccessFile"](source, byteLength), dictionaries);
     }
     get footer() { return this._footer; }
     get numDictionaries() { return this._footer ? this._footer.numDictionaries : 0; }
@@ -11026,7 +10104,7 @@ class AsyncRecordBatchFileReaderImpl extends AsyncRecordBatchStreamReaderImpl {
         }
         const block = this._footer && this._footer.getRecordBatch(index);
         if (block && (await this._handle.seek(block.offset))) {
-            const message = await this._reader.readMessage(enum_1.MessageHeader.RecordBatch);
+            const message = await this._reader.readMessage(_enum__WEBPACK_IMPORTED_MODULE_1__["MessageHeader"].RecordBatch);
             if (message && message.isRecordBatch()) {
                 const header = message.header();
                 const buffer = await this._reader.readMessageBody(message.bodyLength);
@@ -11039,7 +10117,7 @@ class AsyncRecordBatchFileReaderImpl extends AsyncRecordBatchStreamReaderImpl {
     async _readDictionaryBatch(index) {
         const block = this._footer && this._footer.getDictionaryBatch(index);
         if (block && (await this._handle.seek(block.offset))) {
-            const message = await this._reader.readMessage(enum_1.MessageHeader.DictionaryBatch);
+            const message = await this._reader.readMessage(_enum__WEBPACK_IMPORTED_MODULE_1__["MessageHeader"].DictionaryBatch);
             if (message && message.isDictionaryBatch()) {
                 const header = message.header();
                 const buffer = await this._reader.readMessageBody(message.bodyLength);
@@ -11051,10 +10129,10 @@ class AsyncRecordBatchFileReaderImpl extends AsyncRecordBatchStreamReaderImpl {
     async _readFooter() {
         const { _handle } = this;
         _handle._pending && await _handle._pending;
-        const offset = _handle.size - message_1.magicAndPadding;
+        const offset = _handle.size - _message__WEBPACK_IMPORTED_MODULE_9__["magicAndPadding"];
         const length = await _handle.readInt32(offset);
         const buffer = await _handle.readAt(offset - length, length);
-        return file_1.Footer.decode(buffer);
+        return _metadata_file__WEBPACK_IMPORTED_MODULE_2__["Footer"].decode(buffer);
     }
     async _readNextMessageAndValidate(type) {
         if (!this._footer) {
@@ -11075,7 +10153,7 @@ class RecordBatchJSONReaderImpl extends RecordBatchStreamReaderImpl {
         super(source, dictionaries);
     }
     _loadVectors(header, body, types) {
-        return new vectorloader_1.JSONVectorLoader(body, header.nodes, header.buffers, this.dictionaries).visitMany(types);
+        return new _visitor_vectorloader__WEBPACK_IMPORTED_MODULE_6__["JSONVectorLoader"](body, header.nodes, header.buffers, this.dictionaries).visitMany(types);
     }
 }
 //
@@ -11121,16 +10199,16 @@ function fromArrowJSON(source) {
 }
 /** @ignore */
 function fromByteStream(source) {
-    const bytes = source.peek((message_1.magicLength + 7) & ~7);
-    return bytes && bytes.byteLength >= 4 ? !message_1.checkForMagicArrowString(bytes)
+    const bytes = source.peek((_message__WEBPACK_IMPORTED_MODULE_9__["magicLength"] + 7) & ~7);
+    return bytes && bytes.byteLength >= 4 ? !Object(_message__WEBPACK_IMPORTED_MODULE_9__["checkForMagicArrowString"])(bytes)
         ? new RecordBatchStreamReader(new RecordBatchStreamReaderImpl(source))
         : new RecordBatchFileReader(new RecordBatchFileReaderImpl(source.read()))
         : new RecordBatchStreamReader(new RecordBatchStreamReaderImpl(function* () { }()));
 }
 /** @ignore */
 async function fromAsyncByteStream(source) {
-    const bytes = await source.peek((message_1.magicLength + 7) & ~7);
-    return bytes && bytes.byteLength >= 4 ? !message_1.checkForMagicArrowString(bytes)
+    const bytes = await source.peek((_message__WEBPACK_IMPORTED_MODULE_9__["magicLength"] + 7) & ~7);
+    return bytes && bytes.byteLength >= 4 ? !Object(_message__WEBPACK_IMPORTED_MODULE_9__["checkForMagicArrowString"])(bytes)
         ? new AsyncRecordBatchStreamReader(new AsyncRecordBatchStreamReaderImpl(source))
         : new RecordBatchFileReader(new RecordBatchFileReaderImpl(await source.read()))
         : new AsyncRecordBatchStreamReader(new AsyncRecordBatchStreamReaderImpl(async function* () { }()));
@@ -11138,19 +10216,49 @@ async function fromAsyncByteStream(source) {
 /** @ignore */
 async function fromFileHandle(source) {
     const { size } = await source.stat();
-    const file = new file_2.AsyncRandomAccessFile(source, size);
-    if (size >= message_1.magicX2AndPadding) {
-        if (message_1.checkForMagicArrowString(await file.readAt(0, (message_1.magicLength + 7) & ~7))) {
+    const file = new _io_file__WEBPACK_IMPORTED_MODULE_5__["AsyncRandomAccessFile"](source, size);
+    if (size >= _message__WEBPACK_IMPORTED_MODULE_9__["magicX2AndPadding"]) {
+        if (Object(_message__WEBPACK_IMPORTED_MODULE_9__["checkForMagicArrowString"])(await file.readAt(0, (_message__WEBPACK_IMPORTED_MODULE_9__["magicLength"] + 7) & ~7))) {
             return new AsyncRecordBatchFileReader(new AsyncRecordBatchFileReaderImpl(file));
         }
     }
     return new AsyncRecordBatchStreamReader(new AsyncRecordBatchStreamReaderImpl(file));
 }
 
+//# sourceMappingURL=reader.mjs.map
 
 
-},{"../enum":34,"../io/adapters":38,"../io/file":39,"../io/interfaces":40,"../io/stream":41,"../recordbatch":52,"../util/compat":60,"../vector":68,"../visitor/vectorloader":105,"./message":46,"./metadata/file":47}],51:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/ipc/writer.mjs":
+/*!**************************************************!*\
+  !*** ./node_modules/apache-arrow/ipc/writer.mjs ***!
+  \**************************************************/
+/*! exports provided: RecordBatchWriter, RecordBatchStreamWriter, RecordBatchFileWriter, RecordBatchJSONWriter */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RecordBatchWriter", function() { return RecordBatchWriter; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RecordBatchStreamWriter", function() { return RecordBatchStreamWriter; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RecordBatchFileWriter", function() { return RecordBatchFileWriter; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RecordBatchJSONWriter", function() { return RecordBatchJSONWriter; });
+/* harmony import */ var _table__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../table */ "./node_modules/apache-arrow/table.mjs");
+/* harmony import */ var _message__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./message */ "./node_modules/apache-arrow/ipc/message.mjs");
+/* harmony import */ var _column__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../column */ "./node_modules/apache-arrow/column.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../schema */ "./node_modules/apache-arrow/schema.mjs");
+/* harmony import */ var _metadata_message__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./metadata/message */ "./node_modules/apache-arrow/ipc/metadata/message.mjs");
+/* harmony import */ var _metadata_file__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./metadata/file */ "./node_modules/apache-arrow/ipc/metadata/file.mjs");
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony import */ var _io_stream__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../io/stream */ "./node_modules/apache-arrow/io/stream.mjs");
+/* harmony import */ var _visitor_vectorassembler__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../visitor/vectorassembler */ "./node_modules/apache-arrow/visitor/vectorassembler.mjs");
+/* harmony import */ var _visitor_jsontypeassembler__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../visitor/jsontypeassembler */ "./node_modules/apache-arrow/visitor/jsontypeassembler.mjs");
+/* harmony import */ var _visitor_jsonvectorassembler__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../visitor/jsonvectorassembler */ "./node_modules/apache-arrow/visitor/jsonvectorassembler.mjs");
+/* harmony import */ var _util_buffer__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../util/buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
+/* harmony import */ var _recordbatch__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../recordbatch */ "./node_modules/apache-arrow/recordbatch.mjs");
+/* harmony import */ var _io_interfaces__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../io/interfaces */ "./node_modules/apache-arrow/io/interfaces.mjs");
+/* harmony import */ var _util_compat__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../util/compat */ "./node_modules/apache-arrow/util/compat.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -11167,36 +10275,35 @@ async function fromFileHandle(source) {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const table_1 = require("../table");
-const message_1 = require("./message");
-const column_1 = require("../column");
-const type_1 = require("../type");
-const schema_1 = require("../schema");
-const message_2 = require("./metadata/message");
-const metadata = require("./metadata/message");
-const file_1 = require("./metadata/file");
-const enum_1 = require("../enum");
-const stream_1 = require("../io/stream");
-const vectorassembler_1 = require("../visitor/vectorassembler");
-const jsontypeassembler_1 = require("../visitor/jsontypeassembler");
-const jsonvectorassembler_1 = require("../visitor/jsonvectorassembler");
-const buffer_1 = require("../util/buffer");
-const recordbatch_1 = require("../recordbatch");
-const interfaces_1 = require("../io/interfaces");
-const compat_1 = require("../util/compat");
-class RecordBatchWriter extends interfaces_1.ReadableInterop {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class RecordBatchWriter extends _io_interfaces__WEBPACK_IMPORTED_MODULE_14__["ReadableInterop"] {
     constructor(options) {
         super();
         this._position = 0;
         this._started = false;
         // @ts-ignore
-        this._sink = new stream_1.AsyncByteQueue();
+        this._sink = new _io_stream__WEBPACK_IMPORTED_MODULE_8__["AsyncByteQueue"]();
         this._schema = null;
         this._dictionaryBlocks = [];
         this._recordBatchBlocks = [];
         this._dictionaryDeltaOffsets = new Map();
-        compat_1.isObject(options) || (options = { autoDestroy: true, writeLegacyIpcFormat: false });
+        Object(_util_compat__WEBPACK_IMPORTED_MODULE_15__["isObject"])(options) || (options = { autoDestroy: true, writeLegacyIpcFormat: false });
         this._autoDestroy = (typeof options.autoDestroy === 'boolean') ? options.autoDestroy : true;
         this._writeLegacyIpcFormat = (typeof options.writeLegacyIpcFormat === 'boolean') ? options.writeLegacyIpcFormat : false;
     }
@@ -11220,10 +10327,10 @@ class RecordBatchWriter extends interfaces_1.ReadableInterop {
         return this._sink.toUint8Array(sync);
     }
     writeAll(input) {
-        if (compat_1.isPromise(input)) {
+        if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_15__["isPromise"])(input)) {
             return input.then((x) => this.writeAll(x));
         }
-        else if (compat_1.isAsyncIterable(input)) {
+        else if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_15__["isAsyncIterable"])(input)) {
             return writeAllAsync(this, input);
         }
         return writeAll(this, input);
@@ -11243,15 +10350,15 @@ class RecordBatchWriter extends interfaces_1.ReadableInterop {
         return this;
     }
     reset(sink = this._sink, schema = null) {
-        if ((sink === this._sink) || (sink instanceof stream_1.AsyncByteQueue)) {
+        if ((sink === this._sink) || (sink instanceof _io_stream__WEBPACK_IMPORTED_MODULE_8__["AsyncByteQueue"])) {
             this._sink = sink;
         }
         else {
-            this._sink = new stream_1.AsyncByteQueue();
-            if (sink && compat_1.isWritableDOMStream(sink)) {
+            this._sink = new _io_stream__WEBPACK_IMPORTED_MODULE_8__["AsyncByteQueue"]();
+            if (sink && Object(_util_compat__WEBPACK_IMPORTED_MODULE_15__["isWritableDOMStream"])(sink)) {
                 this.toDOMStream({ type: 'bytes' }).pipeTo(sink);
             }
-            else if (sink && compat_1.isWritableNodeStream(sink)) {
+            else if (sink && Object(_util_compat__WEBPACK_IMPORTED_MODULE_15__["isWritableNodeStream"])(sink)) {
                 this.toNodeStream({ objectMode: false }).pipe(sink);
             }
         }
@@ -11283,10 +10390,10 @@ class RecordBatchWriter extends interfaces_1.ReadableInterop {
         else if (payload === null || payload === undefined) {
             return this.finish() && undefined;
         }
-        else if (payload instanceof table_1.Table && !(schema = payload.schema)) {
+        else if (payload instanceof _table__WEBPACK_IMPORTED_MODULE_0__["Table"] && !(schema = payload.schema)) {
             return this.finish() && undefined;
         }
-        else if (payload instanceof recordbatch_1.RecordBatch && !(schema = payload.schema)) {
+        else if (payload instanceof _recordbatch__WEBPACK_IMPORTED_MODULE_13__["RecordBatch"] && !(schema = payload.schema)) {
             return this.finish() && undefined;
         }
         if (schema && !schema.compareTo(this._schema)) {
@@ -11295,30 +10402,30 @@ class RecordBatchWriter extends interfaces_1.ReadableInterop {
             }
             this.reset(this._sink, schema);
         }
-        if (payload instanceof recordbatch_1.RecordBatch) {
-            if (!(payload instanceof recordbatch_1._InternalEmptyPlaceholderRecordBatch)) {
+        if (payload instanceof _recordbatch__WEBPACK_IMPORTED_MODULE_13__["RecordBatch"]) {
+            if (!(payload instanceof _recordbatch__WEBPACK_IMPORTED_MODULE_13__["_InternalEmptyPlaceholderRecordBatch"])) {
                 this._writeRecordBatch(payload);
             }
         }
-        else if (payload instanceof table_1.Table) {
+        else if (payload instanceof _table__WEBPACK_IMPORTED_MODULE_0__["Table"]) {
             this.writeAll(payload.chunks);
         }
-        else if (compat_1.isIterable(payload)) {
+        else if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_15__["isIterable"])(payload)) {
             this.writeAll(payload);
         }
     }
     _writeMessage(message, alignment = 8) {
         const a = alignment - 1;
-        const buffer = message_2.Message.encode(message);
+        const buffer = _metadata_message__WEBPACK_IMPORTED_MODULE_5__["Message"].encode(message);
         const flatbufferSize = buffer.byteLength;
         const prefixSize = !this._writeLegacyIpcFormat ? 8 : 4;
         const alignedSize = (flatbufferSize + prefixSize + a) & ~a;
         const nPaddingBytes = alignedSize - flatbufferSize - prefixSize;
-        if (message.headerType === enum_1.MessageHeader.RecordBatch) {
-            this._recordBatchBlocks.push(new file_1.FileBlock(alignedSize, message.bodyLength, this._position));
+        if (message.headerType === _enum__WEBPACK_IMPORTED_MODULE_7__["MessageHeader"].RecordBatch) {
+            this._recordBatchBlocks.push(new _metadata_file__WEBPACK_IMPORTED_MODULE_6__["FileBlock"](alignedSize, message.bodyLength, this._position));
         }
-        else if (message.headerType === enum_1.MessageHeader.DictionaryBatch) {
-            this._dictionaryBlocks.push(new file_1.FileBlock(alignedSize, message.bodyLength, this._position));
+        else if (message.headerType === _enum__WEBPACK_IMPORTED_MODULE_7__["MessageHeader"].DictionaryBatch) {
+            this._dictionaryBlocks.push(new _metadata_file__WEBPACK_IMPORTED_MODULE_6__["FileBlock"](alignedSize, message.bodyLength, this._position));
         }
         // If not in legacy pre-0.15.0 mode, write the stream continuation indicator
         if (!this._writeLegacyIpcFormat) {
@@ -11335,7 +10442,7 @@ class RecordBatchWriter extends interfaces_1.ReadableInterop {
     }
     _write(chunk) {
         if (this._started) {
-            const buffer = buffer_1.toUint8Array(chunk);
+            const buffer = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_12__["toUint8Array"])(chunk);
             if (buffer && buffer.byteLength > 0) {
                 this._sink.write(buffer);
                 this._position += buffer.byteLength;
@@ -11344,7 +10451,7 @@ class RecordBatchWriter extends interfaces_1.ReadableInterop {
         return this;
     }
     _writeSchema(schema) {
-        return this._writeMessage(message_2.Message.from(schema));
+        return this._writeMessage(_metadata_message__WEBPACK_IMPORTED_MODULE_5__["Message"].from(schema));
     }
     // @ts-ignore
     _writeFooter(schema) {
@@ -11354,15 +10461,15 @@ class RecordBatchWriter extends interfaces_1.ReadableInterop {
             : this._write(Int32Array.of(-1, 0));
     }
     _writeMagic() {
-        return this._write(message_1.MAGIC);
+        return this._write(_message__WEBPACK_IMPORTED_MODULE_1__["MAGIC"]);
     }
     _writePadding(nBytes) {
         return nBytes > 0 ? this._write(new Uint8Array(nBytes)) : this;
     }
     _writeRecordBatch(batch) {
-        const { byteLength, nodes, bufferRegions, buffers } = vectorassembler_1.VectorAssembler.assemble(batch);
-        const recordBatch = new metadata.RecordBatch(batch.length, nodes, bufferRegions);
-        const message = message_2.Message.from(recordBatch, byteLength);
+        const { byteLength, nodes, bufferRegions, buffers } = _visitor_vectorassembler__WEBPACK_IMPORTED_MODULE_9__["VectorAssembler"].assemble(batch);
+        const recordBatch = new _metadata_message__WEBPACK_IMPORTED_MODULE_5__["RecordBatch"](batch.length, nodes, bufferRegions);
+        const message = _metadata_message__WEBPACK_IMPORTED_MODULE_5__["Message"].from(recordBatch, byteLength);
         return this
             ._writeDictionaries(batch)
             ._writeMessage(message)
@@ -11370,10 +10477,10 @@ class RecordBatchWriter extends interfaces_1.ReadableInterop {
     }
     _writeDictionaryBatch(dictionary, id, isDelta = false) {
         this._dictionaryDeltaOffsets.set(id, dictionary.length + (this._dictionaryDeltaOffsets.get(id) || 0));
-        const { byteLength, nodes, bufferRegions, buffers } = vectorassembler_1.VectorAssembler.assemble(dictionary);
-        const recordBatch = new metadata.RecordBatch(dictionary.length, nodes, bufferRegions);
-        const dictionaryBatch = new metadata.DictionaryBatch(recordBatch, id, isDelta);
-        const message = message_2.Message.from(dictionaryBatch, byteLength);
+        const { byteLength, nodes, bufferRegions, buffers } = _visitor_vectorassembler__WEBPACK_IMPORTED_MODULE_9__["VectorAssembler"].assemble(dictionary);
+        const recordBatch = new _metadata_message__WEBPACK_IMPORTED_MODULE_5__["RecordBatch"](dictionary.length, nodes, bufferRegions);
+        const dictionaryBatch = new _metadata_message__WEBPACK_IMPORTED_MODULE_5__["DictionaryBatch"](recordBatch, id, isDelta);
+        const message = _metadata_message__WEBPACK_IMPORTED_MODULE_5__["Message"].from(dictionaryBatch, byteLength);
         return this
             ._writeMessage(message)
             ._writeBodyBuffers(buffers);
@@ -11405,22 +10512,20 @@ class RecordBatchWriter extends interfaces_1.ReadableInterop {
         return this;
     }
 }
-exports.RecordBatchWriter = RecordBatchWriter;
 /** @ignore */
 class RecordBatchStreamWriter extends RecordBatchWriter {
     /** @nocollapse */
     static writeAll(input, options) {
         const writer = new RecordBatchStreamWriter(options);
-        if (compat_1.isPromise(input)) {
+        if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_15__["isPromise"])(input)) {
             return input.then((x) => writer.writeAll(x));
         }
-        else if (compat_1.isAsyncIterable(input)) {
+        else if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_15__["isAsyncIterable"])(input)) {
             return writeAllAsync(writer, input);
         }
         return writeAll(writer, input);
     }
 }
-exports.RecordBatchStreamWriter = RecordBatchStreamWriter;
 /** @ignore */
 class RecordBatchFileWriter extends RecordBatchWriter {
     constructor() {
@@ -11430,10 +10535,10 @@ class RecordBatchFileWriter extends RecordBatchWriter {
     /** @nocollapse */
     static writeAll(input) {
         const writer = new RecordBatchFileWriter();
-        if (compat_1.isPromise(input)) {
+        if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_15__["isPromise"])(input)) {
             return input.then((x) => writer.writeAll(x));
         }
-        else if (compat_1.isAsyncIterable(input)) {
+        else if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_15__["isAsyncIterable"])(input)) {
             return writeAllAsync(writer, input);
         }
         return writeAll(writer, input);
@@ -11443,7 +10548,7 @@ class RecordBatchFileWriter extends RecordBatchWriter {
         return this._writeMagic()._writePadding(2);
     }
     _writeFooter(schema) {
-        const buffer = file_1.Footer.encode(new file_1.Footer(schema, enum_1.MetadataVersion.V4, this._recordBatchBlocks, this._dictionaryBlocks));
+        const buffer = _metadata_file__WEBPACK_IMPORTED_MODULE_6__["Footer"].encode(new _metadata_file__WEBPACK_IMPORTED_MODULE_6__["Footer"](schema, _enum__WEBPACK_IMPORTED_MODULE_7__["MetadataVersion"].V4, this._recordBatchBlocks, this._dictionaryBlocks));
         return super
             ._writeFooter(schema) // EOS bytes for sequential readers
             ._write(buffer) // Write the flatbuffer
@@ -11451,7 +10556,6 @@ class RecordBatchFileWriter extends RecordBatchWriter {
             ._writeMagic(); // then the magic suffix
     }
 }
-exports.RecordBatchFileWriter = RecordBatchFileWriter;
 /** @ignore */
 class RecordBatchJSONWriter extends RecordBatchWriter {
     constructor() {
@@ -11480,7 +10584,7 @@ class RecordBatchJSONWriter extends RecordBatchWriter {
         this._dictionaryDeltaOffsets.set(id, dictionary.length + (this._dictionaryDeltaOffsets.get(id) || 0));
         this._write(this._dictionaryBlocks.length === 0 ? `    ` : `,\n    `);
         this._write(`${dictionaryBatchToJSON(dictionary, id, isDelta)}`);
-        this._dictionaryBlocks.push(new file_1.FileBlock(0, 0, 0));
+        this._dictionaryBlocks.push(new _metadata_file__WEBPACK_IMPORTED_MODULE_6__["FileBlock"](0, 0, 0));
         return this;
     }
     _writeRecordBatch(batch) {
@@ -11500,7 +10604,7 @@ class RecordBatchJSONWriter extends RecordBatchWriter {
             for (let i = -1, n = this._recordBatches.length; ++i < n;) {
                 this._write(i === 0 ? `,\n  "batches": [\n    ` : `,\n    `);
                 this._write(`${recordBatchToJSON(this._recordBatches[i])}`);
-                this._recordBatchBlocks.push(new file_1.FileBlock(0, 0, 0));
+                this._recordBatchBlocks.push(new _metadata_file__WEBPACK_IMPORTED_MODULE_6__["FileBlock"](0, 0, 0));
             }
             this._write(`\n  ]`);
         }
@@ -11512,11 +10616,10 @@ class RecordBatchJSONWriter extends RecordBatchWriter {
         return super.close();
     }
 }
-exports.RecordBatchJSONWriter = RecordBatchJSONWriter;
 /** @ignore */
 function writeAll(writer, input) {
     let chunks = input;
-    if (input instanceof table_1.Table) {
+    if (input instanceof _table__WEBPACK_IMPORTED_MODULE_0__["Table"]) {
         chunks = input.chunks;
         writer.reset(undefined, input.schema);
     }
@@ -11534,12 +10637,12 @@ async function writeAllAsync(writer, batches) {
 }
 /** @ignore */
 function fieldToJSON({ name, type, nullable }) {
-    const assembler = new jsontypeassembler_1.JSONTypeAssembler();
+    const assembler = new _visitor_jsontypeassembler__WEBPACK_IMPORTED_MODULE_10__["JSONTypeAssembler"]();
     return {
         'name': name, 'nullable': nullable,
         'type': assembler.visit(type),
         'children': (type.children || []).map(fieldToJSON),
-        'dictionary': !type_1.DataType.isDictionary(type) ? undefined : {
+        'dictionary': !_type__WEBPACK_IMPORTED_MODULE_3__["DataType"].isDictionary(type) ? undefined : {
             'id': type.id,
             'isOrdered': type.isOrdered,
             'indexType': assembler.visit(type.indices)
@@ -11548,8 +10651,8 @@ function fieldToJSON({ name, type, nullable }) {
 }
 /** @ignore */
 function dictionaryBatchToJSON(dictionary, id, isDelta = false) {
-    const field = new schema_1.Field(`${id}`, dictionary.type, dictionary.nullCount > 0);
-    const columns = jsonvectorassembler_1.JSONVectorAssembler.assemble(new column_1.Column(field, [dictionary]));
+    const field = new _schema__WEBPACK_IMPORTED_MODULE_4__["Field"](`${id}`, dictionary.type, dictionary.nullCount > 0);
+    const columns = _visitor_jsonvectorassembler__WEBPACK_IMPORTED_MODULE_11__["JSONVectorAssembler"].assemble(new _column__WEBPACK_IMPORTED_MODULE_2__["Column"](field, [dictionary]));
     return JSON.stringify({
         'id': id,
         'isDelta': isDelta,
@@ -11563,14 +10666,37 @@ function dictionaryBatchToJSON(dictionary, id, isDelta = false) {
 function recordBatchToJSON(records) {
     return JSON.stringify({
         'count': records.length,
-        'columns': jsonvectorassembler_1.JSONVectorAssembler.assemble(records)
+        'columns': _visitor_jsonvectorassembler__WEBPACK_IMPORTED_MODULE_11__["JSONVectorAssembler"].assemble(records)
     }, null, 2);
 }
 
+//# sourceMappingURL=writer.mjs.map
 
 
-},{"../column":30,"../enum":34,"../io/interfaces":40,"../io/stream":41,"../recordbatch":52,"../schema":53,"../table":54,"../type":55,"../util/buffer":59,"../util/compat":60,"../visitor/jsontypeassembler":97,"../visitor/jsonvectorassembler":98,"../visitor/vectorassembler":103,"./message":46,"./metadata/file":47,"./metadata/message":49}],52:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/recordbatch.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/recordbatch.mjs ***!
+  \***************************************************/
+/*! exports provided: RecordBatch, _InternalEmptyPlaceholderRecordBatch */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RecordBatch", function() { return RecordBatch; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "_InternalEmptyPlaceholderRecordBatch", function() { return _InternalEmptyPlaceholderRecordBatch; });
+/* harmony import */ var _data__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./data */ "./node_modules/apache-arrow/data.mjs");
+/* harmony import */ var _table__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./table */ "./node_modules/apache-arrow/table.mjs");
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./vector */ "./node_modules/apache-arrow/vector.mjs");
+/* harmony import */ var _visitor__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./visitor */ "./node_modules/apache-arrow/visitor.mjs");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./schema */ "./node_modules/apache-arrow/schema.mjs");
+/* harmony import */ var _util_compat__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./util/compat */ "./node_modules/apache-arrow/util/compat.mjs");
+/* harmony import */ var _vector_chunked__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./vector/chunked */ "./node_modules/apache-arrow/vector/chunked.mjs");
+/* harmony import */ var _util_args__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./util/args */ "./node_modules/apache-arrow/util/args.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./type */ "./node_modules/apache-arrow/type.mjs");
+/* harmony import */ var _util_recordbatch__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./util/recordbatch */ "./node_modules/apache-arrow/util/recordbatch.mjs");
+/* harmony import */ var _vector_index__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./vector/index */ "./node_modules/apache-arrow/vector/index.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -11587,53 +10713,52 @@ function recordBatchToJSON(records) {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const data_1 = require("./data");
-const table_1 = require("./table");
-const vector_1 = require("./vector");
-const visitor_1 = require("./visitor");
-const schema_1 = require("./schema");
-const compat_1 = require("./util/compat");
-const chunked_1 = require("./vector/chunked");
-const args_1 = require("./util/args");
-const type_1 = require("./type");
-const recordbatch_1 = require("./util/recordbatch");
-const index_1 = require("./vector/index");
-class RecordBatch extends index_1.StructVector {
+
+
+
+
+
+
+
+
+
+
+
+class RecordBatch extends _vector_index__WEBPACK_IMPORTED_MODULE_10__["StructVector"] {
     constructor(...args) {
         let data;
         let schema = args[0];
         let children;
-        if (args[1] instanceof data_1.Data) {
+        if (args[1] instanceof _data__WEBPACK_IMPORTED_MODULE_0__["Data"]) {
             [, data, children] = args;
         }
         else {
             const fields = schema.fields;
             const [, length, childData] = args;
-            data = data_1.Data.Struct(new type_1.Struct(fields), 0, length, 0, null, childData);
+            data = _data__WEBPACK_IMPORTED_MODULE_0__["Data"].Struct(new _type__WEBPACK_IMPORTED_MODULE_8__["Struct"](fields), 0, length, 0, null, childData);
         }
         super(data, children);
         this._schema = schema;
     }
     /** @nocollapse */
     static from(options) {
-        if (compat_1.isIterable(options['values'])) {
-            return table_1.Table.from(options);
+        if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_5__["isIterable"])(options['values'])) {
+            return _table__WEBPACK_IMPORTED_MODULE_1__["Table"].from(options);
         }
-        return table_1.Table.from(options);
+        return _table__WEBPACK_IMPORTED_MODULE_1__["Table"].from(options);
     }
     /** @nocollapse */
     static new(...args) {
-        const [fs, xs] = args_1.selectFieldArgs(args);
-        const vs = xs.filter((x) => x instanceof vector_1.Vector);
-        return new RecordBatch(...recordbatch_1.ensureSameLengthData(new schema_1.Schema(fs), vs.map((x) => x.data)));
+        const [fs, xs] = Object(_util_args__WEBPACK_IMPORTED_MODULE_7__["selectFieldArgs"])(args);
+        const vs = xs.filter((x) => x instanceof _vector__WEBPACK_IMPORTED_MODULE_2__["Vector"]);
+        return new RecordBatch(...Object(_util_recordbatch__WEBPACK_IMPORTED_MODULE_9__["ensureSameLengthData"])(new _schema__WEBPACK_IMPORTED_MODULE_4__["Schema"](fs), vs.map((x) => x.data)));
     }
     clone(data, children = this._children) {
         return new RecordBatch(this._schema, data, children);
     }
     concat(...others) {
-        const schema = this._schema, chunks = chunked_1.Chunked.flatten(this, ...others);
-        return new table_1.Table(schema, chunks.map(({ data }) => new RecordBatch(schema, data)));
+        const schema = this._schema, chunks = _vector_chunked__WEBPACK_IMPORTED_MODULE_6__["Chunked"].flatten(this, ...others);
+        return new _table__WEBPACK_IMPORTED_MODULE_1__["Table"](schema, chunks.map(({ data }) => new RecordBatch(schema, data)));
     }
     get schema() { return this._schema; }
     get numCols() { return this._schema.fields.length; }
@@ -11650,7 +10775,6 @@ class RecordBatch extends index_1.StructVector {
         return new RecordBatch(schema, this.length, childData);
     }
 }
-exports.RecordBatch = RecordBatch;
 /**
  * An internal class used by the `RecordBatchReader` and `RecordBatchWriter`
  * implementations to differentiate between a stream with valid zero-length
@@ -11662,21 +10786,20 @@ exports.RecordBatch = RecordBatch;
 /* tslint:disable:class-name */
 class _InternalEmptyPlaceholderRecordBatch extends RecordBatch {
     constructor(schema) {
-        super(schema, 0, schema.fields.map((f) => data_1.Data.new(f.type, 0, 0, 0)));
+        super(schema, 0, schema.fields.map((f) => _data__WEBPACK_IMPORTED_MODULE_0__["Data"].new(f.type, 0, 0, 0)));
     }
 }
-exports._InternalEmptyPlaceholderRecordBatch = _InternalEmptyPlaceholderRecordBatch;
 /** @ignore */
-class DictionaryCollector extends visitor_1.Visitor {
+class DictionaryCollector extends _visitor__WEBPACK_IMPORTED_MODULE_3__["Visitor"] {
     constructor() {
         super(...arguments);
         this.dictionaries = new Map();
     }
     static collect(batch) {
-        return new DictionaryCollector().visit(batch.data, new type_1.Struct(batch.schema.fields)).dictionaries;
+        return new DictionaryCollector().visit(batch.data, new _type__WEBPACK_IMPORTED_MODULE_8__["Struct"](batch.schema.fields)).dictionaries;
     }
     visit(data, type) {
-        if (type_1.DataType.isDictionary(type)) {
+        if (_type__WEBPACK_IMPORTED_MODULE_8__["DataType"].isDictionary(type)) {
             return this.visitDictionary(data, type);
         }
         else {
@@ -11693,10 +10816,25 @@ class DictionaryCollector extends visitor_1.Visitor {
     }
 }
 
+//# sourceMappingURL=recordbatch.mjs.map
 
 
-},{"./data":33,"./schema":53,"./table":54,"./type":55,"./util/args":56,"./util/compat":60,"./util/recordbatch":65,"./vector":68,"./vector/chunked":72,"./vector/index":79,"./visitor":91}],53:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/schema.mjs":
+/*!**********************************************!*\
+  !*** ./node_modules/apache-arrow/schema.mjs ***!
+  \**********************************************/
+/*! exports provided: Schema, Field */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Schema", function() { return Schema; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Field", function() { return Field; });
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./type */ "./node_modules/apache-arrow/type.mjs");
+/* harmony import */ var _util_args__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./util/args */ "./node_modules/apache-arrow/util/args.mjs");
+/* harmony import */ var _visitor_typecomparator__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./visitor/typecomparator */ "./node_modules/apache-arrow/visitor/typecomparator.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -11713,11 +10851,10 @@ class DictionaryCollector extends visitor_1.Visitor {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const type_1 = require("./type");
-const args_1 = require("./util/args");
-const args_2 = require("./util/args");
-const typecomparator_1 = require("./visitor/typecomparator");
+
+
+
+
 class Schema {
     constructor(fields = [], metadata, dictionaries) {
         this.fields = (fields || []);
@@ -11733,14 +10870,14 @@ class Schema {
     }
     /** @nocollapse */
     static new(...args) {
-        return new Schema(args_2.selectFieldArgs(args)[0]);
+        return new Schema(Object(_util_args__WEBPACK_IMPORTED_MODULE_1__["selectFieldArgs"])(args)[0]);
     }
     get [Symbol.toStringTag]() { return 'Schema'; }
     toString() {
         return `Schema<{ ${this.fields.map((f, i) => `${i}: ${f}`).join(', ')} }>`;
     }
     compareTo(other) {
-        return typecomparator_1.instance.compareSchemas(this, other);
+        return _visitor_typecomparator__WEBPACK_IMPORTED_MODULE_2__["instance"].compareSchemas(this, other);
     }
     select(...columnNames) {
         const names = columnNames.reduce((xs, x) => (xs[x] = true) && xs, Object.create(null));
@@ -11751,7 +10888,7 @@ class Schema {
     }
     assign(...args) {
         const other = args[0] instanceof Schema ? args[0]
-            : new Schema(args_1.selectArgs(Field, args));
+            : new Schema(Object(_util_args__WEBPACK_IMPORTED_MODULE_1__["selectArgs"])(Field, args));
         const curFields = [...this.fields];
         const metadata = mergeMaps(mergeMaps(new Map(), this.metadata), other.metadata);
         const newFields = other.fields.filter((f2) => {
@@ -11764,7 +10901,6 @@ class Schema {
         return new Schema([...curFields, ...newFields], metadata, new Map([...this.dictionaries, ...newDictionaries]));
     }
 }
-exports.Schema = Schema;
 class Field {
     constructor(name, type, nullable = false, metadata) {
         this.name = name;
@@ -11787,7 +10923,7 @@ class Field {
     get [Symbol.toStringTag]() { return 'Field'; }
     toString() { return `${this.name}: ${this.type}`; }
     compareTo(other) {
-        return typecomparator_1.instance.compareField(this, other);
+        return _visitor_typecomparator__WEBPACK_IMPORTED_MODULE_2__["instance"].compareField(this, other);
     }
     clone(...args) {
         let [name, type, nullable, metadata] = args;
@@ -11797,7 +10933,6 @@ class Field {
         return Field.new(name, type, nullable, metadata);
     }
 }
-exports.Field = Field;
 /** @ignore */
 function mergeMaps(m1, m2) {
     return new Map([...(m1 || new Map()), ...(m2 || new Map())]);
@@ -11807,7 +10942,7 @@ function generateDictionaryMap(fields, dictionaries = new Map()) {
     for (let i = -1, n = fields.length; ++i < n;) {
         const field = fields[i];
         const type = field.type;
-        if (type_1.DataType.isDictionary(type)) {
+        if (_type__WEBPACK_IMPORTED_MODULE_0__["DataType"].isDictionary(type)) {
             if (!dictionaries.has(type.id)) {
                 dictionaries.set(type.id, type.dictionary);
             }
@@ -11831,10 +10966,31 @@ Field.prototype.name = null;
 Field.prototype.nullable = null;
 Field.prototype.metadata = null;
 
+//# sourceMappingURL=schema.mjs.map
 
 
-},{"./type":55,"./util/args":56,"./visitor/typecomparator":102}],54:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/table.mjs":
+/*!*********************************************!*\
+  !*** ./node_modules/apache-arrow/table.mjs ***!
+  \*********************************************/
+/*! exports provided: Table */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Table", function() { return Table; });
+/* harmony import */ var _column__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./column */ "./node_modules/apache-arrow/column.mjs");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./schema */ "./node_modules/apache-arrow/schema.mjs");
+/* harmony import */ var _recordbatch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./recordbatch */ "./node_modules/apache-arrow/recordbatch.mjs");
+/* harmony import */ var _ipc_reader__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./ipc/reader */ "./node_modules/apache-arrow/ipc/reader.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./type */ "./node_modules/apache-arrow/type.mjs");
+/* harmony import */ var _util_args__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./util/args */ "./node_modules/apache-arrow/util/args.mjs");
+/* harmony import */ var _util_compat__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./util/compat */ "./node_modules/apache-arrow/util/compat.mjs");
+/* harmony import */ var _ipc_writer__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./ipc/writer */ "./node_modules/apache-arrow/ipc/writer.mjs");
+/* harmony import */ var _util_recordbatch__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./util/recordbatch */ "./node_modules/apache-arrow/util/recordbatch.mjs");
+/* harmony import */ var _vector_index__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./vector/index */ "./node_modules/apache-arrow/vector/index.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -11851,49 +11007,48 @@ Field.prototype.metadata = null;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const column_1 = require("./column");
-const schema_1 = require("./schema");
-const recordbatch_1 = require("./recordbatch");
-const reader_1 = require("./ipc/reader");
-const type_1 = require("./type");
-const args_1 = require("./util/args");
-const compat_1 = require("./util/compat");
-const writer_1 = require("./ipc/writer");
-const recordbatch_2 = require("./util/recordbatch");
-const index_1 = require("./vector/index");
-class Table extends index_1.Chunked {
+
+
+
+
+
+
+
+
+
+
+class Table extends _vector_index__WEBPACK_IMPORTED_MODULE_9__["Chunked"] {
     constructor(...args) {
         let schema = null;
-        if (args[0] instanceof schema_1.Schema) {
+        if (args[0] instanceof _schema__WEBPACK_IMPORTED_MODULE_1__["Schema"]) {
             schema = args.shift();
         }
-        let chunks = args_1.selectArgs(recordbatch_1.RecordBatch, args);
+        let chunks = Object(_util_args__WEBPACK_IMPORTED_MODULE_5__["selectArgs"])(_recordbatch__WEBPACK_IMPORTED_MODULE_2__["RecordBatch"], args);
         if (!schema && !(schema = chunks[0] && chunks[0].schema)) {
             throw new TypeError('Table must be initialized with a Schema or at least one RecordBatch');
         }
-        chunks[0] || (chunks[0] = new recordbatch_1._InternalEmptyPlaceholderRecordBatch(schema));
-        super(new type_1.Struct(schema.fields), chunks);
+        chunks[0] || (chunks[0] = new _recordbatch__WEBPACK_IMPORTED_MODULE_2__["_InternalEmptyPlaceholderRecordBatch"](schema));
+        super(new _type__WEBPACK_IMPORTED_MODULE_4__["Struct"](schema.fields), chunks);
         this._schema = schema;
         this._chunks = chunks;
     }
     /** @nocollapse */
-    static empty(schema = new schema_1.Schema([])) { return new Table(schema, []); }
+    static empty(schema = new _schema__WEBPACK_IMPORTED_MODULE_1__["Schema"]([])) { return new Table(schema, []); }
     /** @nocollapse */
     static from(input) {
         if (!input) {
             return Table.empty();
         }
         if (typeof input === 'object') {
-            let table = compat_1.isIterable(input['values']) ? tableFromIterable(input)
-                : compat_1.isAsyncIterable(input['values']) ? tableFromAsyncIterable(input)
+            let table = Object(_util_compat__WEBPACK_IMPORTED_MODULE_6__["isIterable"])(input['values']) ? tableFromIterable(input)
+                : Object(_util_compat__WEBPACK_IMPORTED_MODULE_6__["isAsyncIterable"])(input['values']) ? tableFromAsyncIterable(input)
                     : null;
             if (table !== null) {
                 return table;
             }
         }
-        let reader = reader_1.RecordBatchReader.from(input);
-        if (compat_1.isPromise(reader)) {
+        let reader = _ipc_reader__WEBPACK_IMPORTED_MODULE_3__["RecordBatchReader"].from(input);
+        if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_6__["isPromise"])(reader)) {
             return (async () => await Table.from(await reader))();
         }
         if (reader.isSync() && (reader = reader.open())) {
@@ -11922,7 +11077,7 @@ class Table extends index_1.Chunked {
     }
     /** @nocollapse */
     static new(...cols) {
-        return new Table(...recordbatch_2.distributeColumnsIntoRecordBatches(args_1.selectColumnArgs(cols)));
+        return new Table(...Object(_util_recordbatch__WEBPACK_IMPORTED_MODULE_8__["distributeColumnsIntoRecordBatches"])(Object(_util_args__WEBPACK_IMPORTED_MODULE_5__["selectColumnArgs"])(cols)));
     }
     get schema() { return this._schema; }
     get length() { return this._length; }
@@ -11955,7 +11110,7 @@ class Table extends index_1.Chunked {
                 .map((chunk) => chunk.getChildAt(index))
                 .filter((vec) => vec != null);
             if (chunks.length > 0) {
-                return (columns[index] = new column_1.Column(field, chunks));
+                return (columns[index] = new _column__WEBPACK_IMPORTED_MODULE_0__["Column"](field, chunks));
             }
         }
         return null;
@@ -11963,8 +11118,8 @@ class Table extends index_1.Chunked {
     // @ts-ignore
     serialize(encoding = 'binary', stream = true) {
         const Writer = !stream
-            ? writer_1.RecordBatchFileWriter
-            : writer_1.RecordBatchStreamWriter;
+            ? _ipc_writer__WEBPACK_IMPORTED_MODULE_7__["RecordBatchFileWriter"]
+            : _ipc_writer__WEBPACK_IMPORTED_MODULE_7__["RecordBatchStreamWriter"];
         return Writer.writeAll(this).toUint8Array(true);
     }
     count() {
@@ -11977,7 +11132,7 @@ class Table extends index_1.Chunked {
     selectAt(...columnIndices) {
         const schema = this._schema.selectAt(...columnIndices);
         return new Table(schema, this._chunks.map(({ length, data: { childData } }) => {
-            return new recordbatch_1.RecordBatch(schema, length, columnIndices.map((i) => childData[i]).filter(Boolean));
+            return new _recordbatch__WEBPACK_IMPORTED_MODULE_2__["RecordBatch"](schema, length, columnIndices.map((i) => childData[i]).filter(Boolean));
         }));
     }
     assign(other) {
@@ -11993,29 +11148,85 @@ class Table extends index_1.Chunked {
             ...fields.map((_f, i, _fs, j = oldToNew[i]) => (j === undefined ? this.getColumnAt(i) : other.getColumnAt(j))),
             ...indices.map((i) => other.getColumnAt(i))
         ].filter(Boolean);
-        return new Table(...recordbatch_2.distributeVectorsIntoRecordBatches(schema, columns));
+        return new Table(...Object(_util_recordbatch__WEBPACK_IMPORTED_MODULE_8__["distributeVectorsIntoRecordBatches"])(schema, columns));
     }
 }
-exports.Table = Table;
 function tableFromIterable(input) {
     const { type } = input;
-    if (type instanceof type_1.Struct) {
-        return Table.fromStruct(index_1.StructVector.from(input));
+    if (type instanceof _type__WEBPACK_IMPORTED_MODULE_4__["Struct"]) {
+        return Table.fromStruct(_vector_index__WEBPACK_IMPORTED_MODULE_9__["StructVector"].from(input));
     }
     return null;
 }
 function tableFromAsyncIterable(input) {
     const { type } = input;
-    if (type instanceof type_1.Struct) {
-        return index_1.StructVector.from(input).then((vector) => Table.fromStruct(vector));
+    if (type instanceof _type__WEBPACK_IMPORTED_MODULE_4__["Struct"]) {
+        return _vector_index__WEBPACK_IMPORTED_MODULE_9__["StructVector"].from(input).then((vector) => Table.fromStruct(vector));
     }
     return null;
 }
 
+//# sourceMappingURL=table.mjs.map
 
 
-},{"./column":30,"./ipc/reader":50,"./ipc/writer":51,"./recordbatch":52,"./schema":53,"./type":55,"./util/args":56,"./util/compat":60,"./util/recordbatch":65,"./vector/index":79}],55:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/type.mjs":
+/*!********************************************!*\
+  !*** ./node_modules/apache-arrow/type.mjs ***!
+  \********************************************/
+/*! exports provided: DataType, Null, Int, Int8, Int16, Int32, Int64, Uint8, Uint16, Uint32, Uint64, Float, Float16, Float32, Float64, Binary, Utf8, Bool, Decimal, Date_, DateDay, DateMillisecond, Time, TimeSecond, TimeMillisecond, TimeMicrosecond, TimeNanosecond, Timestamp, TimestampSecond, TimestampMillisecond, TimestampMicrosecond, TimestampNanosecond, Interval, IntervalDayTime, IntervalYearMonth, List, Struct, Union, DenseUnion, SparseUnion, FixedSizeBinary, FixedSizeList, Map_, Dictionary, strideForType */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DataType", function() { return DataType; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Null", function() { return Null; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Int", function() { return Int_; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Int8", function() { return Int8; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Int16", function() { return Int16; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Int32", function() { return Int32; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Int64", function() { return Int64; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Uint8", function() { return Uint8; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Uint16", function() { return Uint16; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Uint32", function() { return Uint32; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Uint64", function() { return Uint64; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Float", function() { return Float; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Float16", function() { return Float16; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Float32", function() { return Float32; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Float64", function() { return Float64; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Binary", function() { return Binary; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Utf8", function() { return Utf8; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Bool", function() { return Bool; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Decimal", function() { return Decimal; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Date_", function() { return Date_; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DateDay", function() { return DateDay; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DateMillisecond", function() { return DateMillisecond; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Time", function() { return Time_; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimeSecond", function() { return TimeSecond; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimeMillisecond", function() { return TimeMillisecond; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimeMicrosecond", function() { return TimeMicrosecond; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimeNanosecond", function() { return TimeNanosecond; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Timestamp", function() { return Timestamp_; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimestampSecond", function() { return TimestampSecond; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimestampMillisecond", function() { return TimestampMillisecond; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimestampMicrosecond", function() { return TimestampMicrosecond; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimestampNanosecond", function() { return TimestampNanosecond; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Interval", function() { return Interval_; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "IntervalDayTime", function() { return IntervalDayTime; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "IntervalYearMonth", function() { return IntervalYearMonth; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "List", function() { return List; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Struct", function() { return Struct; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Union", function() { return Union_; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DenseUnion", function() { return DenseUnion; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SparseUnion", function() { return SparseUnion; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FixedSizeBinary", function() { return FixedSizeBinary; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FixedSizeList", function() { return FixedSizeList; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Map_", function() { return Map_; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Dictionary", function() { return Dictionary; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "strideForType", function() { return strideForType; });
+/* harmony import */ var _visitor_typecomparator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./visitor/typecomparator */ "./node_modules/apache-arrow/visitor/typecomparator.mjs");
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./enum */ "./node_modules/apache-arrow/enum.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -12032,35 +11243,34 @@ function tableFromAsyncIterable(input) {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const typecomparator_1 = require("./visitor/typecomparator");
-const enum_1 = require("./enum");
+
+
 /**
  * An abstract base class for classes that encapsulate metadata about each of
  * the logical types that Arrow can represent.
  */
 class DataType {
-    /** @nocollapse */ static isNull(x) { return x && x.typeId === enum_1.Type.Null; }
-    /** @nocollapse */ static isInt(x) { return x && x.typeId === enum_1.Type.Int; }
-    /** @nocollapse */ static isFloat(x) { return x && x.typeId === enum_1.Type.Float; }
-    /** @nocollapse */ static isBinary(x) { return x && x.typeId === enum_1.Type.Binary; }
-    /** @nocollapse */ static isUtf8(x) { return x && x.typeId === enum_1.Type.Utf8; }
-    /** @nocollapse */ static isBool(x) { return x && x.typeId === enum_1.Type.Bool; }
-    /** @nocollapse */ static isDecimal(x) { return x && x.typeId === enum_1.Type.Decimal; }
-    /** @nocollapse */ static isDate(x) { return x && x.typeId === enum_1.Type.Date; }
-    /** @nocollapse */ static isTime(x) { return x && x.typeId === enum_1.Type.Time; }
-    /** @nocollapse */ static isTimestamp(x) { return x && x.typeId === enum_1.Type.Timestamp; }
-    /** @nocollapse */ static isInterval(x) { return x && x.typeId === enum_1.Type.Interval; }
-    /** @nocollapse */ static isList(x) { return x && x.typeId === enum_1.Type.List; }
-    /** @nocollapse */ static isStruct(x) { return x && x.typeId === enum_1.Type.Struct; }
-    /** @nocollapse */ static isUnion(x) { return x && x.typeId === enum_1.Type.Union; }
-    /** @nocollapse */ static isFixedSizeBinary(x) { return x && x.typeId === enum_1.Type.FixedSizeBinary; }
-    /** @nocollapse */ static isFixedSizeList(x) { return x && x.typeId === enum_1.Type.FixedSizeList; }
-    /** @nocollapse */ static isMap(x) { return x && x.typeId === enum_1.Type.Map; }
-    /** @nocollapse */ static isDictionary(x) { return x && x.typeId === enum_1.Type.Dictionary; }
-    get typeId() { return enum_1.Type.NONE; }
+    /** @nocollapse */ static isNull(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Null; }
+    /** @nocollapse */ static isInt(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Int; }
+    /** @nocollapse */ static isFloat(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Float; }
+    /** @nocollapse */ static isBinary(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Binary; }
+    /** @nocollapse */ static isUtf8(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Utf8; }
+    /** @nocollapse */ static isBool(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Bool; }
+    /** @nocollapse */ static isDecimal(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Decimal; }
+    /** @nocollapse */ static isDate(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Date; }
+    /** @nocollapse */ static isTime(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Time; }
+    /** @nocollapse */ static isTimestamp(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Timestamp; }
+    /** @nocollapse */ static isInterval(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Interval; }
+    /** @nocollapse */ static isList(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].List; }
+    /** @nocollapse */ static isStruct(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Struct; }
+    /** @nocollapse */ static isUnion(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Union; }
+    /** @nocollapse */ static isFixedSizeBinary(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].FixedSizeBinary; }
+    /** @nocollapse */ static isFixedSizeList(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].FixedSizeList; }
+    /** @nocollapse */ static isMap(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Map; }
+    /** @nocollapse */ static isDictionary(x) { return x && x.typeId === _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Dictionary; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].NONE; }
     compareTo(other) {
-        return typecomparator_1.instance.visit(this, other);
+        return _visitor_typecomparator__WEBPACK_IMPORTED_MODULE_0__["instance"].visit(this, other);
     }
 }
 DataType[Symbol.toStringTag] = ((proto) => {
@@ -12068,16 +11278,14 @@ DataType[Symbol.toStringTag] = ((proto) => {
     proto.ArrayType = Array;
     return proto[Symbol.toStringTag] = 'DataType';
 })(DataType.prototype);
-exports.DataType = DataType;
 /** @ignore */
 class Null extends DataType {
     toString() { return `Null`; }
-    get typeId() { return enum_1.Type.Null; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Null; }
 }
 Null[Symbol.toStringTag] = ((proto) => {
     return proto[Symbol.toStringTag] = 'Null';
 })(Null.prototype);
-exports.Null = Null;
 /** @ignore */
 class Int_ extends DataType {
     constructor(isSigned, bitWidth) {
@@ -12085,7 +11293,7 @@ class Int_ extends DataType {
         this.isSigned = isSigned;
         this.bitWidth = bitWidth;
     }
-    get typeId() { return enum_1.Type.Int; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Int; }
     get ArrayType() {
         switch (this.bitWidth) {
             case 8: return this.isSigned ? Int8Array : Uint8Array;
@@ -12102,47 +11310,39 @@ Int_[Symbol.toStringTag] = ((proto) => {
     proto.bitWidth = null;
     return proto[Symbol.toStringTag] = 'Int';
 })(Int_.prototype);
-exports.Int = Int_;
+
 /** @ignore */
 class Int8 extends Int_ {
     constructor() { super(true, 8); }
 }
-exports.Int8 = Int8;
 /** @ignore */
 class Int16 extends Int_ {
     constructor() { super(true, 16); }
 }
-exports.Int16 = Int16;
 /** @ignore */
 class Int32 extends Int_ {
     constructor() { super(true, 32); }
 }
-exports.Int32 = Int32;
 /** @ignore */
 class Int64 extends Int_ {
     constructor() { super(true, 64); }
 }
-exports.Int64 = Int64;
 /** @ignore */
 class Uint8 extends Int_ {
     constructor() { super(false, 8); }
 }
-exports.Uint8 = Uint8;
 /** @ignore */
 class Uint16 extends Int_ {
     constructor() { super(false, 16); }
 }
-exports.Uint16 = Uint16;
 /** @ignore */
 class Uint32 extends Int_ {
     constructor() { super(false, 32); }
 }
-exports.Uint32 = Uint32;
 /** @ignore */
 class Uint64 extends Int_ {
     constructor() { super(false, 64); }
 }
-exports.Uint64 = Uint64;
 Object.defineProperty(Int8.prototype, 'ArrayType', { value: Int8Array });
 Object.defineProperty(Int16.prototype, 'ArrayType', { value: Int16Array });
 Object.defineProperty(Int32.prototype, 'ArrayType', { value: Int32Array });
@@ -12157,12 +11357,12 @@ class Float extends DataType {
         super();
         this.precision = precision;
     }
-    get typeId() { return enum_1.Type.Float; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Float; }
     get ArrayType() {
         switch (this.precision) {
-            case enum_1.Precision.HALF: return Uint16Array;
-            case enum_1.Precision.SINGLE: return Float32Array;
-            case enum_1.Precision.DOUBLE: return Float64Array;
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Precision"].HALF: return Uint16Array;
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Precision"].SINGLE: return Float32Array;
+            case _enum__WEBPACK_IMPORTED_MODULE_1__["Precision"].DOUBLE: return Float64Array;
         }
         throw new Error(`Unrecognized ${this[Symbol.toStringTag]} type`);
     }
@@ -12172,22 +11372,18 @@ Float[Symbol.toStringTag] = ((proto) => {
     proto.precision = null;
     return proto[Symbol.toStringTag] = 'Float';
 })(Float.prototype);
-exports.Float = Float;
 /** @ignore */
 class Float16 extends Float {
-    constructor() { super(enum_1.Precision.HALF); }
+    constructor() { super(_enum__WEBPACK_IMPORTED_MODULE_1__["Precision"].HALF); }
 }
-exports.Float16 = Float16;
 /** @ignore */
 class Float32 extends Float {
-    constructor() { super(enum_1.Precision.SINGLE); }
+    constructor() { super(_enum__WEBPACK_IMPORTED_MODULE_1__["Precision"].SINGLE); }
 }
-exports.Float32 = Float32;
 /** @ignore */
 class Float64 extends Float {
-    constructor() { super(enum_1.Precision.DOUBLE); }
+    constructor() { super(_enum__WEBPACK_IMPORTED_MODULE_1__["Precision"].DOUBLE); }
 }
-exports.Float64 = Float64;
 Object.defineProperty(Float16.prototype, 'ArrayType', { value: Uint16Array });
 Object.defineProperty(Float32.prototype, 'ArrayType', { value: Float32Array });
 Object.defineProperty(Float64.prototype, 'ArrayType', { value: Float64Array });
@@ -12196,40 +11392,37 @@ class Binary extends DataType {
     constructor() {
         super();
     }
-    get typeId() { return enum_1.Type.Binary; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Binary; }
     toString() { return `Binary`; }
 }
 Binary[Symbol.toStringTag] = ((proto) => {
     proto.ArrayType = Uint8Array;
     return proto[Symbol.toStringTag] = 'Binary';
 })(Binary.prototype);
-exports.Binary = Binary;
 /** @ignore */
 class Utf8 extends DataType {
     constructor() {
         super();
     }
-    get typeId() { return enum_1.Type.Utf8; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Utf8; }
     toString() { return `Utf8`; }
 }
 Utf8[Symbol.toStringTag] = ((proto) => {
     proto.ArrayType = Uint8Array;
     return proto[Symbol.toStringTag] = 'Utf8';
 })(Utf8.prototype);
-exports.Utf8 = Utf8;
 /** @ignore */
 class Bool extends DataType {
     constructor() {
         super();
     }
-    get typeId() { return enum_1.Type.Bool; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Bool; }
     toString() { return `Bool`; }
 }
 Bool[Symbol.toStringTag] = ((proto) => {
     proto.ArrayType = Uint8Array;
     return proto[Symbol.toStringTag] = 'Bool';
 })(Bool.prototype);
-exports.Bool = Bool;
 /** @ignore */
 class Decimal extends DataType {
     constructor(scale, precision) {
@@ -12237,7 +11430,7 @@ class Decimal extends DataType {
         this.scale = scale;
         this.precision = precision;
     }
-    get typeId() { return enum_1.Type.Decimal; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Decimal; }
     toString() { return `Decimal[${this.precision}e${this.scale > 0 ? `+` : ``}${this.scale}]`; }
 }
 Decimal[Symbol.toStringTag] = ((proto) => {
@@ -12246,32 +11439,28 @@ Decimal[Symbol.toStringTag] = ((proto) => {
     proto.ArrayType = Uint32Array;
     return proto[Symbol.toStringTag] = 'Decimal';
 })(Decimal.prototype);
-exports.Decimal = Decimal;
 /** @ignore */
 class Date_ extends DataType {
     constructor(unit) {
         super();
         this.unit = unit;
     }
-    get typeId() { return enum_1.Type.Date; }
-    toString() { return `Date${(this.unit + 1) * 32}<${enum_1.DateUnit[this.unit]}>`; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Date; }
+    toString() { return `Date${(this.unit + 1) * 32}<${_enum__WEBPACK_IMPORTED_MODULE_1__["DateUnit"][this.unit]}>`; }
 }
 Date_[Symbol.toStringTag] = ((proto) => {
     proto.unit = null;
     proto.ArrayType = Int32Array;
     return proto[Symbol.toStringTag] = 'Date';
 })(Date_.prototype);
-exports.Date_ = Date_;
 /** @ignore */
 class DateDay extends Date_ {
-    constructor() { super(enum_1.DateUnit.DAY); }
+    constructor() { super(_enum__WEBPACK_IMPORTED_MODULE_1__["DateUnit"].DAY); }
 }
-exports.DateDay = DateDay;
 /** @ignore */
 class DateMillisecond extends Date_ {
-    constructor() { super(enum_1.DateUnit.MILLISECOND); }
+    constructor() { super(_enum__WEBPACK_IMPORTED_MODULE_1__["DateUnit"].MILLISECOND); }
 }
-exports.DateMillisecond = DateMillisecond;
 /** @ignore */
 class Time_ extends DataType {
     constructor(unit, bitWidth) {
@@ -12279,8 +11468,8 @@ class Time_ extends DataType {
         this.unit = unit;
         this.bitWidth = bitWidth;
     }
-    get typeId() { return enum_1.Type.Time; }
-    toString() { return `Time${this.bitWidth}<${enum_1.TimeUnit[this.unit]}>`; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Time; }
+    toString() { return `Time${this.bitWidth}<${_enum__WEBPACK_IMPORTED_MODULE_1__["TimeUnit"][this.unit]}>`; }
 }
 Time_[Symbol.toStringTag] = ((proto) => {
     proto.unit = null;
@@ -12288,27 +11477,23 @@ Time_[Symbol.toStringTag] = ((proto) => {
     proto.ArrayType = Int32Array;
     return proto[Symbol.toStringTag] = 'Time';
 })(Time_.prototype);
-exports.Time = Time_;
+
 /** @ignore */
 class TimeSecond extends Time_ {
-    constructor() { super(enum_1.TimeUnit.SECOND, 32); }
+    constructor() { super(_enum__WEBPACK_IMPORTED_MODULE_1__["TimeUnit"].SECOND, 32); }
 }
-exports.TimeSecond = TimeSecond;
 /** @ignore */
 class TimeMillisecond extends Time_ {
-    constructor() { super(enum_1.TimeUnit.MILLISECOND, 32); }
+    constructor() { super(_enum__WEBPACK_IMPORTED_MODULE_1__["TimeUnit"].MILLISECOND, 32); }
 }
-exports.TimeMillisecond = TimeMillisecond;
 /** @ignore */
 class TimeMicrosecond extends Time_ {
-    constructor() { super(enum_1.TimeUnit.MICROSECOND, 64); }
+    constructor() { super(_enum__WEBPACK_IMPORTED_MODULE_1__["TimeUnit"].MICROSECOND, 64); }
 }
-exports.TimeMicrosecond = TimeMicrosecond;
 /** @ignore */
 class TimeNanosecond extends Time_ {
-    constructor() { super(enum_1.TimeUnit.NANOSECOND, 64); }
+    constructor() { super(_enum__WEBPACK_IMPORTED_MODULE_1__["TimeUnit"].NANOSECOND, 64); }
 }
-exports.TimeNanosecond = TimeNanosecond;
 /** @ignore */
 class Timestamp_ extends DataType {
     constructor(unit, timezone) {
@@ -12316,8 +11501,8 @@ class Timestamp_ extends DataType {
         this.unit = unit;
         this.timezone = timezone;
     }
-    get typeId() { return enum_1.Type.Timestamp; }
-    toString() { return `Timestamp<${enum_1.TimeUnit[this.unit]}${this.timezone ? `, ${this.timezone}` : ``}>`; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Timestamp; }
+    toString() { return `Timestamp<${_enum__WEBPACK_IMPORTED_MODULE_1__["TimeUnit"][this.unit]}${this.timezone ? `, ${this.timezone}` : ``}>`; }
 }
 Timestamp_[Symbol.toStringTag] = ((proto) => {
     proto.unit = null;
@@ -12325,59 +11510,53 @@ Timestamp_[Symbol.toStringTag] = ((proto) => {
     proto.ArrayType = Int32Array;
     return proto[Symbol.toStringTag] = 'Timestamp';
 })(Timestamp_.prototype);
-exports.Timestamp = Timestamp_;
+
 /** @ignore */
 class TimestampSecond extends Timestamp_ {
-    constructor(timezone) { super(enum_1.TimeUnit.SECOND, timezone); }
+    constructor(timezone) { super(_enum__WEBPACK_IMPORTED_MODULE_1__["TimeUnit"].SECOND, timezone); }
 }
-exports.TimestampSecond = TimestampSecond;
 /** @ignore */
 class TimestampMillisecond extends Timestamp_ {
-    constructor(timezone) { super(enum_1.TimeUnit.MILLISECOND, timezone); }
+    constructor(timezone) { super(_enum__WEBPACK_IMPORTED_MODULE_1__["TimeUnit"].MILLISECOND, timezone); }
 }
-exports.TimestampMillisecond = TimestampMillisecond;
 /** @ignore */
 class TimestampMicrosecond extends Timestamp_ {
-    constructor(timezone) { super(enum_1.TimeUnit.MICROSECOND, timezone); }
+    constructor(timezone) { super(_enum__WEBPACK_IMPORTED_MODULE_1__["TimeUnit"].MICROSECOND, timezone); }
 }
-exports.TimestampMicrosecond = TimestampMicrosecond;
 /** @ignore */
 class TimestampNanosecond extends Timestamp_ {
-    constructor(timezone) { super(enum_1.TimeUnit.NANOSECOND, timezone); }
+    constructor(timezone) { super(_enum__WEBPACK_IMPORTED_MODULE_1__["TimeUnit"].NANOSECOND, timezone); }
 }
-exports.TimestampNanosecond = TimestampNanosecond;
 /** @ignore */
 class Interval_ extends DataType {
     constructor(unit) {
         super();
         this.unit = unit;
     }
-    get typeId() { return enum_1.Type.Interval; }
-    toString() { return `Interval<${enum_1.IntervalUnit[this.unit]}>`; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Interval; }
+    toString() { return `Interval<${_enum__WEBPACK_IMPORTED_MODULE_1__["IntervalUnit"][this.unit]}>`; }
 }
 Interval_[Symbol.toStringTag] = ((proto) => {
     proto.unit = null;
     proto.ArrayType = Int32Array;
     return proto[Symbol.toStringTag] = 'Interval';
 })(Interval_.prototype);
-exports.Interval = Interval_;
+
 /** @ignore */
 class IntervalDayTime extends Interval_ {
-    constructor() { super(enum_1.IntervalUnit.DAY_TIME); }
+    constructor() { super(_enum__WEBPACK_IMPORTED_MODULE_1__["IntervalUnit"].DAY_TIME); }
 }
-exports.IntervalDayTime = IntervalDayTime;
 /** @ignore */
 class IntervalYearMonth extends Interval_ {
-    constructor() { super(enum_1.IntervalUnit.YEAR_MONTH); }
+    constructor() { super(_enum__WEBPACK_IMPORTED_MODULE_1__["IntervalUnit"].YEAR_MONTH); }
 }
-exports.IntervalYearMonth = IntervalYearMonth;
 /** @ignore */
 class List extends DataType {
     constructor(child) {
         super();
         this.children = [child];
     }
-    get typeId() { return enum_1.Type.List; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].List; }
     toString() { return `List<${this.valueType}>`; }
     get valueType() { return this.children[0].type; }
     get valueField() { return this.children[0]; }
@@ -12387,21 +11566,19 @@ List[Symbol.toStringTag] = ((proto) => {
     proto.children = null;
     return proto[Symbol.toStringTag] = 'List';
 })(List.prototype);
-exports.List = List;
 /** @ignore */
 class Struct extends DataType {
     constructor(children) {
         super();
         this.children = children;
     }
-    get typeId() { return enum_1.Type.Struct; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Struct; }
     toString() { return `Struct<{${this.children.map((f) => `${f.name}:${f.type}`).join(`, `)}}>`; }
 }
 Struct[Symbol.toStringTag] = ((proto) => {
     proto.children = null;
     return proto[Symbol.toStringTag] = 'Struct';
 })(Struct.prototype);
-exports.Struct = Struct;
 /** @ignore */
 class Union_ extends DataType {
     constructor(mode, typeIds, children) {
@@ -12413,7 +11590,7 @@ class Union_ extends DataType {
             return (typeIdToChildIndex[typeId] = idx) && typeIdToChildIndex || typeIdToChildIndex;
         }, Object.create(null));
     }
-    get typeId() { return enum_1.Type.Union; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Union; }
     toString() {
         return `${this[Symbol.toStringTag]}<${this.children.map((x) => `${x.type}`).join(` | `)}>`;
     }
@@ -12426,28 +11603,26 @@ Union_[Symbol.toStringTag] = ((proto) => {
     proto.ArrayType = Int8Array;
     return proto[Symbol.toStringTag] = 'Union';
 })(Union_.prototype);
-exports.Union = Union_;
+
 /** @ignore */
 class DenseUnion extends Union_ {
     constructor(typeIds, children) {
-        super(enum_1.UnionMode.Dense, typeIds, children);
+        super(_enum__WEBPACK_IMPORTED_MODULE_1__["UnionMode"].Dense, typeIds, children);
     }
 }
-exports.DenseUnion = DenseUnion;
 /** @ignore */
 class SparseUnion extends Union_ {
     constructor(typeIds, children) {
-        super(enum_1.UnionMode.Sparse, typeIds, children);
+        super(_enum__WEBPACK_IMPORTED_MODULE_1__["UnionMode"].Sparse, typeIds, children);
     }
 }
-exports.SparseUnion = SparseUnion;
 /** @ignore */
 class FixedSizeBinary extends DataType {
     constructor(byteWidth) {
         super();
         this.byteWidth = byteWidth;
     }
-    get typeId() { return enum_1.Type.FixedSizeBinary; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].FixedSizeBinary; }
     toString() { return `FixedSizeBinary[${this.byteWidth}]`; }
 }
 FixedSizeBinary[Symbol.toStringTag] = ((proto) => {
@@ -12455,7 +11630,6 @@ FixedSizeBinary[Symbol.toStringTag] = ((proto) => {
     proto.ArrayType = Uint8Array;
     return proto[Symbol.toStringTag] = 'FixedSizeBinary';
 })(FixedSizeBinary.prototype);
-exports.FixedSizeBinary = FixedSizeBinary;
 /** @ignore */
 class FixedSizeList extends DataType {
     constructor(listSize, child) {
@@ -12463,7 +11637,7 @@ class FixedSizeList extends DataType {
         this.listSize = listSize;
         this.children = [child];
     }
-    get typeId() { return enum_1.Type.FixedSizeList; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].FixedSizeList; }
     get valueType() { return this.children[0].type; }
     get valueField() { return this.children[0]; }
     get ArrayType() { return this.valueType.ArrayType; }
@@ -12474,7 +11648,6 @@ FixedSizeList[Symbol.toStringTag] = ((proto) => {
     proto.listSize = null;
     return proto[Symbol.toStringTag] = 'FixedSizeList';
 })(FixedSizeList.prototype);
-exports.FixedSizeList = FixedSizeList;
 /** @ignore */
 class Map_ extends DataType {
     constructor(child, keysSorted = false) {
@@ -12482,7 +11655,7 @@ class Map_ extends DataType {
         this.children = [child];
         this.keysSorted = keysSorted;
     }
-    get typeId() { return enum_1.Type.Map; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Map; }
     get keyType() { return this.children[0].type.children[0].type; }
     get valueType() { return this.children[0].type.children[1].type; }
     toString() { return `Map<{${this.children[0].type.children.map((f) => `${f.name}:${f.type}`).join(`, `)}}>`; }
@@ -12492,7 +11665,6 @@ Map_[Symbol.toStringTag] = ((proto) => {
     proto.keysSorted = null;
     return proto[Symbol.toStringTag] = 'Map_';
 })(Map_.prototype);
-exports.Map_ = Map_;
 /** @ignore */
 const getId = ((atomicDictionaryId) => () => ++atomicDictionaryId)(-1);
 /** @ignore */
@@ -12504,7 +11676,7 @@ class Dictionary extends DataType {
         this.isOrdered = isOrdered || false;
         this.id = id == null ? getId() : typeof id === 'number' ? id : id.low;
     }
-    get typeId() { return enum_1.Type.Dictionary; }
+    get typeId() { return _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Dictionary; }
     get children() { return this.dictionary.children; }
     get valueType() { return this.dictionary; }
     get ArrayType() { return this.dictionary.ArrayType; }
@@ -12517,28 +11689,48 @@ Dictionary[Symbol.toStringTag] = ((proto) => {
     proto.dictionary = null;
     return proto[Symbol.toStringTag] = 'Dictionary';
 })(Dictionary.prototype);
-exports.Dictionary = Dictionary;
 /** @ignore */
 function strideForType(type) {
     let t = type;
     switch (type.typeId) {
-        case enum_1.Type.Decimal: return 4;
-        case enum_1.Type.Timestamp: return 2;
-        case enum_1.Type.Date: return 1 + t.unit;
-        case enum_1.Type.Interval: return 1 + t.unit;
-        case enum_1.Type.Int: return 1 + +(t.bitWidth > 32);
-        case enum_1.Type.Time: return 1 + +(t.bitWidth > 32);
-        case enum_1.Type.FixedSizeList: return t.listSize;
-        case enum_1.Type.FixedSizeBinary: return t.byteWidth;
+        case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Decimal: return 4;
+        case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Timestamp: return 2;
+        case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Date: return 1 + t.unit;
+        case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Interval: return 1 + t.unit;
+        case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Int: return 1 + +(t.bitWidth > 32);
+        case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].Time: return 1 + +(t.bitWidth > 32);
+        case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].FixedSizeList: return t.listSize;
+        case _enum__WEBPACK_IMPORTED_MODULE_1__["Type"].FixedSizeBinary: return t.byteWidth;
         default: return 1;
     }
 }
-exports.strideForType = strideForType;
+
+//# sourceMappingURL=type.mjs.map
 
 
+/***/ }),
 
-},{"./enum":34,"./visitor/typecomparator":102}],56:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/util/args.mjs":
+/*!*************************************************!*\
+  !*** ./node_modules/apache-arrow/util/args.mjs ***!
+  \*************************************************/
+/*! exports provided: selectArgs, selectColumnArgs, selectFieldArgs, selectChunkArgs, selectVectorChildrenArgs, selectColumnChildrenArgs */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "selectArgs", function() { return selectArgs; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "selectColumnArgs", function() { return selectColumnArgs; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "selectFieldArgs", function() { return selectFieldArgs; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "selectChunkArgs", function() { return selectChunkArgs; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "selectVectorChildrenArgs", function() { return selectVectorChildrenArgs; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "selectColumnChildrenArgs", function() { return selectColumnChildrenArgs; });
+/* harmony import */ var _data__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../data */ "./node_modules/apache-arrow/data.mjs");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../schema */ "./node_modules/apache-arrow/schema.mjs");
+/* harmony import */ var _column__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../column */ "./node_modules/apache-arrow/column.mjs");
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../vector */ "./node_modules/apache-arrow/vector.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
+/* harmony import */ var _vector_chunked__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../vector/chunked */ "./node_modules/apache-arrow/vector/chunked.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -12555,31 +11747,30 @@ exports.strideForType = strideForType;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const data_1 = require("../data");
-const schema_1 = require("../schema");
-const column_1 = require("../column");
-const vector_1 = require("../vector");
-const type_1 = require("../type");
-const chunked_1 = require("../vector/chunked");
+
+
+
+
+
+
 const isArray = Array.isArray;
 /** @ignore */
-exports.selectArgs = (Ctor, vals) => _selectArgs(Ctor, vals, [], 0);
+const selectArgs = (Ctor, vals) => _selectArgs(Ctor, vals, [], 0);
 /** @ignore */
-exports.selectColumnArgs = (args) => {
+const selectColumnArgs = (args) => {
     const [fields, values] = _selectFieldArgs(args, [[], []]);
-    return values.map((x, i) => x instanceof column_1.Column ? column_1.Column.new(x.field.clone(fields[i]), x) :
-        x instanceof vector_1.Vector ? column_1.Column.new(fields[i], x) :
-            column_1.Column.new(fields[i], []));
+    return values.map((x, i) => x instanceof _column__WEBPACK_IMPORTED_MODULE_2__["Column"] ? _column__WEBPACK_IMPORTED_MODULE_2__["Column"].new(x.field.clone(fields[i]), x) :
+        x instanceof _vector__WEBPACK_IMPORTED_MODULE_3__["Vector"] ? _column__WEBPACK_IMPORTED_MODULE_2__["Column"].new(fields[i], x) :
+            _column__WEBPACK_IMPORTED_MODULE_2__["Column"].new(fields[i], []));
 };
 /** @ignore */
-exports.selectFieldArgs = (args) => _selectFieldArgs(args, [[], []]);
+const selectFieldArgs = (args) => _selectFieldArgs(args, [[], []]);
 /** @ignore */
-exports.selectChunkArgs = (Ctor, vals) => _selectChunkArgs(Ctor, vals, [], 0);
+const selectChunkArgs = (Ctor, vals) => _selectChunkArgs(Ctor, vals, [], 0);
 /** @ignore */
-exports.selectVectorChildrenArgs = (Ctor, vals) => _selectVectorChildrenArgs(Ctor, vals, [], 0);
+const selectVectorChildrenArgs = (Ctor, vals) => _selectVectorChildrenArgs(Ctor, vals, [], 0);
 /** @ignore */
-exports.selectColumnChildrenArgs = (Ctor, vals) => _selectColumnChildrenArgs(Ctor, vals, [], 0);
+const selectColumnChildrenArgs = (Ctor, vals) => _selectColumnChildrenArgs(Ctor, vals, [], 0);
 /** @ignore */
 function _selectArgs(Ctor, vals, res, idx) {
     let value, j = idx;
@@ -12602,7 +11793,7 @@ function _selectChunkArgs(Ctor, vals, res, idx) {
         if (isArray(value = vals[i])) {
             j = _selectChunkArgs(Ctor, value, res, j).length;
         }
-        else if (value instanceof chunked_1.Chunked) {
+        else if (value instanceof _vector_chunked__WEBPACK_IMPORTED_MODULE_5__["Chunked"]) {
             j = _selectChunkArgs(Ctor, value.chunks, res, j).length;
         }
         else if (value instanceof Ctor) {
@@ -12620,9 +11811,9 @@ function _selectVectorChildrenArgs(Ctor, vals, res, idx) {
             j = _selectVectorChildrenArgs(Ctor, value, res, j).length;
         }
         else if (value instanceof Ctor) {
-            j = _selectArgs(vector_1.Vector, value.schema.fields.map((_, i) => value.getChildAt(i)), res, j).length;
+            j = _selectArgs(_vector__WEBPACK_IMPORTED_MODULE_3__["Vector"], value.schema.fields.map((_, i) => value.getChildAt(i)), res, j).length;
         }
-        else if (value instanceof vector_1.Vector) {
+        else if (value instanceof _vector__WEBPACK_IMPORTED_MODULE_3__["Vector"]) {
             res[j++] = value;
         }
     }
@@ -12637,9 +11828,9 @@ function _selectColumnChildrenArgs(Ctor, vals, res, idx) {
             j = _selectColumnChildrenArgs(Ctor, value, res, j).length;
         }
         else if (value instanceof Ctor) {
-            j = _selectArgs(column_1.Column, value.schema.fields.map((f, i) => column_1.Column.new(f, value.getChildAt(i))), res, j).length;
+            j = _selectArgs(_column__WEBPACK_IMPORTED_MODULE_2__["Column"], value.schema.fields.map((f, i) => _column__WEBPACK_IMPORTED_MODULE_2__["Column"].new(f, value.getChildAt(i))), res, j).length;
         }
-        else if (value instanceof column_1.Column) {
+        else if (value instanceof _column__WEBPACK_IMPORTED_MODULE_2__["Column"]) {
             res[j++] = value;
         }
     }
@@ -12660,7 +11851,7 @@ function _selectFieldArgs(vals, ret) {
             if (isArray(vals[0])) {
                 return _selectFieldArgs(vals[0], ret);
             }
-            if (!(vals[0] instanceof data_1.Data || vals[0] instanceof vector_1.Vector || vals[0] instanceof type_1.DataType)) {
+            if (!(vals[0] instanceof _data__WEBPACK_IMPORTED_MODULE_0__["Data"] || vals[0] instanceof _vector__WEBPACK_IMPORTED_MODULE_3__["Vector"] || vals[0] instanceof _type__WEBPACK_IMPORTED_MODULE_4__["DataType"])) {
                 [keys, vals] = Object.entries(vals[0]).reduce(toKeysAndValues, ret);
             }
             break;
@@ -12677,27 +11868,46 @@ function _selectFieldArgs(vals, ret) {
     let [fields, values] = ret;
     while (++idx < len) {
         val = vals[idx];
-        if (val instanceof column_1.Column && (values[++valueIndex] = val)) {
+        if (val instanceof _column__WEBPACK_IMPORTED_MODULE_2__["Column"] && (values[++valueIndex] = val)) {
             fields[++fieldIndex] = val.field.clone(keys[idx], val.type, true);
         }
         else {
             ({ [idx]: field = idx } = keys);
-            if (val instanceof type_1.DataType && (values[++valueIndex] = val)) {
-                fields[++fieldIndex] = schema_1.Field.new(field, val, true);
+            if (val instanceof _type__WEBPACK_IMPORTED_MODULE_4__["DataType"] && (values[++valueIndex] = val)) {
+                fields[++fieldIndex] = _schema__WEBPACK_IMPORTED_MODULE_1__["Field"].new(field, val, true);
             }
             else if (val && val.type && (values[++valueIndex] = val)) {
-                val instanceof data_1.Data && (values[valueIndex] = val = vector_1.Vector.new(val));
-                fields[++fieldIndex] = schema_1.Field.new(field, val.type, true);
+                val instanceof _data__WEBPACK_IMPORTED_MODULE_0__["Data"] && (values[valueIndex] = val = _vector__WEBPACK_IMPORTED_MODULE_3__["Vector"].new(val));
+                fields[++fieldIndex] = _schema__WEBPACK_IMPORTED_MODULE_1__["Field"].new(field, val.type, true);
             }
         }
     }
     return ret;
 }
 
+//# sourceMappingURL=args.mjs.map
 
 
-},{"../column":30,"../data":33,"../schema":53,"../type":55,"../vector":68,"../vector/chunked":72}],57:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/util/bit.mjs":
+/*!************************************************!*\
+  !*** ./node_modules/apache-arrow/util/bit.mjs ***!
+  \************************************************/
+/*! exports provided: getBool, getBit, setBool, truncateBitmap, packBools, iterateBits, popcnt_bit_range, popcnt_array, popcnt_uint32 */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getBool", function() { return getBool; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getBit", function() { return getBit; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setBool", function() { return setBool; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "truncateBitmap", function() { return truncateBitmap; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "packBools", function() { return packBools; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "iterateBits", function() { return iterateBits; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "popcnt_bit_range", function() { return popcnt_bit_range; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "popcnt_array", function() { return popcnt_array; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "popcnt_uint32", function() { return popcnt_uint32; });
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -12714,24 +11924,20 @@ function _selectFieldArgs(vals, ret) {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
 /** @ignore */
 function getBool(_data, _index, byte, bit) {
     return (byte & 1 << bit) !== 0;
 }
-exports.getBool = getBool;
 /** @ignore */
 function getBit(_data, _index, byte, bit) {
     return (byte & 1 << bit) >> bit;
 }
-exports.getBit = getBit;
 /** @ignore */
 function setBool(bytes, index, value) {
     return value ?
         !!(bytes[index >> 3] |= (1 << (index % 8))) || true :
         !(bytes[index >> 3] &= ~(1 << (index % 8))) && false;
 }
-exports.setBool = setBool;
 /** @ignore */
 function truncateBitmap(offset, length, bitmap) {
     const alignedSize = (bitmap.byteLength + 7) & ~7;
@@ -12745,7 +11951,6 @@ function truncateBitmap(offset, length, bitmap) {
     }
     return bitmap;
 }
-exports.truncateBitmap = truncateBitmap;
 /** @ignore */
 function packBools(values) {
     let xs = [];
@@ -12764,7 +11969,6 @@ function packBools(values) {
     b.set(xs);
     return b;
 }
-exports.packBools = packBools;
 /** @ignore */
 function* iterateBits(bytes, begin, length, context, get) {
     let bit = begin % 8;
@@ -12777,7 +11981,6 @@ function* iterateBits(bytes, begin, length, context, get) {
         } while (--remaining > 0 && ++bit < 8);
     }
 }
-exports.iterateBits = iterateBits;
 /**
  * Compute the population count (the number of bits set to 1) for a range of bits in a Uint8Array.
  * @param vector The Uint8Array of bits for which to compute the population count.
@@ -12809,7 +12012,6 @@ function popcnt_bit_range(data, lhs, rhs) {
         // Get the popcnt of all bits between the left and right hand sides' multiples of 8
         popcnt_array(data, lhsInside >> 3, (rhsInside - lhsInside) >> 3));
 }
-exports.popcnt_bit_range = popcnt_bit_range;
 /** @ignore */
 function popcnt_array(arr, byteOffset, byteLength) {
     let cnt = 0, pos = byteOffset | 0;
@@ -12829,7 +12031,6 @@ function popcnt_array(arr, byteOffset, byteLength) {
     }
     return cnt;
 }
-exports.popcnt_array = popcnt_array;
 /** @ignore */
 function popcnt_uint32(uint32) {
     let i = uint32 | 0;
@@ -12837,12 +12038,27 @@ function popcnt_uint32(uint32) {
     i = (i & 0x33333333) + ((i >>> 2) & 0x33333333);
     return (((i + (i >>> 4)) & 0x0F0F0F0F) * 0x01010101) >>> 24;
 }
-exports.popcnt_uint32 = popcnt_uint32;
+
+//# sourceMappingURL=bit.mjs.map
 
 
+/***/ }),
 
-},{}],58:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/util/bn.mjs":
+/*!***********************************************!*\
+  !*** ./node_modules/apache-arrow/util/bn.mjs ***!
+  \***********************************************/
+/*! exports provided: isArrowBigNumSymbol, bignumToString, bignumToBigInt, BN */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isArrowBigNumSymbol", function() { return isArrowBigNumSymbol; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "bignumToString", function() { return bignumToString; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "bignumToBigInt", function() { return bignumToBigInt; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BN", function() { return BN; });
+/* harmony import */ var _buffer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
+/* harmony import */ var _compat__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./compat */ "./node_modules/apache-arrow/util/compat.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -12859,29 +12075,28 @@ exports.popcnt_uint32 = popcnt_uint32;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const buffer_1 = require("./buffer");
-const compat_1 = require("./compat");
+
+
 /** @ignore */
-exports.isArrowBigNumSymbol = Symbol.for('isArrowBigNum');
+const isArrowBigNumSymbol = Symbol.for('isArrowBigNum');
 /** @ignore */
 function BigNum(x, ...xs) {
     if (xs.length === 0) {
-        return Object.setPrototypeOf(buffer_1.toArrayBufferView(this['TypedArray'], x), this.constructor.prototype);
+        return Object.setPrototypeOf(Object(_buffer__WEBPACK_IMPORTED_MODULE_0__["toArrayBufferView"])(this['TypedArray'], x), this.constructor.prototype);
     }
     return Object.setPrototypeOf(new this['TypedArray'](x, ...xs), this.constructor.prototype);
 }
-BigNum.prototype[exports.isArrowBigNumSymbol] = true;
-BigNum.prototype.toJSON = function () { return `"${exports.bignumToString(this)}"`; };
+BigNum.prototype[isArrowBigNumSymbol] = true;
+BigNum.prototype.toJSON = function () { return `"${bignumToString(this)}"`; };
 BigNum.prototype.valueOf = function () { return bignumToNumber(this); };
-BigNum.prototype.toString = function () { return exports.bignumToString(this); };
+BigNum.prototype.toString = function () { return bignumToString(this); };
 BigNum.prototype[Symbol.toPrimitive] = function (hint = 'default') {
     switch (hint) {
         case 'number': return bignumToNumber(this);
-        case 'string': return exports.bignumToString(this);
-        case 'default': return exports.bignumToBigInt(this);
+        case 'string': return bignumToString(this);
+        case 'default': return bignumToBigInt(this);
     }
-    return exports.bignumToString(this);
+    return bignumToString(this);
 };
 /** @ignore */
 function SignedBigNum(...args) { return BigNum.apply(this, args); }
@@ -12892,9 +12107,9 @@ function DecimalBigNum(...args) { return BigNum.apply(this, args); }
 Object.setPrototypeOf(SignedBigNum.prototype, Object.create(Int32Array.prototype));
 Object.setPrototypeOf(UnsignedBigNum.prototype, Object.create(Uint32Array.prototype));
 Object.setPrototypeOf(DecimalBigNum.prototype, Object.create(Uint32Array.prototype));
-Object.assign(SignedBigNum.prototype, BigNum.prototype, { 'constructor': SignedBigNum, 'signed': true, 'TypedArray': Int32Array, 'BigIntArray': compat_1.BigInt64Array });
-Object.assign(UnsignedBigNum.prototype, BigNum.prototype, { 'constructor': UnsignedBigNum, 'signed': false, 'TypedArray': Uint32Array, 'BigIntArray': compat_1.BigUint64Array });
-Object.assign(DecimalBigNum.prototype, BigNum.prototype, { 'constructor': DecimalBigNum, 'signed': true, 'TypedArray': Uint32Array, 'BigIntArray': compat_1.BigUint64Array });
+Object.assign(SignedBigNum.prototype, BigNum.prototype, { 'constructor': SignedBigNum, 'signed': true, 'TypedArray': Int32Array, 'BigIntArray': _compat__WEBPACK_IMPORTED_MODULE_1__["BigInt64Array"] });
+Object.assign(UnsignedBigNum.prototype, BigNum.prototype, { 'constructor': UnsignedBigNum, 'signed': false, 'TypedArray': Uint32Array, 'BigIntArray': _compat__WEBPACK_IMPORTED_MODULE_1__["BigUint64Array"] });
+Object.assign(DecimalBigNum.prototype, BigNum.prototype, { 'constructor': DecimalBigNum, 'signed': true, 'TypedArray': Uint32Array, 'BigIntArray': _compat__WEBPACK_IMPORTED_MODULE_1__["BigUint64Array"] });
 /** @ignore */
 function bignumToNumber(bn) {
     let { buffer, byteOffset, length, 'signed': signed } = bn;
@@ -12908,13 +12123,17 @@ function bignumToNumber(bn) {
     }
     return number;
 }
-if (!compat_1.BigIntAvailable) {
-    exports.bignumToString = decimalToString;
-    exports.bignumToBigInt = exports.bignumToString;
+/** @ignore */
+let bignumToString;
+/** @ignore */
+let bignumToBigInt;
+if (!_compat__WEBPACK_IMPORTED_MODULE_1__["BigIntAvailable"]) {
+    bignumToString = decimalToString;
+    bignumToBigInt = bignumToString;
 }
 else {
-    exports.bignumToBigInt = ((a) => a.byteLength === 8 ? new a['BigIntArray'](a.buffer, a.byteOffset, 1)[0] : decimalToString(a));
-    exports.bignumToString = ((a) => a.byteLength === 8 ? `${new a['BigIntArray'](a.buffer, a.byteOffset, 1)[0]}` : decimalToString(a));
+    bignumToBigInt = ((a) => a.byteLength === 8 ? new a['BigIntArray'](a.buffer, a.byteOffset, 1)[0] : decimalToString(a));
+    bignumToString = ((a) => a.byteLength === 8 ? `${new a['BigIntArray'](a.buffer, a.byteOffset, 1)[0]}` : decimalToString(a));
 }
 /** @ignore */
 function decimalToString(a) {
@@ -12949,7 +12168,7 @@ class BN {
             case Int8Array:
             case Int16Array:
             case Int32Array:
-            case compat_1.BigInt64Array:
+            case _compat__WEBPACK_IMPORTED_MODULE_1__["BigInt64Array"]:
                 return new SignedBigNum(num);
         }
         if (num.byteLength === 16) {
@@ -12970,12 +12189,60 @@ class BN {
         return new DecimalBigNum(num);
     }
 }
-exports.BN = BN;
+
+//# sourceMappingURL=bn.mjs.map
 
 
+/***/ }),
 
-},{"./buffer":59,"./compat":60}],59:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/util/buffer.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/util/buffer.mjs ***!
+  \***************************************************/
+/*! exports provided: memcpy, joinUint8Arrays, toArrayBufferView, toInt8Array, toInt16Array, toInt32Array, toBigInt64Array, toUint8Array, toUint16Array, toUint32Array, toBigUint64Array, toFloat32Array, toFloat64Array, toUint8ClampedArray, toArrayBufferViewIterator, toInt8ArrayIterator, toInt16ArrayIterator, toInt32ArrayIterator, toUint8ArrayIterator, toUint16ArrayIterator, toUint32ArrayIterator, toFloat32ArrayIterator, toFloat64ArrayIterator, toUint8ClampedArrayIterator, toArrayBufferViewAsyncIterator, toInt8ArrayAsyncIterator, toInt16ArrayAsyncIterator, toInt32ArrayAsyncIterator, toUint8ArrayAsyncIterator, toUint16ArrayAsyncIterator, toUint32ArrayAsyncIterator, toFloat32ArrayAsyncIterator, toFloat64ArrayAsyncIterator, toUint8ClampedArrayAsyncIterator, rebaseValueOffsets, compareArrayLike */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "memcpy", function() { return memcpy; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "joinUint8Arrays", function() { return joinUint8Arrays; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toArrayBufferView", function() { return toArrayBufferView; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toInt8Array", function() { return toInt8Array; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toInt16Array", function() { return toInt16Array; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toInt32Array", function() { return toInt32Array; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toBigInt64Array", function() { return toBigInt64Array; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toUint8Array", function() { return toUint8Array; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toUint16Array", function() { return toUint16Array; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toUint32Array", function() { return toUint32Array; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toBigUint64Array", function() { return toBigUint64Array; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toFloat32Array", function() { return toFloat32Array; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toFloat64Array", function() { return toFloat64Array; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toUint8ClampedArray", function() { return toUint8ClampedArray; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toArrayBufferViewIterator", function() { return toArrayBufferViewIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toInt8ArrayIterator", function() { return toInt8ArrayIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toInt16ArrayIterator", function() { return toInt16ArrayIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toInt32ArrayIterator", function() { return toInt32ArrayIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toUint8ArrayIterator", function() { return toUint8ArrayIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toUint16ArrayIterator", function() { return toUint16ArrayIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toUint32ArrayIterator", function() { return toUint32ArrayIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toFloat32ArrayIterator", function() { return toFloat32ArrayIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toFloat64ArrayIterator", function() { return toFloat64ArrayIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toUint8ClampedArrayIterator", function() { return toUint8ClampedArrayIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toArrayBufferViewAsyncIterator", function() { return toArrayBufferViewAsyncIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toInt8ArrayAsyncIterator", function() { return toInt8ArrayAsyncIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toInt16ArrayAsyncIterator", function() { return toInt16ArrayAsyncIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toInt32ArrayAsyncIterator", function() { return toInt32ArrayAsyncIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toUint8ArrayAsyncIterator", function() { return toUint8ArrayAsyncIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toUint16ArrayAsyncIterator", function() { return toUint16ArrayAsyncIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toUint32ArrayAsyncIterator", function() { return toUint32ArrayAsyncIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toFloat32ArrayAsyncIterator", function() { return toFloat32ArrayAsyncIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toFloat64ArrayAsyncIterator", function() { return toFloat64ArrayAsyncIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toUint8ClampedArrayAsyncIterator", function() { return toUint8ClampedArrayAsyncIterator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "rebaseValueOffsets", function() { return rebaseValueOffsets; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "compareArrayLike", function() { return compareArrayLike; });
+/* harmony import */ var flatbuffers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! flatbuffers */ "./node_modules/flatbuffers/js/flatbuffers.mjs");
+/* harmony import */ var _util_utf8__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/utf8 */ "./node_modules/apache-arrow/util/utf8.mjs");
+/* harmony import */ var _compat__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./compat */ "./node_modules/apache-arrow/util/compat.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -12992,11 +12259,10 @@ exports.BN = BN;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const flatbuffers_1 = require("flatbuffers");
-const utf8_1 = require("../util/utf8");
-var ByteBuffer = flatbuffers_1.flatbuffers.ByteBuffer;
-const compat_1 = require("./compat");
+
+
+var ByteBuffer = flatbuffers__WEBPACK_IMPORTED_MODULE_0__["flatbuffers"].ByteBuffer;
+
 /** @ignore */
 const SharedArrayBuf = (typeof SharedArrayBuffer !== 'undefined' ? SharedArrayBuffer : ArrayBuffer);
 /** @ignore */
@@ -13030,7 +12296,6 @@ function memcpy(target, source, targetByteOffset = 0, sourceByteLength = source.
     dst.set(src, targetByteOffset);
     return target;
 }
-exports.memcpy = memcpy;
 /** @ignore */
 function joinUint8Arrays(chunks, size) {
     // collapse chunks that share the same underlying ArrayBuffer and whose byte ranges overlap,
@@ -13058,9 +12323,8 @@ function joinUint8Arrays(chunks, size) {
     }
     return [buffer || new Uint8Array(0), result.slice(index), byteLength - (buffer ? buffer.byteLength : 0)];
 }
-exports.joinUint8Arrays = joinUint8Arrays;
 function toArrayBufferView(ArrayBufferViewCtor, input) {
-    let value = compat_1.isIteratorResult(input) ? input.value : input;
+    let value = Object(_compat__WEBPACK_IMPORTED_MODULE_2__["isIteratorResult"])(input) ? input.value : input;
     if (value instanceof ArrayBufferViewCtor) {
         if (ArrayBufferViewCtor === Uint8Array) {
             // Node's `Buffer` class passes the `instanceof Uint8Array` check, but we need
@@ -13073,7 +12337,7 @@ function toArrayBufferView(ArrayBufferViewCtor, input) {
         return new ArrayBufferViewCtor(0);
     }
     if (typeof value === 'string') {
-        value = utf8_1.encodeUtf8(value);
+        value = Object(_util_utf8__WEBPACK_IMPORTED_MODULE_1__["encodeUtf8"])(value);
     }
     if (value instanceof ArrayBuffer) {
         return new ArrayBufferViewCtor(value);
@@ -13087,18 +12351,17 @@ function toArrayBufferView(ArrayBufferViewCtor, input) {
     return !ArrayBuffer.isView(value) ? ArrayBufferViewCtor.from(value) : value.byteLength <= 0 ? new ArrayBufferViewCtor(0)
         : new ArrayBufferViewCtor(value.buffer, value.byteOffset, value.byteLength / ArrayBufferViewCtor.BYTES_PER_ELEMENT);
 }
-exports.toArrayBufferView = toArrayBufferView;
-/** @ignore */ exports.toInt8Array = (input) => toArrayBufferView(Int8Array, input);
-/** @ignore */ exports.toInt16Array = (input) => toArrayBufferView(Int16Array, input);
-/** @ignore */ exports.toInt32Array = (input) => toArrayBufferView(Int32Array, input);
-/** @ignore */ exports.toBigInt64Array = (input) => toArrayBufferView(compat_1.BigInt64Array, input);
-/** @ignore */ exports.toUint8Array = (input) => toArrayBufferView(Uint8Array, input);
-/** @ignore */ exports.toUint16Array = (input) => toArrayBufferView(Uint16Array, input);
-/** @ignore */ exports.toUint32Array = (input) => toArrayBufferView(Uint32Array, input);
-/** @ignore */ exports.toBigUint64Array = (input) => toArrayBufferView(compat_1.BigUint64Array, input);
-/** @ignore */ exports.toFloat32Array = (input) => toArrayBufferView(Float32Array, input);
-/** @ignore */ exports.toFloat64Array = (input) => toArrayBufferView(Float64Array, input);
-/** @ignore */ exports.toUint8ClampedArray = (input) => toArrayBufferView(Uint8ClampedArray, input);
+/** @ignore */ const toInt8Array = (input) => toArrayBufferView(Int8Array, input);
+/** @ignore */ const toInt16Array = (input) => toArrayBufferView(Int16Array, input);
+/** @ignore */ const toInt32Array = (input) => toArrayBufferView(Int32Array, input);
+/** @ignore */ const toBigInt64Array = (input) => toArrayBufferView(_compat__WEBPACK_IMPORTED_MODULE_2__["BigInt64Array"], input);
+/** @ignore */ const toUint8Array = (input) => toArrayBufferView(Uint8Array, input);
+/** @ignore */ const toUint16Array = (input) => toArrayBufferView(Uint16Array, input);
+/** @ignore */ const toUint32Array = (input) => toArrayBufferView(Uint32Array, input);
+/** @ignore */ const toBigUint64Array = (input) => toArrayBufferView(_compat__WEBPACK_IMPORTED_MODULE_2__["BigUint64Array"], input);
+/** @ignore */ const toFloat32Array = (input) => toArrayBufferView(Float32Array, input);
+/** @ignore */ const toFloat64Array = (input) => toArrayBufferView(Float64Array, input);
+/** @ignore */ const toUint8ClampedArray = (input) => toArrayBufferView(Uint8ClampedArray, input);
 /** @ignore */
 const pump = (iterator) => { iterator.next(); return iterator; };
 /** @ignore */
@@ -13108,7 +12371,7 @@ function* toArrayBufferViewIterator(ArrayCtor, source) {
         : (ArrayBuffer.isView(source)) ? wrap(source)
             : (source instanceof ArrayBuffer) ? wrap(source)
                 : (source instanceof SharedArrayBuf) ? wrap(source)
-                    : !compat_1.isIterable(source) ? wrap(source) : source;
+                    : !Object(_compat__WEBPACK_IMPORTED_MODULE_2__["isIterable"])(source) ? wrap(source) : source;
     yield* pump((function* (it) {
         let r = null;
         do {
@@ -13116,20 +12379,19 @@ function* toArrayBufferViewIterator(ArrayCtor, source) {
         } while (!r.done);
     })(buffers[Symbol.iterator]()));
 }
-exports.toArrayBufferViewIterator = toArrayBufferViewIterator;
-/** @ignore */ exports.toInt8ArrayIterator = (input) => toArrayBufferViewIterator(Int8Array, input);
-/** @ignore */ exports.toInt16ArrayIterator = (input) => toArrayBufferViewIterator(Int16Array, input);
-/** @ignore */ exports.toInt32ArrayIterator = (input) => toArrayBufferViewIterator(Int32Array, input);
-/** @ignore */ exports.toUint8ArrayIterator = (input) => toArrayBufferViewIterator(Uint8Array, input);
-/** @ignore */ exports.toUint16ArrayIterator = (input) => toArrayBufferViewIterator(Uint16Array, input);
-/** @ignore */ exports.toUint32ArrayIterator = (input) => toArrayBufferViewIterator(Uint32Array, input);
-/** @ignore */ exports.toFloat32ArrayIterator = (input) => toArrayBufferViewIterator(Float32Array, input);
-/** @ignore */ exports.toFloat64ArrayIterator = (input) => toArrayBufferViewIterator(Float64Array, input);
-/** @ignore */ exports.toUint8ClampedArrayIterator = (input) => toArrayBufferViewIterator(Uint8ClampedArray, input);
+/** @ignore */ const toInt8ArrayIterator = (input) => toArrayBufferViewIterator(Int8Array, input);
+/** @ignore */ const toInt16ArrayIterator = (input) => toArrayBufferViewIterator(Int16Array, input);
+/** @ignore */ const toInt32ArrayIterator = (input) => toArrayBufferViewIterator(Int32Array, input);
+/** @ignore */ const toUint8ArrayIterator = (input) => toArrayBufferViewIterator(Uint8Array, input);
+/** @ignore */ const toUint16ArrayIterator = (input) => toArrayBufferViewIterator(Uint16Array, input);
+/** @ignore */ const toUint32ArrayIterator = (input) => toArrayBufferViewIterator(Uint32Array, input);
+/** @ignore */ const toFloat32ArrayIterator = (input) => toArrayBufferViewIterator(Float32Array, input);
+/** @ignore */ const toFloat64ArrayIterator = (input) => toArrayBufferViewIterator(Float64Array, input);
+/** @ignore */ const toUint8ClampedArrayIterator = (input) => toArrayBufferViewIterator(Uint8ClampedArray, input);
 /** @ignore */
 async function* toArrayBufferViewAsyncIterator(ArrayCtor, source) {
     // if a Promise, unwrap the Promise and iterate the resolved value
-    if (compat_1.isPromise(source)) {
+    if (Object(_compat__WEBPACK_IMPORTED_MODULE_2__["isPromise"])(source)) {
         return yield* toArrayBufferViewAsyncIterator(ArrayCtor, await source);
     }
     const wrap = async function* (x) { yield await x; };
@@ -13145,8 +12407,8 @@ async function* toArrayBufferViewAsyncIterator(ArrayCtor, source) {
         : (ArrayBuffer.isView(source)) ? wrap(source) // if TypedArray, wrap in an AsyncIterableIterator
             : (source instanceof ArrayBuffer) ? wrap(source) // if ArrayBuffer, wrap in an AsyncIterableIterator
                 : (source instanceof SharedArrayBuf) ? wrap(source) // if SharedArrayBuffer, wrap in an AsyncIterableIterator
-                    : compat_1.isIterable(source) ? emit(source) // If Iterable, wrap in an AsyncIterableIterator and compose the `next` values
-                        : !compat_1.isAsyncIterable(source) ? wrap(source) // If not an AsyncIterable, treat as a sentinel and wrap in an AsyncIterableIterator
+                    : Object(_compat__WEBPACK_IMPORTED_MODULE_2__["isIterable"])(source) ? emit(source) // If Iterable, wrap in an AsyncIterableIterator and compose the `next` values
+                        : !Object(_compat__WEBPACK_IMPORTED_MODULE_2__["isAsyncIterable"])(source) ? wrap(source) // If not an AsyncIterable, treat as a sentinel and wrap in an AsyncIterableIterator
                             : source; // otherwise if AsyncIterable, use it
     yield* pump((async function* (it) {
         let r = null;
@@ -13155,16 +12417,15 @@ async function* toArrayBufferViewAsyncIterator(ArrayCtor, source) {
         } while (!r.done);
     })(buffers[Symbol.asyncIterator]()));
 }
-exports.toArrayBufferViewAsyncIterator = toArrayBufferViewAsyncIterator;
-/** @ignore */ exports.toInt8ArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Int8Array, input);
-/** @ignore */ exports.toInt16ArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Int16Array, input);
-/** @ignore */ exports.toInt32ArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Int32Array, input);
-/** @ignore */ exports.toUint8ArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Uint8Array, input);
-/** @ignore */ exports.toUint16ArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Uint16Array, input);
-/** @ignore */ exports.toUint32ArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Uint32Array, input);
-/** @ignore */ exports.toFloat32ArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Float32Array, input);
-/** @ignore */ exports.toFloat64ArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Float64Array, input);
-/** @ignore */ exports.toUint8ClampedArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Uint8ClampedArray, input);
+/** @ignore */ const toInt8ArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Int8Array, input);
+/** @ignore */ const toInt16ArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Int16Array, input);
+/** @ignore */ const toInt32ArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Int32Array, input);
+/** @ignore */ const toUint8ArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Uint8Array, input);
+/** @ignore */ const toUint16ArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Uint16Array, input);
+/** @ignore */ const toUint32ArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Uint32Array, input);
+/** @ignore */ const toFloat32ArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Float32Array, input);
+/** @ignore */ const toFloat64ArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Float64Array, input);
+/** @ignore */ const toUint8ClampedArrayAsyncIterator = (input) => toArrayBufferViewAsyncIterator(Uint8ClampedArray, input);
 /** @ignore */
 function rebaseValueOffsets(offset, length, valueOffsets) {
     // If we have a non-zero offset, create a new offsets array with the values
@@ -13177,7 +12438,6 @@ function rebaseValueOffsets(offset, length, valueOffsets) {
     }
     return valueOffsets;
 }
-exports.rebaseValueOffsets = rebaseValueOffsets;
 /** @ignore */
 function compareArrayLike(a, b) {
     let i = 0, n = a.length;
@@ -13193,12 +12453,44 @@ function compareArrayLike(a, b) {
     }
     return true;
 }
-exports.compareArrayLike = compareArrayLike;
+
+//# sourceMappingURL=buffer.mjs.map
 
 
+/***/ }),
 
-},{"../util/utf8":66,"./compat":60,"flatbuffers":106}],60:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/util/compat.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/util/compat.mjs ***!
+  \***************************************************/
+/*! exports provided: BigInt, BigIntAvailable, BigInt64Array, BigInt64ArrayAvailable, BigUint64Array, BigUint64ArrayAvailable, isObject, isPromise, isObservable, isIterable, isAsyncIterable, isArrowJSON, isArrayLike, isIteratorResult, isUnderlyingSink, isFileHandle, isFSReadStream, isFetchResponse, isWritableDOMStream, isReadableDOMStream, isWritableNodeStream, isReadableNodeStream */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BigInt", function() { return BigIntCtor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BigIntAvailable", function() { return BigIntAvailable; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BigInt64Array", function() { return BigInt64ArrayCtor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BigInt64ArrayAvailable", function() { return BigInt64ArrayAvailable; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BigUint64Array", function() { return BigUint64ArrayCtor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BigUint64ArrayAvailable", function() { return BigUint64ArrayAvailable; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isObject", function() { return isObject; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isPromise", function() { return isPromise; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isObservable", function() { return isObservable; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isIterable", function() { return isIterable; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isAsyncIterable", function() { return isAsyncIterable; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isArrowJSON", function() { return isArrowJSON; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isArrayLike", function() { return isArrayLike; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isIteratorResult", function() { return isIteratorResult; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isUnderlyingSink", function() { return isUnderlyingSink; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isFileHandle", function() { return isFileHandle; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isFSReadStream", function() { return isFSReadStream; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isFetchResponse", function() { return isFetchResponse; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isWritableDOMStream", function() { return isWritableDOMStream; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isReadableDOMStream", function() { return isReadableDOMStream; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isWritableNodeStream", function() { return isWritableNodeStream; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isReadableNodeStream", function() { return isReadableNodeStream; });
+/* harmony import */ var _io_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../io/interfaces */ "./node_modules/apache-arrow/io/interfaces.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -13215,8 +12507,7 @@ exports.compareArrayLike = compareArrayLike;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const interfaces_1 = require("../io/interfaces");
+
 /** @ignore */
 const [BigIntCtor, BigIntAvailable] = (() => {
     const BigIntUnavailableError = () => { throw new Error('BigInt is not available in this environment'); };
@@ -13225,8 +12516,6 @@ const [BigIntCtor, BigIntAvailable] = (() => {
     BigIntUnavailable.asUintN = () => { throw BigIntUnavailableError(); };
     return typeof BigInt !== 'undefined' ? [BigInt, true] : [BigIntUnavailable, false];
 })();
-exports.BigInt = BigIntCtor;
-exports.BigIntAvailable = BigIntAvailable;
 /** @ignore */
 const [BigInt64ArrayCtor, BigInt64ArrayAvailable] = (() => {
     const BigInt64ArrayUnavailableError = () => { throw new Error('BigInt64Array is not available in this environment'); };
@@ -13238,8 +12527,6 @@ const [BigInt64ArrayCtor, BigInt64ArrayAvailable] = (() => {
     }
     return typeof BigInt64Array !== 'undefined' ? [BigInt64Array, true] : [BigInt64ArrayUnavailable, false];
 })();
-exports.BigInt64Array = BigInt64ArrayCtor;
-exports.BigInt64ArrayAvailable = BigInt64ArrayAvailable;
 /** @ignore */
 const [BigUint64ArrayCtor, BigUint64ArrayAvailable] = (() => {
     const BigUint64ArrayUnavailableError = () => { throw new Error('BigUint64Array is not available in this environment'); };
@@ -13251,96 +12538,110 @@ const [BigUint64ArrayCtor, BigUint64ArrayAvailable] = (() => {
     }
     return typeof BigUint64Array !== 'undefined' ? [BigUint64Array, true] : [BigUint64ArrayUnavailable, false];
 })();
-exports.BigUint64Array = BigUint64ArrayCtor;
-exports.BigUint64ArrayAvailable = BigUint64ArrayAvailable;
+
+
+
 /** @ignore */ const isNumber = (x) => typeof x === 'number';
 /** @ignore */ const isBoolean = (x) => typeof x === 'boolean';
 /** @ignore */ const isFunction = (x) => typeof x === 'function';
 /** @ignore */
-exports.isObject = (x) => x != null && Object(x) === x;
+const isObject = (x) => x != null && Object(x) === x;
 /** @ignore */
-exports.isPromise = (x) => {
-    return exports.isObject(x) && isFunction(x.then);
+const isPromise = (x) => {
+    return isObject(x) && isFunction(x.then);
 };
 /** @ignore */
-exports.isObservable = (x) => {
-    return exports.isObject(x) && isFunction(x.subscribe);
+const isObservable = (x) => {
+    return isObject(x) && isFunction(x.subscribe);
 };
 /** @ignore */
-exports.isIterable = (x) => {
-    return exports.isObject(x) && isFunction(x[Symbol.iterator]);
+const isIterable = (x) => {
+    return isObject(x) && isFunction(x[Symbol.iterator]);
 };
 /** @ignore */
-exports.isAsyncIterable = (x) => {
-    return exports.isObject(x) && isFunction(x[Symbol.asyncIterator]);
+const isAsyncIterable = (x) => {
+    return isObject(x) && isFunction(x[Symbol.asyncIterator]);
 };
 /** @ignore */
-exports.isArrowJSON = (x) => {
-    return exports.isObject(x) && exports.isObject(x['schema']);
+const isArrowJSON = (x) => {
+    return isObject(x) && isObject(x['schema']);
 };
 /** @ignore */
-exports.isArrayLike = (x) => {
-    return exports.isObject(x) && isNumber(x['length']);
+const isArrayLike = (x) => {
+    return isObject(x) && isNumber(x['length']);
 };
 /** @ignore */
-exports.isIteratorResult = (x) => {
-    return exports.isObject(x) && ('done' in x) && ('value' in x);
+const isIteratorResult = (x) => {
+    return isObject(x) && ('done' in x) && ('value' in x);
 };
 /** @ignore */
-exports.isUnderlyingSink = (x) => {
-    return exports.isObject(x) &&
+const isUnderlyingSink = (x) => {
+    return isObject(x) &&
         isFunction(x['abort']) &&
         isFunction(x['close']) &&
         isFunction(x['start']) &&
         isFunction(x['write']);
 };
 /** @ignore */
-exports.isFileHandle = (x) => {
-    return exports.isObject(x) && isFunction(x['stat']) && isNumber(x['fd']);
+const isFileHandle = (x) => {
+    return isObject(x) && isFunction(x['stat']) && isNumber(x['fd']);
 };
 /** @ignore */
-exports.isFSReadStream = (x) => {
-    return exports.isReadableNodeStream(x) && isNumber(x['bytesRead']);
+const isFSReadStream = (x) => {
+    return isReadableNodeStream(x) && isNumber(x['bytesRead']);
 };
 /** @ignore */
-exports.isFetchResponse = (x) => {
-    return exports.isObject(x) && exports.isReadableDOMStream(x['body']);
+const isFetchResponse = (x) => {
+    return isObject(x) && isReadableDOMStream(x['body']);
 };
 /** @ignore */
-exports.isWritableDOMStream = (x) => {
-    return exports.isObject(x) &&
+const isWritableDOMStream = (x) => {
+    return isObject(x) &&
         isFunction(x['abort']) &&
         isFunction(x['getWriter']) &&
-        !(x instanceof interfaces_1.ReadableInterop);
+        !(x instanceof _io_interfaces__WEBPACK_IMPORTED_MODULE_0__["ReadableInterop"]);
 };
 /** @ignore */
-exports.isReadableDOMStream = (x) => {
-    return exports.isObject(x) &&
+const isReadableDOMStream = (x) => {
+    return isObject(x) &&
         isFunction(x['cancel']) &&
         isFunction(x['getReader']) &&
-        !(x instanceof interfaces_1.ReadableInterop);
+        !(x instanceof _io_interfaces__WEBPACK_IMPORTED_MODULE_0__["ReadableInterop"]);
 };
 /** @ignore */
-exports.isWritableNodeStream = (x) => {
-    return exports.isObject(x) &&
+const isWritableNodeStream = (x) => {
+    return isObject(x) &&
         isFunction(x['end']) &&
         isFunction(x['write']) &&
         isBoolean(x['writable']) &&
-        !(x instanceof interfaces_1.ReadableInterop);
+        !(x instanceof _io_interfaces__WEBPACK_IMPORTED_MODULE_0__["ReadableInterop"]);
 };
 /** @ignore */
-exports.isReadableNodeStream = (x) => {
-    return exports.isObject(x) &&
+const isReadableNodeStream = (x) => {
+    return isObject(x) &&
         isFunction(x['read']) &&
         isFunction(x['pipe']) &&
         isBoolean(x['readable']) &&
-        !(x instanceof interfaces_1.ReadableInterop);
+        !(x instanceof _io_interfaces__WEBPACK_IMPORTED_MODULE_0__["ReadableInterop"]);
 };
 
+//# sourceMappingURL=compat.mjs.map
 
 
-},{"../io/interfaces":40}],61:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/util/fn.mjs":
+/*!***********************************************!*\
+  !*** ./node_modules/apache-arrow/util/fn.mjs ***!
+  \***********************************************/
+/*! exports provided: partial0, partial1, partial2 */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "partial0", function() { return partial0; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "partial1", function() { return partial1; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "partial2", function() { return partial2; });
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -13357,27 +12658,37 @@ exports.isReadableNodeStream = (x) => {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
 /** @ignore */
 function partial0(visit) {
     return function () { return visit(this); };
 }
-exports.partial0 = partial0;
 /** @ignore */
 function partial1(visit) {
     return function (a) { return visit(this, a); };
 }
-exports.partial1 = partial1;
 /** @ignore */
 function partial2(visit) {
     return function (a, b) { return visit(this, a, b); };
 }
-exports.partial2 = partial2;
+
+//# sourceMappingURL=fn.mjs.map
 
 
+/***/ }),
 
-},{}],62:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/util/int.mjs":
+/*!************************************************!*\
+  !*** ./node_modules/apache-arrow/util/int.mjs ***!
+  \************************************************/
+/*! exports provided: BaseInt64, Uint64, Int64, Int128 */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BaseInt64", function() { return BaseInt64; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Uint64", function() { return Uint64; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Int64", function() { return Int64; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Int128", function() { return Int128; });
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -13394,7 +12705,6 @@ exports.partial2 = partial2;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
 /** @ignore */
 const carryBit16 = 1 << 16;
 /** @ignore */
@@ -13474,7 +12784,6 @@ class BaseInt64 {
         return `${intAsHex(this.buffer[1])} ${intAsHex(this.buffer[0])}`;
     }
 }
-exports.BaseInt64 = BaseInt64;
 /** @ignore */
 class Uint64 extends BaseInt64 {
     times(other) {
@@ -13533,7 +12842,6 @@ class Uint64 extends BaseInt64 {
         return rtrn.plus(right);
     }
 }
-exports.Uint64 = Uint64;
 /** @ignore */
 class Int64 extends BaseInt64 {
     negate() {
@@ -13609,7 +12917,6 @@ class Int64 extends BaseInt64 {
         return rtrn.plus(right);
     }
 }
-exports.Int64 = Int64;
 /** @ignore */
 class Int128 {
     constructor(buffer) {
@@ -13747,12 +13054,23 @@ class Int128 {
         return data;
     }
 }
-exports.Int128 = Int128;
+
+//# sourceMappingURL=int.mjs.map
 
 
+/***/ }),
 
-},{}],63:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/util/math.mjs":
+/*!*************************************************!*\
+  !*** ./node_modules/apache-arrow/util/math.mjs ***!
+  \*************************************************/
+/*! exports provided: uint16ToFloat64, float64ToUint16 */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "uint16ToFloat64", function() { return uint16ToFloat64; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "float64ToUint16", function() { return float64ToUint16; });
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -13769,7 +13087,6 @@ exports.Int128 = Int128;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
 const f64 = new Float64Array(1);
 const u32 = new Uint32Array(f64.buffer);
 /**
@@ -13789,7 +13106,6 @@ function uint16ToFloat64(h) {
     }
     return sign * (2 ** (expo - 15)) * (1 + sigf);
 }
-exports.uint16ToFloat64 = uint16ToFloat64;
 /**
  * Convert a float64 to uint16 (assuming the float64 is logically a float16). Inspired by numpy's `npy_double_to_half`:
  * https://github.com/numpy/numpy/blob/5a5987291dc95376bb098be8d8e5391e89e77a2c/numpy/core/src/npymath/halffloat.c#L43
@@ -13855,12 +13171,22 @@ function float64ToUint16(d) {
     }
     return sign | expo | sigf & 0xFFFF;
 }
-exports.float64ToUint16 = float64ToUint16;
+
+//# sourceMappingURL=math.mjs.map
 
 
+/***/ }),
 
-},{}],64:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/util/pretty.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/util/pretty.mjs ***!
+  \***************************************************/
+/*! exports provided: valueToString */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "valueToString", function() { return valueToString; });
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -13877,7 +13203,6 @@ exports.float64ToUint16 = float64ToUint16;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
 /** @ignore */ const undf = void (0);
 /** @ignore */
 function valueToString(x) {
@@ -13901,12 +13226,28 @@ function valueToString(x) {
     }
     return ArrayBuffer.isView(x) ? `[${x}]` : JSON.stringify(x);
 }
-exports.valueToString = valueToString;
+
+//# sourceMappingURL=pretty.mjs.map
 
 
+/***/ }),
 
-},{}],65:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/util/recordbatch.mjs":
+/*!********************************************************!*\
+  !*** ./node_modules/apache-arrow/util/recordbatch.mjs ***!
+  \********************************************************/
+/*! exports provided: ensureSameLengthData, distributeColumnsIntoRecordBatches, distributeVectorsIntoRecordBatches */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ensureSameLengthData", function() { return ensureSameLengthData; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "distributeColumnsIntoRecordBatches", function() { return distributeColumnsIntoRecordBatches; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "distributeVectorsIntoRecordBatches", function() { return distributeVectorsIntoRecordBatches; });
+/* harmony import */ var _data__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../data */ "./node_modules/apache-arrow/data.mjs");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../schema */ "./node_modules/apache-arrow/schema.mjs");
+/* harmony import */ var _vector_chunked__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../vector/chunked */ "./node_modules/apache-arrow/vector/chunked.mjs");
+/* harmony import */ var _recordbatch__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../recordbatch */ "./node_modules/apache-arrow/recordbatch.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -13923,11 +13264,10 @@ exports.valueToString = valueToString;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const data_1 = require("../data");
-const schema_1 = require("../schema");
-const chunked_1 = require("../vector/chunked");
-const recordbatch_1 = require("../recordbatch");
+
+
+
+
 const noopBuf = new Uint8Array(0);
 const nullBufs = (bitmapLength) => [
     noopBuf, noopBuf, new Uint8Array(bitmapLength), noopBuf
@@ -13947,22 +13287,19 @@ function ensureSameLengthData(schema, chunks, batchLength = chunks.reduce((l, c)
         else {
             (field = fields[i]).nullable || (fields[i] = fields[i].clone({ nullable: true }));
             batchData[i] = data ? data._changeLengthAndBackfillNullBitmap(batchLength)
-                : data_1.Data.new(field.type, 0, batchLength, batchLength, nullBufs(bitmapLength));
+                : _data__WEBPACK_IMPORTED_MODULE_0__["Data"].new(field.type, 0, batchLength, batchLength, nullBufs(bitmapLength));
         }
     }
-    return [new schema_1.Schema(fields), batchLength, batchData];
+    return [new _schema__WEBPACK_IMPORTED_MODULE_1__["Schema"](fields), batchLength, batchData];
 }
-exports.ensureSameLengthData = ensureSameLengthData;
 /** @ignore */
 function distributeColumnsIntoRecordBatches(columns) {
-    return distributeVectorsIntoRecordBatches(new schema_1.Schema(columns.map(({ field }) => field)), columns);
+    return distributeVectorsIntoRecordBatches(new _schema__WEBPACK_IMPORTED_MODULE_1__["Schema"](columns.map(({ field }) => field)), columns);
 }
-exports.distributeColumnsIntoRecordBatches = distributeColumnsIntoRecordBatches;
 /** @ignore */
 function distributeVectorsIntoRecordBatches(schema, vecs) {
-    return uniformlyDistributeChunksAcrossRecordBatches(schema, vecs.map((v) => v instanceof chunked_1.Chunked ? v.chunks.map((c) => c.data) : [v.data]));
+    return uniformlyDistributeChunksAcrossRecordBatches(schema, vecs.map((v) => v instanceof _vector_chunked__WEBPACK_IMPORTED_MODULE_2__["Chunked"] ? v.chunks.map((c) => c.data) : [v.data]));
 }
-exports.distributeVectorsIntoRecordBatches = distributeVectorsIntoRecordBatches;
 /** @ignore */
 function uniformlyDistributeChunksAcrossRecordBatches(schema, columns) {
     const fields = [...schema.fields];
@@ -13984,8 +13321,8 @@ function uniformlyDistributeChunksAcrossRecordBatches(schema, columns) {
         }
     }
     return [
-        schema = new schema_1.Schema(fields, schema.metadata),
-        batchArgs.map((xs) => new recordbatch_1.RecordBatch(schema, ...xs))
+        schema = new _schema__WEBPACK_IMPORTED_MODULE_1__["Schema"](fields, schema.metadata),
+        batchArgs.map((xs) => new _recordbatch__WEBPACK_IMPORTED_MODULE_3__["RecordBatch"](schema, ...xs))
     ];
 }
 /** @ignore */
@@ -14008,17 +13345,30 @@ function distributeChildData(fields, batchLength, childData, columns, memo) {
         else {
             (field = fields[i]).nullable || (fields[i] = field.clone({ nullable: true }));
             childData[i] = data ? data._changeLengthAndBackfillNullBitmap(batchLength)
-                : data_1.Data.new(field.type, 0, batchLength, batchLength, nullBufs(bitmapLength));
+                : _data__WEBPACK_IMPORTED_MODULE_0__["Data"].new(field.type, 0, batchLength, batchLength, nullBufs(bitmapLength));
         }
     }
     return childData;
 }
 
+//# sourceMappingURL=recordbatch.mjs.map
 
 
-},{"../data":33,"../recordbatch":52,"../schema":53,"../vector/chunked":72}],66:[function(require,module,exports){
-(function (Buffer){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/util/utf8.mjs":
+/*!*************************************************!*\
+  !*** ./node_modules/apache-arrow/util/utf8.mjs ***!
+  \*************************************************/
+/*! exports provided: decodeUtf8, encodeUtf8 */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "decodeUtf8", function() { return decodeUtf8; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "encodeUtf8", function() { return encodeUtf8; });
+/* harmony import */ var _buffer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
+/* harmony import */ var text_encoding_utf_8__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! text-encoding-utf-8 */ "./node_modules/text-encoding-utf-8/lib/encoding.lib.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -14035,38 +13385,53 @@ function distributeChildData(fields, batchLength, childData, columns, memo) {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const buffer_1 = require("./buffer");
-const text_encoding_utf_8_1 = require("text-encoding-utf-8");
+
+
 /** @ignore @suppress {missingRequire} */
 const _Buffer = typeof Buffer === 'function' ? Buffer : null;
 /** @ignore */
 const useNativeEncoders = typeof TextDecoder === 'function' && typeof TextEncoder === 'function';
 /** @ignore */
-exports.decodeUtf8 = ((TextDecoder) => {
+const decodeUtf8 = ((TextDecoder) => {
     if (useNativeEncoders || !_Buffer) {
         const decoder = new TextDecoder('utf-8');
         return (buffer) => decoder.decode(buffer);
     }
     return (input) => {
-        const { buffer, byteOffset, length } = buffer_1.toUint8Array(input);
+        const { buffer, byteOffset, length } = Object(_buffer__WEBPACK_IMPORTED_MODULE_0__["toUint8Array"])(input);
         return _Buffer.from(buffer, byteOffset, length).toString();
     };
-})(typeof TextDecoder !== 'undefined' ? TextDecoder : text_encoding_utf_8_1.TextDecoder);
+})(typeof TextDecoder !== 'undefined' ? TextDecoder : text_encoding_utf_8__WEBPACK_IMPORTED_MODULE_1__["TextDecoder"]);
 /** @ignore */
-exports.encodeUtf8 = ((TextEncoder) => {
+const encodeUtf8 = ((TextEncoder) => {
     if (useNativeEncoders || !_Buffer) {
         const encoder = new TextEncoder();
         return (value) => encoder.encode(value);
     }
-    return (input = '') => buffer_1.toUint8Array(_Buffer.from(input, 'utf8'));
-})(typeof TextEncoder !== 'undefined' ? TextEncoder : text_encoding_utf_8_1.TextEncoder);
+    return (input = '') => Object(_buffer__WEBPACK_IMPORTED_MODULE_0__["toUint8Array"])(_Buffer.from(input, 'utf8'));
+})(typeof TextEncoder !== 'undefined' ? TextEncoder : text_encoding_utf_8__WEBPACK_IMPORTED_MODULE_1__["TextEncoder"]);
+
+//# sourceMappingURL=utf8.mjs.map
 
 
+/***/ }),
 
-}).call(this,require("buffer").Buffer)
-},{"./buffer":59,"buffer":2,"text-encoding-utf-8":107}],67:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/util/vector.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/util/vector.mjs ***!
+  \***************************************************/
+/*! exports provided: clampIndex, clampRange, createElementComparator */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "clampIndex", function() { return clampIndex; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "clampRange", function() { return clampRange; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createElementComparator", function() { return createElementComparator; });
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../vector */ "./node_modules/apache-arrow/vector.mjs");
+/* harmony import */ var _vector_row__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../vector/row */ "./node_modules/apache-arrow/vector/row.mjs");
+/* harmony import */ var _util_buffer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
+/* harmony import */ var _compat__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./compat */ "./node_modules/apache-arrow/util/compat.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -14083,18 +13448,16 @@ exports.encodeUtf8 = ((TextEncoder) => {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const vector_1 = require("../vector");
-const row_1 = require("../vector/row");
-const buffer_1 = require("../util/buffer");
-const compat_1 = require("./compat");
+
+
+
+
 /** @ignore */
 function clampIndex(source, index, then) {
     const length = source.length;
     const adjust = index > -1 ? index : (length + (index % length));
     return then ? then(source, adjust) : adjust;
 }
-exports.clampIndex = clampIndex;
 /** @ignore */
 let tmp;
 /** @ignore */
@@ -14114,8 +13477,7 @@ function clampRange(source, begin, end, then) {
     (rhs > len) && (rhs = len);
     return then ? then(source, lhs, rhs) : [lhs, rhs];
 }
-exports.clampRange = clampRange;
-const big0 = compat_1.BigIntAvailable ? compat_1.BigInt(0) : 0;
+const big0 = _compat__WEBPACK_IMPORTED_MODULE_3__["BigIntAvailable"] ? Object(_compat__WEBPACK_IMPORTED_MODULE_3__["BigInt"])(0) : 0;
 const isNaNFast = (value) => value !== value;
 /** @ignore */
 function createElementComparator(search) {
@@ -14137,7 +13499,7 @@ function createElementComparator(search) {
     }
     // Compare TypedArrays
     if (ArrayBuffer.isView(search)) {
-        return (value) => value ? buffer_1.compareArrayLike(search, value) : false;
+        return (value) => value ? Object(_util_buffer__WEBPACK_IMPORTED_MODULE_2__["compareArrayLike"])(search, value) : false;
     }
     // Compare Maps and Rows
     if (search instanceof Map) {
@@ -14148,13 +13510,12 @@ function createElementComparator(search) {
         return createArrayLikeComparator(search);
     }
     // Compare Vectors
-    if (search instanceof vector_1.Vector) {
+    if (search instanceof _vector__WEBPACK_IMPORTED_MODULE_0__["Vector"]) {
         return createVectorComparator(search);
     }
     // Compare non-empty Objects
     return createObjectComparator(search);
 }
-exports.createElementComparator = createElementComparator;
 /** @ignore */
 function createArrayLikeComparator(lhs) {
     const comparators = [];
@@ -14199,14 +13560,14 @@ function createSubElementsComparator(comparators, keys) {
         switch (rhs.constructor) {
             case Array: return compareArray(comparators, rhs);
             case Map:
-            case row_1.MapRow:
-            case row_1.StructRow:
+            case _vector_row__WEBPACK_IMPORTED_MODULE_1__["MapRow"]:
+            case _vector_row__WEBPACK_IMPORTED_MODULE_1__["StructRow"]:
                 return compareObject(comparators, rhs, rhs.keys());
             case Object:
             case undefined: // support `Object.create(null)` objects
                 return compareObject(comparators, rhs, keys || Object.keys(rhs));
         }
-        return rhs instanceof vector_1.Vector ? compareVector(comparators, rhs) : false;
+        return rhs instanceof _vector__WEBPACK_IMPORTED_MODULE_0__["Vector"] ? compareVector(comparators, rhs) : false;
     };
 }
 function compareArray(comparators, arr) {
@@ -14256,10 +13617,22 @@ function compareObject(comparators, obj, keys) {
     return false;
 }
 
+//# sourceMappingURL=vector.mjs.map
 
 
-},{"../util/buffer":59,"../vector":68,"../vector/row":85,"./compat":60}],68:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/vector.mjs":
+/*!**********************************************!*\
+  !*** ./node_modules/apache-arrow/vector.mjs ***!
+  \**********************************************/
+/*! exports provided: AbstractVector, Vector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AbstractVector", function() { return AbstractVector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Vector", function() { return AbstractVector; });
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -14276,16 +13649,29 @@ function compareObject(comparators, obj, keys) {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
 class AbstractVector {
 }
-exports.AbstractVector = AbstractVector;
-exports.Vector = AbstractVector;
 
 
+//# sourceMappingURL=vector.mjs.map
 
-},{}],69:[function(require,module,exports){
+
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/vector/base.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/base.mjs ***!
+  \***************************************************/
+/*! exports provided: BaseVector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BaseVector", function() { return BaseVector; });
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony import */ var _chunked__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./chunked */ "./node_modules/apache-arrow/vector/chunked.mjs");
+/* harmony import */ var _util_vector__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/vector */ "./node_modules/apache-arrow/util/vector.mjs");
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../vector */ "./node_modules/apache-arrow/vector.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -14302,13 +13688,12 @@ exports.Vector = AbstractVector;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const enum_1 = require("../enum");
-const chunked_1 = require("./chunked");
-const vector_1 = require("../util/vector");
-const vector_2 = require("../vector");
+
+
+
+
 /** @ignore */
-class BaseVector extends vector_2.AbstractVector {
+class BaseVector extends _vector__WEBPACK_IMPORTED_MODULE_3__["AbstractVector"] {
     constructor(data, children) {
         super();
         this._children = children;
@@ -14322,7 +13707,7 @@ class BaseVector extends vector_2.AbstractVector {
     get stride() { return this.data.stride; }
     get nullCount() { return this.data.nullCount; }
     get byteLength() { return this.data.byteLength; }
-    get VectorName() { return `${enum_1.Type[this.typeId]}Vector`; }
+    get VectorName() { return `${_enum__WEBPACK_IMPORTED_MODULE_0__["Type"][this.typeId]}Vector`; }
     get ArrayType() { return this.type.ArrayType; }
     get values() { return this.data.values; }
     get typeIds() { return this.data.typeIds; }
@@ -14330,16 +13715,16 @@ class BaseVector extends vector_2.AbstractVector {
     get valueOffsets() { return this.data.valueOffsets; }
     get [Symbol.toStringTag]() { return `${this.VectorName}<${this.type[Symbol.toStringTag]}>`; }
     clone(data, children = this._children) {
-        return vector_2.Vector.new(data, children);
+        return _vector__WEBPACK_IMPORTED_MODULE_3__["Vector"].new(data, children);
     }
     concat(...others) {
-        return chunked_1.Chunked.concat(this, ...others);
+        return _chunked__WEBPACK_IMPORTED_MODULE_1__["Chunked"].concat(this, ...others);
     }
     slice(begin, end) {
         // Adjust args similar to Array.prototype.slice. Normalize begin/end to
         // clamp between 0 and length, and wrap around on negative indices, e.g.
         // slice(-1, 5) or slice(5, -1)
-        return vector_1.clampRange(this, begin, end, this._sliceInternal);
+        return Object(_util_vector__WEBPACK_IMPORTED_MODULE_2__["clampRange"])(this, begin, end, this._sliceInternal);
     }
     isValid(index) {
         if (this.nullCount > 0) {
@@ -14352,7 +13737,7 @@ class BaseVector extends vector_2.AbstractVector {
     }
     getChildAt(index) {
         return index < 0 || index >= this.numChildren ? null : ((this._children || (this._children = []))[index] ||
-            (this._children[index] = vector_2.Vector.new(this.data.childData[index])));
+            (this._children[index] = _vector__WEBPACK_IMPORTED_MODULE_3__["Vector"].new(this.data.childData[index])));
     }
     toJSON() { return [...this]; }
     _sliceInternal(self, begin, end) {
@@ -14363,13 +13748,26 @@ class BaseVector extends vector_2.AbstractVector {
         // Implementation in src/vectors/index.ts due to circular dependency/packaging shenanigans
     }
 }
-exports.BaseVector = BaseVector;
 BaseVector.prototype[Symbol.isConcatSpreadable] = true;
 
+//# sourceMappingURL=base.mjs.map
 
 
-},{"../enum":34,"../util/vector":67,"../vector":68,"./chunked":72}],70:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/vector/binary.mjs":
+/*!*****************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/binary.mjs ***!
+  \*****************************************************/
+/*! exports provided: BinaryVector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BinaryVector", function() { return BinaryVector; });
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../vector */ "./node_modules/apache-arrow/vector.mjs");
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -14386,22 +13784,34 @@ BaseVector.prototype[Symbol.isConcatSpreadable] = true;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const vector_1 = require("../vector");
-const base_1 = require("./base");
-const type_1 = require("../type");
+
+
+
 /** @ignore */
-class BinaryVector extends base_1.BaseVector {
+class BinaryVector extends _base__WEBPACK_IMPORTED_MODULE_1__["BaseVector"] {
     asUtf8() {
-        return vector_1.Vector.new(this.data.clone(new type_1.Utf8()));
+        return _vector__WEBPACK_IMPORTED_MODULE_0__["Vector"].new(this.data.clone(new _type__WEBPACK_IMPORTED_MODULE_2__["Utf8"]()));
     }
 }
-exports.BinaryVector = BinaryVector;
+
+//# sourceMappingURL=binary.mjs.map
 
 
+/***/ }),
 
-},{"../type":55,"../vector":68,"./base":69}],71:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/vector/bool.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/bool.mjs ***!
+  \***************************************************/
+/*! exports provided: BoolVector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BoolVector", function() { return BoolVector; });
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
+/* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./index */ "./node_modules/apache-arrow/vector/index.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -14418,23 +13828,36 @@ exports.BinaryVector = BinaryVector;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const type_1 = require("../type");
-const base_1 = require("./base");
-const index_1 = require("./index");
+
+
+
 /** @ignore */
-class BoolVector extends base_1.BaseVector {
+class BoolVector extends _base__WEBPACK_IMPORTED_MODULE_1__["BaseVector"] {
     /** @nocollapse */
     static from(input) {
-        return index_1.vectorFromValuesWithType(() => new type_1.Bool(), input);
+        return Object(_index__WEBPACK_IMPORTED_MODULE_2__["vectorFromValuesWithType"])(() => new _type__WEBPACK_IMPORTED_MODULE_0__["Bool"](), input);
     }
 }
-exports.BoolVector = BoolVector;
+
+//# sourceMappingURL=bool.mjs.map
 
 
+/***/ }),
 
-},{"../type":55,"./base":69,"./index":79}],72:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/vector/chunked.mjs":
+/*!******************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/chunked.mjs ***!
+  \******************************************************/
+/*! exports provided: Chunked */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Chunked", function() { return Chunked; });
+/* harmony import */ var _util_vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/vector */ "./node_modules/apache-arrow/util/vector.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
+/* harmony import */ var _util_args__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/args */ "./node_modules/apache-arrow/util/args.mjs");
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../vector */ "./node_modules/apache-arrow/vector.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -14451,13 +13874,12 @@ exports.BoolVector = BoolVector;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const vector_1 = require("../util/vector");
-const type_1 = require("../type");
-const args_1 = require("../util/args");
-const vector_2 = require("../vector");
+
+
+
+
 /** @ignore */
-class Chunked extends vector_2.AbstractVector {
+class Chunked extends _vector__WEBPACK_IMPORTED_MODULE_3__["AbstractVector"] {
     constructor(type, chunks = [], offsets = calculateOffsets(chunks)) {
         super();
         this._nullCount = -1;
@@ -14469,7 +13891,7 @@ class Chunked extends vector_2.AbstractVector {
     }
     /** @nocollapse */
     static flatten(...vectors) {
-        return args_1.selectChunkArgs(vector_2.Vector, vectors);
+        return Object(_util_args__WEBPACK_IMPORTED_MODULE_2__["selectChunkArgs"])(_vector__WEBPACK_IMPORTED_MODULE_3__["Vector"], vectors);
     }
     /** @nocollapse */
     static concat(...vectors) {
@@ -14498,7 +13920,7 @@ class Chunked extends vector_2.AbstractVector {
         return nullCount;
     }
     get indices() {
-        if (type_1.DataType.isDictionary(this._type)) {
+        if (_type__WEBPACK_IMPORTED_MODULE_1__["DataType"].isDictionary(this._type)) {
             if (!this._indices) {
                 const chunks = this._chunks;
                 this._indices = (chunks.length === 1
@@ -14510,7 +13932,7 @@ class Chunked extends vector_2.AbstractVector {
         return null;
     }
     get dictionary() {
-        if (type_1.DataType.isDictionary(this._type)) {
+        if (_type__WEBPACK_IMPORTED_MODULE_1__["DataType"].isDictionary(this._type)) {
             return this._chunks[this._chunks.length - 1].data.dictionary;
         }
         return null;
@@ -14527,7 +13949,7 @@ class Chunked extends vector_2.AbstractVector {
         return this.clone(Chunked.flatten(this, ...others));
     }
     slice(begin, end) {
-        return vector_1.clampRange(this, begin, end, this._sliceInternal);
+        return Object(_util_vector__WEBPACK_IMPORTED_MODULE_0__["clampRange"])(this, begin, end, this._sliceInternal);
     }
     getChildAt(index) {
         if (index < 0 || index >= this._numChildren) {
@@ -14653,7 +14075,6 @@ class Chunked extends vector_2.AbstractVector {
         return self.clone(slices);
     }
 }
-exports.Chunked = Chunked;
 /** @ignore */
 function calculateOffsets(vectors) {
     let offsets = new Uint32Array((vectors || []).length + 1);
@@ -14677,10 +14098,27 @@ const arraySet = (src, dst, offset) => {
     return idx;
 };
 
+//# sourceMappingURL=chunked.mjs.map
 
 
-},{"../type":55,"../util/args":56,"../util/vector":67,"../vector":68}],73:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/vector/date.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/date.mjs ***!
+  \***************************************************/
+/*! exports provided: DateVector, DateDayVector, DateMillisecondVector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DateVector", function() { return DateVector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DateDayVector", function() { return DateDayVector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DateMillisecondVector", function() { return DateMillisecondVector; });
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
+/* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./index */ "./node_modules/apache-arrow/vector/index.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -14697,35 +14135,43 @@ const arraySet = (src, dst, offset) => {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const enum_1 = require("../enum");
-const base_1 = require("./base");
-const index_1 = require("./index");
-const type_1 = require("../type");
+
+
+
+
 /** @ignore */
-class DateVector extends base_1.BaseVector {
+class DateVector extends _base__WEBPACK_IMPORTED_MODULE_1__["BaseVector"] {
     /** @nocollapse */
     static from(...args) {
         if (args.length === 2) {
-            return index_1.vectorFromValuesWithType(() => args[1] === enum_1.DateUnit.DAY ? new type_1.DateDay() : new type_1.DateMillisecond(), args[0]);
+            return Object(_index__WEBPACK_IMPORTED_MODULE_2__["vectorFromValuesWithType"])(() => args[1] === _enum__WEBPACK_IMPORTED_MODULE_0__["DateUnit"].DAY ? new _type__WEBPACK_IMPORTED_MODULE_3__["DateDay"]() : new _type__WEBPACK_IMPORTED_MODULE_3__["DateMillisecond"](), args[0]);
         }
-        return index_1.vectorFromValuesWithType(() => new type_1.DateMillisecond(), args[0]);
+        return Object(_index__WEBPACK_IMPORTED_MODULE_2__["vectorFromValuesWithType"])(() => new _type__WEBPACK_IMPORTED_MODULE_3__["DateMillisecond"](), args[0]);
     }
 }
-exports.DateVector = DateVector;
 /** @ignore */
 class DateDayVector extends DateVector {
 }
-exports.DateDayVector = DateDayVector;
 /** @ignore */
 class DateMillisecondVector extends DateVector {
 }
-exports.DateMillisecondVector = DateMillisecondVector;
+
+//# sourceMappingURL=date.mjs.map
 
 
+/***/ }),
 
-},{"../enum":34,"../type":55,"./base":69,"./index":79}],74:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/vector/decimal.mjs":
+/*!******************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/decimal.mjs ***!
+  \******************************************************/
+/*! exports provided: DecimalVector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DecimalVector", function() { return DecimalVector; });
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -14742,17 +14188,31 @@ exports.DateMillisecondVector = DateMillisecondVector;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const base_1 = require("./base");
+
 /** @ignore */
-class DecimalVector extends base_1.BaseVector {
+class DecimalVector extends _base__WEBPACK_IMPORTED_MODULE_0__["BaseVector"] {
 }
-exports.DecimalVector = DecimalVector;
+
+//# sourceMappingURL=decimal.mjs.map
 
 
+/***/ }),
 
-},{"./base":69}],75:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/vector/dictionary.mjs":
+/*!*********************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/dictionary.mjs ***!
+  \*********************************************************/
+/*! exports provided: DictionaryVector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DictionaryVector", function() { return DictionaryVector; });
+/* harmony import */ var _data__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../data */ "./node_modules/apache-arrow/data.mjs");
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../vector */ "./node_modules/apache-arrow/vector.mjs");
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
+/* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./index */ "./node_modules/apache-arrow/vector/index.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -14769,26 +14229,25 @@ exports.DecimalVector = DecimalVector;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const data_1 = require("../data");
-const vector_1 = require("../vector");
-const base_1 = require("./base");
-const index_1 = require("./index");
-const type_1 = require("../type");
+
+
+
+
+
 /** @ignore */
-class DictionaryVector extends base_1.BaseVector {
+class DictionaryVector extends _base__WEBPACK_IMPORTED_MODULE_2__["BaseVector"] {
     constructor(data) {
         super(data);
-        this.indices = vector_1.Vector.new(data.clone(this.type.indices));
+        this.indices = _vector__WEBPACK_IMPORTED_MODULE_1__["Vector"].new(data.clone(this.type.indices));
     }
     /** @nocollapse */
     static from(...args) {
         if (args.length === 3) {
             const [values, indices, keys] = args;
-            const type = new type_1.Dictionary(values.type, indices, null, null);
-            return vector_1.Vector.new(data_1.Data.Dictionary(type, 0, keys.length, 0, null, keys, values));
+            const type = new _type__WEBPACK_IMPORTED_MODULE_4__["Dictionary"](values.type, indices, null, null);
+            return _vector__WEBPACK_IMPORTED_MODULE_1__["Vector"].new(_data__WEBPACK_IMPORTED_MODULE_0__["Data"].Dictionary(type, 0, keys.length, 0, null, keys, values));
         }
-        return index_1.vectorFromValuesWithType(() => args[0].type, args[0]);
+        return Object(_index__WEBPACK_IMPORTED_MODULE_3__["vectorFromValuesWithType"])(() => args[0].type, args[0]);
     }
     get dictionary() { return this.data.dictionary; }
     reverseLookup(value) { return this.dictionary.indexOf(value); }
@@ -14797,13 +14256,24 @@ class DictionaryVector extends base_1.BaseVector {
     setKey(idx, key) { return this.indices.set(idx, key); }
     setValue(key, value) { return this.dictionary.set(key, value); }
 }
-exports.DictionaryVector = DictionaryVector;
 DictionaryVector.prototype.indices = null;
 
+//# sourceMappingURL=dictionary.mjs.map
 
 
-},{"../data":33,"../type":55,"../vector":68,"./base":69,"./index":79}],76:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/vector/fixedsizebinary.mjs":
+/*!**************************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/fixedsizebinary.mjs ***!
+  \**************************************************************/
+/*! exports provided: FixedSizeBinaryVector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FixedSizeBinaryVector", function() { return FixedSizeBinaryVector; });
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -14820,17 +14290,27 @@ DictionaryVector.prototype.indices = null;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const base_1 = require("./base");
+
 /** @ignore */
-class FixedSizeBinaryVector extends base_1.BaseVector {
+class FixedSizeBinaryVector extends _base__WEBPACK_IMPORTED_MODULE_0__["BaseVector"] {
 }
-exports.FixedSizeBinaryVector = FixedSizeBinaryVector;
+
+//# sourceMappingURL=fixedsizebinary.mjs.map
 
 
+/***/ }),
 
-},{"./base":69}],77:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/vector/fixedsizelist.mjs":
+/*!************************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/fixedsizelist.mjs ***!
+  \************************************************************/
+/*! exports provided: FixedSizeListVector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FixedSizeListVector", function() { return FixedSizeListVector; });
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -14847,17 +14327,34 @@ exports.FixedSizeBinaryVector = FixedSizeBinaryVector;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const base_1 = require("./base");
+
 /** @ignore */
-class FixedSizeListVector extends base_1.BaseVector {
+class FixedSizeListVector extends _base__WEBPACK_IMPORTED_MODULE_0__["BaseVector"] {
 }
-exports.FixedSizeListVector = FixedSizeListVector;
+
+//# sourceMappingURL=fixedsizelist.mjs.map
 
 
+/***/ }),
 
-},{"./base":69}],78:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/vector/float.mjs":
+/*!****************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/float.mjs ***!
+  \****************************************************/
+/*! exports provided: FloatVector, Float16Vector, Float32Vector, Float64Vector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FloatVector", function() { return FloatVector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Float16Vector", function() { return Float16Vector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Float32Vector", function() { return Float32Vector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Float64Vector", function() { return Float64Vector; });
+/* harmony import */ var _data__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../data */ "./node_modules/apache-arrow/data.mjs");
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../vector */ "./node_modules/apache-arrow/vector.mjs");
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
+/* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./index */ "./node_modules/apache-arrow/vector/index.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -14874,14 +14371,13 @@ exports.FixedSizeListVector = FixedSizeListVector;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const data_1 = require("../data");
-const vector_1 = require("../vector");
-const base_1 = require("./base");
-const index_1 = require("./index");
-const type_1 = require("../type");
+
+
+
+
+
 /** @ignore */
-class FloatVector extends base_1.BaseVector {
+class FloatVector extends _base__WEBPACK_IMPORTED_MODULE_2__["BaseVector"] {
     /** @nocollapse */
     static from(input) {
         let ArrowType = vectorTypeToDataType(this);
@@ -14900,7 +14396,7 @@ class FloatVector extends base_1.BaseVector {
                 // If the ArrowType is Float16 but the input type isn't a Uint16Array,
                 // let the Float16Builder handle casting the input values to Uint16s.
                 if (!convertTo16Bit(ArrowType, input.constructor)) {
-                    return vector_1.Vector.new(data_1.Data.Float(type, 0, length, 0, null, input));
+                    return _vector__WEBPACK_IMPORTED_MODULE_1__["Vector"].new(_data__WEBPACK_IMPORTED_MODULE_0__["Data"].Float(type, 0, length, 0, null, input));
                 }
             }
         }
@@ -14908,7 +14404,7 @@ class FloatVector extends base_1.BaseVector {
             // If the DataType inferred from the Vector constructor is different than
             // the DataType inferred from the input TypedArray, or if input isn't a
             // TypedArray, use the Builders to construct the result Vector
-            return index_1.vectorFromValuesWithType(() => new ArrowType(), input);
+            return Object(_index__WEBPACK_IMPORTED_MODULE_3__["vectorFromValuesWithType"])(() => new ArrowType(), input);
         }
         if ((input instanceof DataView) || (input instanceof ArrayBuffer)) {
             throw new TypeError(`Cannot infer float type from instance of ${input.constructor.name}`);
@@ -14916,7 +14412,6 @@ class FloatVector extends base_1.BaseVector {
         throw new TypeError('Unrecognized FloatVector input');
     }
 }
-exports.FloatVector = FloatVector;
 /** @ignore */
 class Float16Vector extends FloatVector {
     // Since JS doesn't have half floats, `toArray()` returns a zero-copy slice
@@ -14928,41 +14423,179 @@ class Float16Vector extends FloatVector {
     toFloat32Array() { return new Float32Array(this); }
     toFloat64Array() { return new Float64Array(this); }
 }
-exports.Float16Vector = Float16Vector;
 /** @ignore */
 class Float32Vector extends FloatVector {
 }
-exports.Float32Vector = Float32Vector;
 /** @ignore */
 class Float64Vector extends FloatVector {
 }
-exports.Float64Vector = Float64Vector;
 const convertTo16Bit = (typeCtor, dataCtor) => {
-    return (typeCtor === type_1.Float16) && (dataCtor !== Uint16Array);
+    return (typeCtor === _type__WEBPACK_IMPORTED_MODULE_4__["Float16"]) && (dataCtor !== Uint16Array);
 };
 /** @ignore */
 const arrayTypeToDataType = (ctor) => {
     switch (ctor) {
-        case Uint16Array: return type_1.Float16;
-        case Float32Array: return type_1.Float32;
-        case Float64Array: return type_1.Float64;
+        case Uint16Array: return _type__WEBPACK_IMPORTED_MODULE_4__["Float16"];
+        case Float32Array: return _type__WEBPACK_IMPORTED_MODULE_4__["Float32"];
+        case Float64Array: return _type__WEBPACK_IMPORTED_MODULE_4__["Float64"];
         default: return null;
     }
 };
 /** @ignore */
 const vectorTypeToDataType = (ctor) => {
     switch (ctor) {
-        case Float16Vector: return type_1.Float16;
-        case Float32Vector: return type_1.Float32;
-        case Float64Vector: return type_1.Float64;
+        case Float16Vector: return _type__WEBPACK_IMPORTED_MODULE_4__["Float16"];
+        case Float32Vector: return _type__WEBPACK_IMPORTED_MODULE_4__["Float32"];
+        case Float64Vector: return _type__WEBPACK_IMPORTED_MODULE_4__["Float64"];
         default: return null;
     }
 };
 
+//# sourceMappingURL=float.mjs.map
 
 
-},{"../data":33,"../type":55,"../vector":68,"./base":69,"./index":79}],79:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/vector/index.mjs":
+/*!****************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/index.mjs ***!
+  \****************************************************/
+/*! exports provided: Vector, BaseVector, BinaryVector, BoolVector, Chunked, DateVector, DateDayVector, DateMillisecondVector, DecimalVector, DictionaryVector, FixedSizeBinaryVector, FixedSizeListVector, FloatVector, Float16Vector, Float32Vector, Float64Vector, IntervalVector, IntervalDayTimeVector, IntervalYearMonthVector, IntVector, Int8Vector, Int16Vector, Int32Vector, Int64Vector, Uint8Vector, Uint16Vector, Uint32Vector, Uint64Vector, ListVector, MapVector, NullVector, StructVector, TimestampVector, TimestampSecondVector, TimestampMillisecondVector, TimestampMicrosecondVector, TimestampNanosecondVector, TimeVector, TimeSecondVector, TimeMillisecondVector, TimeMicrosecondVector, TimeNanosecondVector, UnionVector, DenseUnionVector, SparseUnionVector, Utf8Vector, MapRow, StructRow, vectorFromValuesWithType */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "vectorFromValuesWithType", function() { return vectorFromValuesWithType; });
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../vector */ "./node_modules/apache-arrow/vector.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Vector", function() { return _vector__WEBPACK_IMPORTED_MODULE_0__["Vector"]; });
+
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseVector", function() { return _base__WEBPACK_IMPORTED_MODULE_1__["BaseVector"]; });
+
+/* harmony import */ var _binary__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./binary */ "./node_modules/apache-arrow/vector/binary.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BinaryVector", function() { return _binary__WEBPACK_IMPORTED_MODULE_2__["BinaryVector"]; });
+
+/* harmony import */ var _bool__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./bool */ "./node_modules/apache-arrow/vector/bool.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoolVector", function() { return _bool__WEBPACK_IMPORTED_MODULE_3__["BoolVector"]; });
+
+/* harmony import */ var _chunked__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./chunked */ "./node_modules/apache-arrow/vector/chunked.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Chunked", function() { return _chunked__WEBPACK_IMPORTED_MODULE_4__["Chunked"]; });
+
+/* harmony import */ var _date__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./date */ "./node_modules/apache-arrow/vector/date.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateVector", function() { return _date__WEBPACK_IMPORTED_MODULE_5__["DateVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateDayVector", function() { return _date__WEBPACK_IMPORTED_MODULE_5__["DateDayVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateMillisecondVector", function() { return _date__WEBPACK_IMPORTED_MODULE_5__["DateMillisecondVector"]; });
+
+/* harmony import */ var _decimal__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./decimal */ "./node_modules/apache-arrow/vector/decimal.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DecimalVector", function() { return _decimal__WEBPACK_IMPORTED_MODULE_6__["DecimalVector"]; });
+
+/* harmony import */ var _dictionary__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./dictionary */ "./node_modules/apache-arrow/vector/dictionary.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DictionaryVector", function() { return _dictionary__WEBPACK_IMPORTED_MODULE_7__["DictionaryVector"]; });
+
+/* harmony import */ var _fixedsizebinary__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./fixedsizebinary */ "./node_modules/apache-arrow/vector/fixedsizebinary.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FixedSizeBinaryVector", function() { return _fixedsizebinary__WEBPACK_IMPORTED_MODULE_8__["FixedSizeBinaryVector"]; });
+
+/* harmony import */ var _fixedsizelist__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./fixedsizelist */ "./node_modules/apache-arrow/vector/fixedsizelist.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FixedSizeListVector", function() { return _fixedsizelist__WEBPACK_IMPORTED_MODULE_9__["FixedSizeListVector"]; });
+
+/* harmony import */ var _float__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./float */ "./node_modules/apache-arrow/vector/float.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FloatVector", function() { return _float__WEBPACK_IMPORTED_MODULE_10__["FloatVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float16Vector", function() { return _float__WEBPACK_IMPORTED_MODULE_10__["Float16Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float32Vector", function() { return _float__WEBPACK_IMPORTED_MODULE_10__["Float32Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float64Vector", function() { return _float__WEBPACK_IMPORTED_MODULE_10__["Float64Vector"]; });
+
+/* harmony import */ var _interval__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./interval */ "./node_modules/apache-arrow/vector/interval.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalVector", function() { return _interval__WEBPACK_IMPORTED_MODULE_11__["IntervalVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalDayTimeVector", function() { return _interval__WEBPACK_IMPORTED_MODULE_11__["IntervalDayTimeVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntervalYearMonthVector", function() { return _interval__WEBPACK_IMPORTED_MODULE_11__["IntervalYearMonthVector"]; });
+
+/* harmony import */ var _int__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./int */ "./node_modules/apache-arrow/vector/int.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "IntVector", function() { return _int__WEBPACK_IMPORTED_MODULE_12__["IntVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int8Vector", function() { return _int__WEBPACK_IMPORTED_MODULE_12__["Int8Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int16Vector", function() { return _int__WEBPACK_IMPORTED_MODULE_12__["Int16Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int32Vector", function() { return _int__WEBPACK_IMPORTED_MODULE_12__["Int32Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Int64Vector", function() { return _int__WEBPACK_IMPORTED_MODULE_12__["Int64Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint8Vector", function() { return _int__WEBPACK_IMPORTED_MODULE_12__["Uint8Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint16Vector", function() { return _int__WEBPACK_IMPORTED_MODULE_12__["Uint16Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint32Vector", function() { return _int__WEBPACK_IMPORTED_MODULE_12__["Uint32Vector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Uint64Vector", function() { return _int__WEBPACK_IMPORTED_MODULE_12__["Uint64Vector"]; });
+
+/* harmony import */ var _list__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./list */ "./node_modules/apache-arrow/vector/list.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ListVector", function() { return _list__WEBPACK_IMPORTED_MODULE_13__["ListVector"]; });
+
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./map */ "./node_modules/apache-arrow/vector/map.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MapVector", function() { return _map__WEBPACK_IMPORTED_MODULE_14__["MapVector"]; });
+
+/* harmony import */ var _null__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./null */ "./node_modules/apache-arrow/vector/null.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "NullVector", function() { return _null__WEBPACK_IMPORTED_MODULE_15__["NullVector"]; });
+
+/* harmony import */ var _struct__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./struct */ "./node_modules/apache-arrow/vector/struct.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "StructVector", function() { return _struct__WEBPACK_IMPORTED_MODULE_16__["StructVector"]; });
+
+/* harmony import */ var _timestamp__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./timestamp */ "./node_modules/apache-arrow/vector/timestamp.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampVector", function() { return _timestamp__WEBPACK_IMPORTED_MODULE_17__["TimestampVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampSecondVector", function() { return _timestamp__WEBPACK_IMPORTED_MODULE_17__["TimestampSecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampMillisecondVector", function() { return _timestamp__WEBPACK_IMPORTED_MODULE_17__["TimestampMillisecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampMicrosecondVector", function() { return _timestamp__WEBPACK_IMPORTED_MODULE_17__["TimestampMicrosecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimestampNanosecondVector", function() { return _timestamp__WEBPACK_IMPORTED_MODULE_17__["TimestampNanosecondVector"]; });
+
+/* harmony import */ var _time__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./time */ "./node_modules/apache-arrow/vector/time.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeVector", function() { return _time__WEBPACK_IMPORTED_MODULE_18__["TimeVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeSecondVector", function() { return _time__WEBPACK_IMPORTED_MODULE_18__["TimeSecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeMillisecondVector", function() { return _time__WEBPACK_IMPORTED_MODULE_18__["TimeMillisecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeMicrosecondVector", function() { return _time__WEBPACK_IMPORTED_MODULE_18__["TimeMicrosecondVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeNanosecondVector", function() { return _time__WEBPACK_IMPORTED_MODULE_18__["TimeNanosecondVector"]; });
+
+/* harmony import */ var _union__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./union */ "./node_modules/apache-arrow/vector/union.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "UnionVector", function() { return _union__WEBPACK_IMPORTED_MODULE_19__["UnionVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DenseUnionVector", function() { return _union__WEBPACK_IMPORTED_MODULE_19__["DenseUnionVector"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SparseUnionVector", function() { return _union__WEBPACK_IMPORTED_MODULE_19__["SparseUnionVector"]; });
+
+/* harmony import */ var _utf8__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./utf8 */ "./node_modules/apache-arrow/vector/utf8.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Utf8Vector", function() { return _utf8__WEBPACK_IMPORTED_MODULE_20__["Utf8Vector"]; });
+
+/* harmony import */ var _row__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./row */ "./node_modules/apache-arrow/vector/row.mjs");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MapRow", function() { return _row__WEBPACK_IMPORTED_MODULE_21__["MapRow"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "StructRow", function() { return _row__WEBPACK_IMPORTED_MODULE_21__["StructRow"]; });
+
+/* harmony import */ var _util_fn__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ../util/fn */ "./node_modules/apache-arrow/util/fn.mjs");
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ../enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony import */ var _util_bit__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ../util/bit */ "./node_modules/apache-arrow/util/bit.mjs");
+/* harmony import */ var _util_compat__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ../util/compat */ "./node_modules/apache-arrow/util/compat.mjs");
+/* harmony import */ var _builder__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ../builder */ "./node_modules/apache-arrow/builder.mjs");
+/* harmony import */ var _visitor_get__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ../visitor/get */ "./node_modules/apache-arrow/visitor/get.mjs");
+/* harmony import */ var _visitor_set__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ../visitor/set */ "./node_modules/apache-arrow/visitor/set.mjs");
+/* harmony import */ var _visitor_indexof__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ../visitor/indexof */ "./node_modules/apache-arrow/visitor/indexof.mjs");
+/* harmony import */ var _visitor_toarray__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! ../visitor/toarray */ "./node_modules/apache-arrow/visitor/toarray.mjs");
+/* harmony import */ var _visitor_iterator__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! ../visitor/iterator */ "./node_modules/apache-arrow/visitor/iterator.mjs");
+/* harmony import */ var _visitor_bytewidth__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! ../visitor/bytewidth */ "./node_modules/apache-arrow/visitor/bytewidth.mjs");
+/* harmony import */ var _visitor_vectorctor__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! ../visitor/vectorctor */ "./node_modules/apache-arrow/visitor/vectorctor.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -14979,126 +14612,76 @@ const vectorTypeToDataType = (ctor) => {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-var vector_1 = require("../vector");
-exports.Vector = vector_1.Vector;
-var base_1 = require("./base");
-exports.BaseVector = base_1.BaseVector;
-var binary_1 = require("./binary");
-exports.BinaryVector = binary_1.BinaryVector;
-var bool_1 = require("./bool");
-exports.BoolVector = bool_1.BoolVector;
-var chunked_1 = require("./chunked");
-exports.Chunked = chunked_1.Chunked;
-var date_1 = require("./date");
-exports.DateVector = date_1.DateVector;
-exports.DateDayVector = date_1.DateDayVector;
-exports.DateMillisecondVector = date_1.DateMillisecondVector;
-var decimal_1 = require("./decimal");
-exports.DecimalVector = decimal_1.DecimalVector;
-var dictionary_1 = require("./dictionary");
-exports.DictionaryVector = dictionary_1.DictionaryVector;
-var fixedsizebinary_1 = require("./fixedsizebinary");
-exports.FixedSizeBinaryVector = fixedsizebinary_1.FixedSizeBinaryVector;
-var fixedsizelist_1 = require("./fixedsizelist");
-exports.FixedSizeListVector = fixedsizelist_1.FixedSizeListVector;
-var float_1 = require("./float");
-exports.FloatVector = float_1.FloatVector;
-exports.Float16Vector = float_1.Float16Vector;
-exports.Float32Vector = float_1.Float32Vector;
-exports.Float64Vector = float_1.Float64Vector;
-var interval_1 = require("./interval");
-exports.IntervalVector = interval_1.IntervalVector;
-exports.IntervalDayTimeVector = interval_1.IntervalDayTimeVector;
-exports.IntervalYearMonthVector = interval_1.IntervalYearMonthVector;
-var int_1 = require("./int");
-exports.IntVector = int_1.IntVector;
-exports.Int8Vector = int_1.Int8Vector;
-exports.Int16Vector = int_1.Int16Vector;
-exports.Int32Vector = int_1.Int32Vector;
-exports.Int64Vector = int_1.Int64Vector;
-exports.Uint8Vector = int_1.Uint8Vector;
-exports.Uint16Vector = int_1.Uint16Vector;
-exports.Uint32Vector = int_1.Uint32Vector;
-exports.Uint64Vector = int_1.Uint64Vector;
-var list_1 = require("./list");
-exports.ListVector = list_1.ListVector;
-var map_1 = require("./map");
-exports.MapVector = map_1.MapVector;
-var null_1 = require("./null");
-exports.NullVector = null_1.NullVector;
-var struct_1 = require("./struct");
-exports.StructVector = struct_1.StructVector;
-var timestamp_1 = require("./timestamp");
-exports.TimestampVector = timestamp_1.TimestampVector;
-exports.TimestampSecondVector = timestamp_1.TimestampSecondVector;
-exports.TimestampMillisecondVector = timestamp_1.TimestampMillisecondVector;
-exports.TimestampMicrosecondVector = timestamp_1.TimestampMicrosecondVector;
-exports.TimestampNanosecondVector = timestamp_1.TimestampNanosecondVector;
-var time_1 = require("./time");
-exports.TimeVector = time_1.TimeVector;
-exports.TimeSecondVector = time_1.TimeSecondVector;
-exports.TimeMillisecondVector = time_1.TimeMillisecondVector;
-exports.TimeMicrosecondVector = time_1.TimeMicrosecondVector;
-exports.TimeNanosecondVector = time_1.TimeNanosecondVector;
-var union_1 = require("./union");
-exports.UnionVector = union_1.UnionVector;
-exports.DenseUnionVector = union_1.DenseUnionVector;
-exports.SparseUnionVector = union_1.SparseUnionVector;
-var utf8_1 = require("./utf8");
-exports.Utf8Vector = utf8_1.Utf8Vector;
-var row_1 = require("./row");
-exports.MapRow = row_1.MapRow;
-exports.StructRow = row_1.StructRow;
-const fn = require("../util/fn");
-const enum_1 = require("../enum");
-const vector_2 = require("../vector");
-const chunked_2 = require("./chunked");
-const base_2 = require("./base");
-const bit_1 = require("../util/bit");
-const compat_1 = require("../util/compat");
-const builder_1 = require("../builder");
-const get_1 = require("../visitor/get");
-const set_1 = require("../visitor/set");
-const indexof_1 = require("../visitor/indexof");
-const toarray_1 = require("../visitor/toarray");
-const iterator_1 = require("../visitor/iterator");
-const bytewidth_1 = require("../visitor/bytewidth");
-const vectorctor_1 = require("../visitor/vectorctor");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /** @nocollapse */
-vector_2.Vector.new = newVector;
+_vector__WEBPACK_IMPORTED_MODULE_0__["Vector"].new = newVector;
 /** @nocollapse */
-vector_2.Vector.from = vectorFrom;
+_vector__WEBPACK_IMPORTED_MODULE_0__["Vector"].from = vectorFrom;
 /** @ignore */
 function newVector(data, ...args) {
-    return new (vectorctor_1.instance.getVisitFn(data)())(data, ...args);
+    return new (_visitor_vectorctor__WEBPACK_IMPORTED_MODULE_33__["instance"].getVisitFn(data)())(data, ...args);
 }
 /** @ignore */
 function vectorFromValuesWithType(newDataType, input) {
-    if (compat_1.isIterable(input)) {
-        return vector_2.Vector.from({ 'nullValues': [null, undefined], type: newDataType(), 'values': input });
+    if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_25__["isIterable"])(input)) {
+        return _vector__WEBPACK_IMPORTED_MODULE_0__["Vector"].from({ 'nullValues': [null, undefined], type: newDataType(), 'values': input });
     }
-    else if (compat_1.isAsyncIterable(input)) {
-        return vector_2.Vector.from({ 'nullValues': [null, undefined], type: newDataType(), 'values': input });
+    else if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_25__["isAsyncIterable"])(input)) {
+        return _vector__WEBPACK_IMPORTED_MODULE_0__["Vector"].from({ 'nullValues': [null, undefined], type: newDataType(), 'values': input });
     }
     const { 'values': values = [], 'type': type = newDataType(), 'nullValues': nullValues = [null, undefined], } = { ...input };
-    return compat_1.isIterable(values)
-        ? vector_2.Vector.from({ nullValues, ...input, type })
-        : vector_2.Vector.from({ nullValues, ...input, type });
+    return Object(_util_compat__WEBPACK_IMPORTED_MODULE_25__["isIterable"])(values)
+        ? _vector__WEBPACK_IMPORTED_MODULE_0__["Vector"].from({ nullValues, ...input, type })
+        : _vector__WEBPACK_IMPORTED_MODULE_0__["Vector"].from({ nullValues, ...input, type });
 }
-exports.vectorFromValuesWithType = vectorFromValuesWithType;
 function vectorFrom(input) {
     const { 'values': values = [], ...options } = { 'nullValues': [null, undefined], ...input };
-    if (compat_1.isIterable(values)) {
-        const chunks = [...builder_1.Builder.throughIterable(options)(values)];
-        return chunks.length === 1 ? chunks[0] : chunked_2.Chunked.concat(chunks);
+    if (Object(_util_compat__WEBPACK_IMPORTED_MODULE_25__["isIterable"])(values)) {
+        const chunks = [..._builder__WEBPACK_IMPORTED_MODULE_26__["Builder"].throughIterable(options)(values)];
+        return chunks.length === 1 ? chunks[0] : _chunked__WEBPACK_IMPORTED_MODULE_4__["Chunked"].concat(chunks);
     }
     return (async (chunks) => {
-        const transform = builder_1.Builder.throughAsyncIterable(options);
+        const transform = _builder__WEBPACK_IMPORTED_MODULE_26__["Builder"].throughAsyncIterable(options);
         for await (const chunk of transform(values)) {
             chunks.push(chunk);
         }
-        return chunks.length === 1 ? chunks[0] : chunked_2.Chunked.concat(chunks);
+        return chunks.length === 1 ? chunks[0] : _chunked__WEBPACK_IMPORTED_MODULE_4__["Chunked"].concat(chunks);
     })([]);
 }
 //
@@ -15108,38 +14691,38 @@ function vectorFrom(input) {
 // This comment is here to remind you to not set breakpoints in these function bodies, or to inform
 // you why the breakpoints you have already set are not being triggered. Have a great day!
 //
-base_2.BaseVector.prototype.get = function baseVectorGet(index) {
-    return get_1.instance.visit(this, index);
+_base__WEBPACK_IMPORTED_MODULE_1__["BaseVector"].prototype.get = function baseVectorGet(index) {
+    return _visitor_get__WEBPACK_IMPORTED_MODULE_27__["instance"].visit(this, index);
 };
-base_2.BaseVector.prototype.set = function baseVectorSet(index, value) {
-    return set_1.instance.visit(this, index, value);
+_base__WEBPACK_IMPORTED_MODULE_1__["BaseVector"].prototype.set = function baseVectorSet(index, value) {
+    return _visitor_set__WEBPACK_IMPORTED_MODULE_28__["instance"].visit(this, index, value);
 };
-base_2.BaseVector.prototype.indexOf = function baseVectorIndexOf(value, fromIndex) {
-    return indexof_1.instance.visit(this, value, fromIndex);
+_base__WEBPACK_IMPORTED_MODULE_1__["BaseVector"].prototype.indexOf = function baseVectorIndexOf(value, fromIndex) {
+    return _visitor_indexof__WEBPACK_IMPORTED_MODULE_29__["instance"].visit(this, value, fromIndex);
 };
-base_2.BaseVector.prototype.toArray = function baseVectorToArray() {
-    return toarray_1.instance.visit(this);
+_base__WEBPACK_IMPORTED_MODULE_1__["BaseVector"].prototype.toArray = function baseVectorToArray() {
+    return _visitor_toarray__WEBPACK_IMPORTED_MODULE_30__["instance"].visit(this);
 };
-base_2.BaseVector.prototype.getByteWidth = function baseVectorGetByteWidth() {
-    return bytewidth_1.instance.visit(this.type);
+_base__WEBPACK_IMPORTED_MODULE_1__["BaseVector"].prototype.getByteWidth = function baseVectorGetByteWidth() {
+    return _visitor_bytewidth__WEBPACK_IMPORTED_MODULE_32__["instance"].visit(this.type);
 };
-base_2.BaseVector.prototype[Symbol.iterator] = function baseVectorSymbolIterator() {
-    return iterator_1.instance.visit(this);
+_base__WEBPACK_IMPORTED_MODULE_1__["BaseVector"].prototype[Symbol.iterator] = function baseVectorSymbolIterator() {
+    return _visitor_iterator__WEBPACK_IMPORTED_MODULE_31__["instance"].visit(this);
 };
-base_2.BaseVector.prototype._bindDataAccessors = bindBaseVectorDataAccessors;
+_base__WEBPACK_IMPORTED_MODULE_1__["BaseVector"].prototype._bindDataAccessors = bindBaseVectorDataAccessors;
 // Perf: bind and assign the operator Visitor methods to each of the Vector subclasses for each Type
-Object.keys(enum_1.Type)
-    .map((T) => enum_1.Type[T])
+Object.keys(_enum__WEBPACK_IMPORTED_MODULE_23__["Type"])
+    .map((T) => _enum__WEBPACK_IMPORTED_MODULE_23__["Type"][T])
     .filter((T) => typeof T === 'number')
-    .filter((typeId) => typeId !== enum_1.Type.NONE)
+    .filter((typeId) => typeId !== _enum__WEBPACK_IMPORTED_MODULE_23__["Type"].NONE)
     .forEach((typeId) => {
-    const VectorCtor = vectorctor_1.instance.visit(typeId);
-    VectorCtor.prototype['get'] = fn.partial1(get_1.instance.getVisitFn(typeId));
-    VectorCtor.prototype['set'] = fn.partial2(set_1.instance.getVisitFn(typeId));
-    VectorCtor.prototype['indexOf'] = fn.partial2(indexof_1.instance.getVisitFn(typeId));
-    VectorCtor.prototype['toArray'] = fn.partial0(toarray_1.instance.getVisitFn(typeId));
-    VectorCtor.prototype['getByteWidth'] = partialType0(bytewidth_1.instance.getVisitFn(typeId));
-    VectorCtor.prototype[Symbol.iterator] = fn.partial0(iterator_1.instance.getVisitFn(typeId));
+    const VectorCtor = _visitor_vectorctor__WEBPACK_IMPORTED_MODULE_33__["instance"].visit(typeId);
+    VectorCtor.prototype['get'] = _util_fn__WEBPACK_IMPORTED_MODULE_22__["partial1"](_visitor_get__WEBPACK_IMPORTED_MODULE_27__["instance"].getVisitFn(typeId));
+    VectorCtor.prototype['set'] = _util_fn__WEBPACK_IMPORTED_MODULE_22__["partial2"](_visitor_set__WEBPACK_IMPORTED_MODULE_28__["instance"].getVisitFn(typeId));
+    VectorCtor.prototype['indexOf'] = _util_fn__WEBPACK_IMPORTED_MODULE_22__["partial2"](_visitor_indexof__WEBPACK_IMPORTED_MODULE_29__["instance"].getVisitFn(typeId));
+    VectorCtor.prototype['toArray'] = _util_fn__WEBPACK_IMPORTED_MODULE_22__["partial0"](_visitor_toarray__WEBPACK_IMPORTED_MODULE_30__["instance"].getVisitFn(typeId));
+    VectorCtor.prototype['getByteWidth'] = partialType0(_visitor_bytewidth__WEBPACK_IMPORTED_MODULE_32__["instance"].getVisitFn(typeId));
+    VectorCtor.prototype[Symbol.iterator] = _util_fn__WEBPACK_IMPORTED_MODULE_22__["partial0"](_visitor_iterator__WEBPACK_IMPORTED_MODULE_31__["instance"].getVisitFn(typeId));
 });
 /** @ignore */
 function partialType0(visit) {
@@ -15152,7 +14735,7 @@ function wrapNullableGet(fn) {
 /** @ignore */
 function wrapNullableSet(fn) {
     return function (i, a) {
-        if (bit_1.setBool(this.nullBitmap, this.offset + i, !(a === null || a === undefined))) {
+        if (Object(_util_bit__WEBPACK_IMPORTED_MODULE_24__["setBool"])(this.nullBitmap, this.offset + i, !(a === null || a === undefined))) {
             fn.call(this, i, a);
         }
     };
@@ -15166,10 +14749,36 @@ function bindBaseVectorDataAccessors() {
     }
 }
 
+//# sourceMappingURL=index.mjs.map
 
 
-},{"../builder":7,"../enum":34,"../util/bit":57,"../util/compat":60,"../util/fn":61,"../vector":68,"../visitor/bytewidth":93,"../visitor/get":94,"../visitor/indexof":95,"../visitor/iterator":96,"../visitor/set":99,"../visitor/toarray":100,"../visitor/vectorctor":104,"./base":69,"./binary":70,"./bool":71,"./chunked":72,"./date":73,"./decimal":74,"./dictionary":75,"./fixedsizebinary":76,"./fixedsizelist":77,"./float":78,"./int":80,"./interval":81,"./list":82,"./map":83,"./null":84,"./row":85,"./struct":86,"./time":87,"./timestamp":88,"./union":89,"./utf8":90}],80:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/vector/int.mjs":
+/*!**************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/int.mjs ***!
+  \**************************************************/
+/*! exports provided: IntVector, Int8Vector, Int16Vector, Int32Vector, Int64Vector, Uint8Vector, Uint16Vector, Uint32Vector, Uint64Vector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "IntVector", function() { return IntVector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Int8Vector", function() { return Int8Vector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Int16Vector", function() { return Int16Vector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Int32Vector", function() { return Int32Vector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Int64Vector", function() { return Int64Vector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Uint8Vector", function() { return Uint8Vector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Uint16Vector", function() { return Uint16Vector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Uint32Vector", function() { return Uint32Vector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Uint64Vector", function() { return Uint64Vector; });
+/* harmony import */ var _data__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../data */ "./node_modules/apache-arrow/data.mjs");
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../vector */ "./node_modules/apache-arrow/vector.mjs");
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
+/* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./index */ "./node_modules/apache-arrow/vector/index.mjs");
+/* harmony import */ var _util_compat__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../util/compat */ "./node_modules/apache-arrow/util/compat.mjs");
+/* harmony import */ var _util_buffer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../util/buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -15186,16 +14795,15 @@ function bindBaseVectorDataAccessors() {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const data_1 = require("../data");
-const vector_1 = require("../vector");
-const base_1 = require("./base");
-const index_1 = require("./index");
-const compat_1 = require("../util/compat");
-const buffer_1 = require("../util/buffer");
-const type_1 = require("../type");
+
+
+
+
+
+
+
 /** @ignore */
-class IntVector extends base_1.BaseVector {
+class IntVector extends _base__WEBPACK_IMPORTED_MODULE_2__["BaseVector"] {
     /** @nocollapse */
     static from(...args) {
         let [input, is64bit = false] = args;
@@ -15216,14 +14824,14 @@ class IntVector extends base_1.BaseVector {
                 if (convert32To64Bit(ArrowType, input.constructor)) {
                     length *= 0.5;
                 }
-                return vector_1.Vector.new(data_1.Data.Int(type, 0, length, 0, null, input));
+                return _vector__WEBPACK_IMPORTED_MODULE_1__["Vector"].new(_data__WEBPACK_IMPORTED_MODULE_0__["Data"].Int(type, 0, length, 0, null, input));
             }
         }
         if (ArrowType) {
             // If the DataType inferred from the Vector constructor is different than
             // the DataType inferred from the input TypedArray, or if input isn't a
             // TypedArray, use the Builders to construct the result Vector
-            return index_1.vectorFromValuesWithType(() => new ArrowType(), input);
+            return Object(_index__WEBPACK_IMPORTED_MODULE_3__["vectorFromValuesWithType"])(() => new ArrowType(), input);
         }
         if ((input instanceof DataView) || (input instanceof ArrayBuffer)) {
             throw new TypeError(`Cannot infer integer type from instance of ${input.constructor.name}`);
@@ -15231,88 +14839,93 @@ class IntVector extends base_1.BaseVector {
         throw new TypeError('Unrecognized IntVector input');
     }
 }
-exports.IntVector = IntVector;
 /** @ignore */
 class Int8Vector extends IntVector {
 }
-exports.Int8Vector = Int8Vector;
 /** @ignore */
 class Int16Vector extends IntVector {
 }
-exports.Int16Vector = Int16Vector;
 /** @ignore */
 class Int32Vector extends IntVector {
 }
-exports.Int32Vector = Int32Vector;
 /** @ignore */
 class Int64Vector extends IntVector {
     toBigInt64Array() {
-        return buffer_1.toBigInt64Array(this.values);
+        return Object(_util_buffer__WEBPACK_IMPORTED_MODULE_5__["toBigInt64Array"])(this.values);
     }
     get values64() {
         return this._values64 || (this._values64 = this.toBigInt64Array());
     }
 }
-exports.Int64Vector = Int64Vector;
 /** @ignore */
 class Uint8Vector extends IntVector {
 }
-exports.Uint8Vector = Uint8Vector;
 /** @ignore */
 class Uint16Vector extends IntVector {
 }
-exports.Uint16Vector = Uint16Vector;
 /** @ignore */
 class Uint32Vector extends IntVector {
 }
-exports.Uint32Vector = Uint32Vector;
 /** @ignore */
 class Uint64Vector extends IntVector {
     toBigUint64Array() {
-        return buffer_1.toBigUint64Array(this.values);
+        return Object(_util_buffer__WEBPACK_IMPORTED_MODULE_5__["toBigUint64Array"])(this.values);
     }
     get values64() {
         return this._values64 || (this._values64 = this.toBigUint64Array());
     }
 }
-exports.Uint64Vector = Uint64Vector;
 const convert32To64Bit = (typeCtor, dataCtor) => {
-    return (typeCtor === type_1.Int64 || typeCtor === type_1.Uint64) &&
+    return (typeCtor === _type__WEBPACK_IMPORTED_MODULE_6__["Int64"] || typeCtor === _type__WEBPACK_IMPORTED_MODULE_6__["Uint64"]) &&
         (dataCtor === Int32Array || dataCtor === Uint32Array);
 };
 /** @ignore */
 const arrayTypeToDataType = (ctor, is64bit) => {
     switch (ctor) {
-        case Int8Array: return type_1.Int8;
-        case Int16Array: return type_1.Int16;
-        case Int32Array: return is64bit ? type_1.Int64 : type_1.Int32;
-        case compat_1.BigInt64Array: return type_1.Int64;
-        case Uint8Array: return type_1.Uint8;
-        case Uint16Array: return type_1.Uint16;
-        case Uint32Array: return is64bit ? type_1.Uint64 : type_1.Uint32;
-        case compat_1.BigUint64Array: return type_1.Uint64;
+        case Int8Array: return _type__WEBPACK_IMPORTED_MODULE_6__["Int8"];
+        case Int16Array: return _type__WEBPACK_IMPORTED_MODULE_6__["Int16"];
+        case Int32Array: return is64bit ? _type__WEBPACK_IMPORTED_MODULE_6__["Int64"] : _type__WEBPACK_IMPORTED_MODULE_6__["Int32"];
+        case _util_compat__WEBPACK_IMPORTED_MODULE_4__["BigInt64Array"]: return _type__WEBPACK_IMPORTED_MODULE_6__["Int64"];
+        case Uint8Array: return _type__WEBPACK_IMPORTED_MODULE_6__["Uint8"];
+        case Uint16Array: return _type__WEBPACK_IMPORTED_MODULE_6__["Uint16"];
+        case Uint32Array: return is64bit ? _type__WEBPACK_IMPORTED_MODULE_6__["Uint64"] : _type__WEBPACK_IMPORTED_MODULE_6__["Uint32"];
+        case _util_compat__WEBPACK_IMPORTED_MODULE_4__["BigUint64Array"]: return _type__WEBPACK_IMPORTED_MODULE_6__["Uint64"];
         default: return null;
     }
 };
 /** @ignore */
 const vectorTypeToDataType = (ctor, is64bit) => {
     switch (ctor) {
-        case Int8Vector: return type_1.Int8;
-        case Int16Vector: return type_1.Int16;
-        case Int32Vector: return is64bit ? type_1.Int64 : type_1.Int32;
-        case Int64Vector: return type_1.Int64;
-        case Uint8Vector: return type_1.Uint8;
-        case Uint16Vector: return type_1.Uint16;
-        case Uint32Vector: return is64bit ? type_1.Uint64 : type_1.Uint32;
-        case Uint64Vector: return type_1.Uint64;
+        case Int8Vector: return _type__WEBPACK_IMPORTED_MODULE_6__["Int8"];
+        case Int16Vector: return _type__WEBPACK_IMPORTED_MODULE_6__["Int16"];
+        case Int32Vector: return is64bit ? _type__WEBPACK_IMPORTED_MODULE_6__["Int64"] : _type__WEBPACK_IMPORTED_MODULE_6__["Int32"];
+        case Int64Vector: return _type__WEBPACK_IMPORTED_MODULE_6__["Int64"];
+        case Uint8Vector: return _type__WEBPACK_IMPORTED_MODULE_6__["Uint8"];
+        case Uint16Vector: return _type__WEBPACK_IMPORTED_MODULE_6__["Uint16"];
+        case Uint32Vector: return is64bit ? _type__WEBPACK_IMPORTED_MODULE_6__["Uint64"] : _type__WEBPACK_IMPORTED_MODULE_6__["Uint32"];
+        case Uint64Vector: return _type__WEBPACK_IMPORTED_MODULE_6__["Uint64"];
         default: return null;
     }
 };
 
+//# sourceMappingURL=int.mjs.map
 
 
-},{"../data":33,"../type":55,"../util/buffer":59,"../util/compat":60,"../vector":68,"./base":69,"./index":79}],81:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/vector/interval.mjs":
+/*!*******************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/interval.mjs ***!
+  \*******************************************************/
+/*! exports provided: IntervalVector, IntervalDayTimeVector, IntervalYearMonthVector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "IntervalVector", function() { return IntervalVector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "IntervalDayTimeVector", function() { return IntervalDayTimeVector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "IntervalYearMonthVector", function() { return IntervalYearMonthVector; });
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -15329,25 +14942,33 @@ const vectorTypeToDataType = (ctor, is64bit) => {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const base_1 = require("./base");
+
 /** @ignore */
-class IntervalVector extends base_1.BaseVector {
+class IntervalVector extends _base__WEBPACK_IMPORTED_MODULE_0__["BaseVector"] {
 }
-exports.IntervalVector = IntervalVector;
 /** @ignore */
 class IntervalDayTimeVector extends IntervalVector {
 }
-exports.IntervalDayTimeVector = IntervalDayTimeVector;
 /** @ignore */
 class IntervalYearMonthVector extends IntervalVector {
 }
-exports.IntervalYearMonthVector = IntervalYearMonthVector;
+
+//# sourceMappingURL=interval.mjs.map
 
 
+/***/ }),
 
-},{"./base":69}],82:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/vector/list.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/list.mjs ***!
+  \***************************************************/
+/*! exports provided: ListVector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ListVector", function() { return ListVector; });
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -15364,17 +14985,30 @@ exports.IntervalYearMonthVector = IntervalYearMonthVector;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const base_1 = require("./base");
+
 /** @ignore */
-class ListVector extends base_1.BaseVector {
+class ListVector extends _base__WEBPACK_IMPORTED_MODULE_0__["BaseVector"] {
 }
-exports.ListVector = ListVector;
+
+//# sourceMappingURL=list.mjs.map
 
 
+/***/ }),
 
-},{"./base":69}],83:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/vector/map.mjs":
+/*!**************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/map.mjs ***!
+  \**************************************************/
+/*! exports provided: MapVector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MapVector", function() { return MapVector; });
+/* harmony import */ var _row__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./row */ "./node_modules/apache-arrow/vector/row.mjs");
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../vector */ "./node_modules/apache-arrow/vector.mjs");
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -15391,29 +15025,39 @@ exports.ListVector = ListVector;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const row_1 = require("./row");
-const vector_1 = require("../vector");
-const base_1 = require("./base");
-const type_1 = require("../type");
+
+
+
+
 /** @ignore */
-class MapVector extends base_1.BaseVector {
+class MapVector extends _base__WEBPACK_IMPORTED_MODULE_2__["BaseVector"] {
     asList() {
         const child = this.type.children[0];
-        return vector_1.Vector.new(this.data.clone(new type_1.List(child)));
+        return _vector__WEBPACK_IMPORTED_MODULE_1__["Vector"].new(this.data.clone(new _type__WEBPACK_IMPORTED_MODULE_3__["List"](child)));
     }
     bind(index) {
         const child = this.getChildAt(0);
         const { [index]: begin, [index + 1]: end } = this.valueOffsets;
-        return new row_1.MapRow(child.slice(begin, end));
+        return new _row__WEBPACK_IMPORTED_MODULE_0__["MapRow"](child.slice(begin, end));
     }
 }
-exports.MapVector = MapVector;
+
+//# sourceMappingURL=map.mjs.map
 
 
+/***/ }),
 
-},{"../type":55,"../vector":68,"./base":69,"./row":85}],84:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/vector/null.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/null.mjs ***!
+  \***************************************************/
+/*! exports provided: NullVector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NullVector", function() { return NullVector; });
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -15430,17 +15074,28 @@ exports.MapVector = MapVector;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const base_1 = require("./base");
+
 /** @ignore */
-class NullVector extends base_1.BaseVector {
+class NullVector extends _base__WEBPACK_IMPORTED_MODULE_0__["BaseVector"] {
 }
-exports.NullVector = NullVector;
+
+//# sourceMappingURL=null.mjs.map
 
 
+/***/ }),
 
-},{"./base":69}],85:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/vector/row.mjs":
+/*!**************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/row.mjs ***!
+  \**************************************************/
+/*! exports provided: MapRow, StructRow */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MapRow", function() { return MapRow; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "StructRow", function() { return StructRow; });
+/* harmony import */ var _util_pretty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/pretty */ "./node_modules/apache-arrow/util/pretty.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -15457,8 +15112,7 @@ exports.NullVector = NullVector;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const pretty_1 = require("../util/pretty");
+
 /** @ignore */ const kParent = Symbol.for('parent');
 /** @ignore */ const kRowIndex = Symbol.for('rowIndex');
 /** @ignore */ const kKeyToIdx = Symbol.for('keyToIdx');
@@ -15543,8 +15197,8 @@ class Row {
     toString() {
         const str = [];
         this.forEach((val, key) => {
-            key = pretty_1.valueToString(key);
-            val = pretty_1.valueToString(val);
+            key = Object(_util_pretty__WEBPACK_IMPORTED_MODULE_0__["valueToString"])(key);
+            val = Object(_util_pretty__WEBPACK_IMPORTED_MODULE_0__["valueToString"])(val);
             str.push(`${key}: ${val}`);
         });
         return `{ ${str.join(', ')} }`;
@@ -15582,7 +15236,6 @@ class MapRow extends Row {
         this[kParent].getChildAt(1).set(index, value);
     }
 }
-exports.MapRow = MapRow;
 class StructRow extends Row {
     constructor(parent) {
         super(parent, parent.type.children.length);
@@ -15611,7 +15264,6 @@ class StructRow extends Row {
         return this[kParent].getChildAt(index).set(this[kRowIndex], value);
     }
 }
-exports.StructRow = StructRow;
 Object.setPrototypeOf(Row.prototype, Map.prototype);
 /** @ignore */
 const defineRowProxyProperties = (() => {
@@ -15784,10 +15436,23 @@ const createRowProxy = (() => {
     return (row) => new Proxy(row, RowProxyHandler);
 })();
 
+//# sourceMappingURL=row.mjs.map
 
 
-},{"../util/pretty":64}],86:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/vector/struct.mjs":
+/*!*****************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/struct.mjs ***!
+  \*****************************************************/
+/*! exports provided: StructVector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "StructVector", function() { return StructVector; });
+/* harmony import */ var _row__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./row */ "./node_modules/apache-arrow/vector/row.mjs");
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -15804,25 +15469,39 @@ const createRowProxy = (() => {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const row_1 = require("./row");
-const base_1 = require("./base");
+
+
 /** @ignore */ const kRowIndex = Symbol.for('rowIndex');
 /** @ignore */
-class StructVector extends base_1.BaseVector {
+class StructVector extends _base__WEBPACK_IMPORTED_MODULE_1__["BaseVector"] {
     bind(index) {
-        const proto = this._row || (this._row = new row_1.StructRow(this));
+        const proto = this._row || (this._row = new _row__WEBPACK_IMPORTED_MODULE_0__["StructRow"](this));
         const bound = Object.create(proto);
         bound[kRowIndex] = index;
         return bound;
     }
 }
-exports.StructVector = StructVector;
+
+//# sourceMappingURL=struct.mjs.map
 
 
+/***/ }),
 
-},{"./base":69,"./row":85}],87:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/vector/time.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/time.mjs ***!
+  \***************************************************/
+/*! exports provided: TimeVector, TimeSecondVector, TimeMillisecondVector, TimeMicrosecondVector, TimeNanosecondVector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimeVector", function() { return TimeVector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimeSecondVector", function() { return TimeSecondVector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimeMillisecondVector", function() { return TimeMillisecondVector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimeMicrosecondVector", function() { return TimeMicrosecondVector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimeNanosecondVector", function() { return TimeNanosecondVector; });
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -15839,33 +15518,43 @@ exports.StructVector = StructVector;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const base_1 = require("./base");
+
 /** @ignore */
-class TimeVector extends base_1.BaseVector {
+class TimeVector extends _base__WEBPACK_IMPORTED_MODULE_0__["BaseVector"] {
 }
-exports.TimeVector = TimeVector;
 /** @ignore */
 class TimeSecondVector extends TimeVector {
 }
-exports.TimeSecondVector = TimeSecondVector;
 /** @ignore */
 class TimeMillisecondVector extends TimeVector {
 }
-exports.TimeMillisecondVector = TimeMillisecondVector;
 /** @ignore */
 class TimeMicrosecondVector extends TimeVector {
 }
-exports.TimeMicrosecondVector = TimeMicrosecondVector;
 /** @ignore */
 class TimeNanosecondVector extends TimeVector {
 }
-exports.TimeNanosecondVector = TimeNanosecondVector;
+
+//# sourceMappingURL=time.mjs.map
 
 
+/***/ }),
 
-},{"./base":69}],88:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/vector/timestamp.mjs":
+/*!********************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/timestamp.mjs ***!
+  \********************************************************/
+/*! exports provided: TimestampVector, TimestampSecondVector, TimestampMillisecondVector, TimestampMicrosecondVector, TimestampNanosecondVector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimestampVector", function() { return TimestampVector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimestampSecondVector", function() { return TimestampSecondVector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimestampMillisecondVector", function() { return TimestampMillisecondVector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimestampMicrosecondVector", function() { return TimestampMicrosecondVector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimestampNanosecondVector", function() { return TimestampNanosecondVector; });
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -15882,33 +15571,41 @@ exports.TimeNanosecondVector = TimeNanosecondVector;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const base_1 = require("./base");
+
 /** @ignore */
-class TimestampVector extends base_1.BaseVector {
+class TimestampVector extends _base__WEBPACK_IMPORTED_MODULE_0__["BaseVector"] {
 }
-exports.TimestampVector = TimestampVector;
 /** @ignore */
 class TimestampSecondVector extends TimestampVector {
 }
-exports.TimestampSecondVector = TimestampSecondVector;
 /** @ignore */
 class TimestampMillisecondVector extends TimestampVector {
 }
-exports.TimestampMillisecondVector = TimestampMillisecondVector;
 /** @ignore */
 class TimestampMicrosecondVector extends TimestampVector {
 }
-exports.TimestampMicrosecondVector = TimestampMicrosecondVector;
 /** @ignore */
 class TimestampNanosecondVector extends TimestampVector {
 }
-exports.TimestampNanosecondVector = TimestampNanosecondVector;
+
+//# sourceMappingURL=timestamp.mjs.map
 
 
+/***/ }),
 
-},{"./base":69}],89:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/vector/union.mjs":
+/*!****************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/union.mjs ***!
+  \****************************************************/
+/*! exports provided: UnionVector, DenseUnionVector, SparseUnionVector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "UnionVector", function() { return UnionVector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DenseUnionVector", function() { return DenseUnionVector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SparseUnionVector", function() { return SparseUnionVector; });
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -15925,27 +15622,38 @@ exports.TimestampNanosecondVector = TimestampNanosecondVector;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const base_1 = require("./base");
+
 /** @ignore */
-class UnionVector extends base_1.BaseVector {
+class UnionVector extends _base__WEBPACK_IMPORTED_MODULE_0__["BaseVector"] {
     get typeIdToChildIndex() { return this.data.type.typeIdToChildIndex; }
 }
-exports.UnionVector = UnionVector;
 /** @ignore */
 class DenseUnionVector extends UnionVector {
     get valueOffsets() { return this.data.valueOffsets; }
 }
-exports.DenseUnionVector = DenseUnionVector;
 /** @ignore */
 class SparseUnionVector extends UnionVector {
 }
-exports.SparseUnionVector = SparseUnionVector;
+
+//# sourceMappingURL=union.mjs.map
 
 
+/***/ }),
 
-},{"./base":69}],90:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/vector/utf8.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/vector/utf8.mjs ***!
+  \***************************************************/
+/*! exports provided: Utf8Vector */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Utf8Vector", function() { return Utf8Vector; });
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../vector */ "./node_modules/apache-arrow/vector.mjs");
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./base */ "./node_modules/apache-arrow/vector/base.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
+/* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./index */ "./node_modules/apache-arrow/vector/index.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -15962,27 +15670,40 @@ exports.SparseUnionVector = SparseUnionVector;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const vector_1 = require("../vector");
-const base_1 = require("./base");
-const type_1 = require("../type");
-const index_1 = require("./index");
+
+
+
+
 /** @ignore */
-class Utf8Vector extends base_1.BaseVector {
+class Utf8Vector extends _base__WEBPACK_IMPORTED_MODULE_1__["BaseVector"] {
     /** @nocollapse */
     static from(input) {
-        return index_1.vectorFromValuesWithType(() => new type_1.Utf8(), input);
+        return Object(_index__WEBPACK_IMPORTED_MODULE_3__["vectorFromValuesWithType"])(() => new _type__WEBPACK_IMPORTED_MODULE_2__["Utf8"](), input);
     }
     asBinary() {
-        return vector_1.Vector.new(this.data.clone(new type_1.Binary()));
+        return _vector__WEBPACK_IMPORTED_MODULE_0__["Vector"].new(this.data.clone(new _type__WEBPACK_IMPORTED_MODULE_2__["Binary"]()));
     }
 }
-exports.Utf8Vector = Utf8Vector;
+
+//# sourceMappingURL=utf8.mjs.map
 
 
+/***/ }),
 
-},{"../type":55,"../vector":68,"./base":69,"./index":79}],91:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/visitor.mjs":
+/*!***********************************************!*\
+  !*** ./node_modules/apache-arrow/visitor.mjs ***!
+  \***********************************************/
+/*! exports provided: Visitor */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Visitor", function() { return Visitor; });
+/* harmony import */ var _data__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./data */ "./node_modules/apache-arrow/data.mjs");
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./vector */ "./node_modules/apache-arrow/vector.mjs");
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./type */ "./node_modules/apache-arrow/type.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -15999,11 +15720,10 @@ exports.Utf8Vector = Utf8Vector;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const data_1 = require("./data");
-const vector_1 = require("./vector");
-const enum_1 = require("./enum");
-const type_1 = require("./type");
+
+
+
+
 class Visitor {
     visitMany(nodes, ...args) {
         return nodes.map((node, i) => this.visit(node, ...args.map((x) => x[i])));
@@ -16033,152 +15753,151 @@ class Visitor {
     visitFixedSizeList(_node, ..._args) { return null; }
     visitMap(_node, ..._args) { return null; }
 }
-exports.Visitor = Visitor;
 /** @ignore */
 function getVisitFn(visitor, node, throwIfNotFound = true) {
     let fn = null;
-    let dtype = enum_1.Type.NONE;
+    let dtype = _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].NONE;
     // tslint:disable
-    if (node instanceof data_1.Data) {
+    if (node instanceof _data__WEBPACK_IMPORTED_MODULE_0__["Data"]) {
         dtype = inferDType(node.type);
     }
-    else if (node instanceof vector_1.Vector) {
+    else if (node instanceof _vector__WEBPACK_IMPORTED_MODULE_1__["Vector"]) {
         dtype = inferDType(node.type);
     }
-    else if (node instanceof type_1.DataType) {
+    else if (node instanceof _type__WEBPACK_IMPORTED_MODULE_3__["DataType"]) {
         dtype = inferDType(node);
     }
     else if (typeof (dtype = node) !== 'number') {
-        dtype = enum_1.Type[node];
+        dtype = _enum__WEBPACK_IMPORTED_MODULE_2__["Type"][node];
     }
     switch (dtype) {
-        case enum_1.Type.Null:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Null:
             fn = visitor.visitNull;
             break;
-        case enum_1.Type.Bool:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Bool:
             fn = visitor.visitBool;
             break;
-        case enum_1.Type.Int:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Int:
             fn = visitor.visitInt;
             break;
-        case enum_1.Type.Int8:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Int8:
             fn = visitor.visitInt8 || visitor.visitInt;
             break;
-        case enum_1.Type.Int16:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Int16:
             fn = visitor.visitInt16 || visitor.visitInt;
             break;
-        case enum_1.Type.Int32:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Int32:
             fn = visitor.visitInt32 || visitor.visitInt;
             break;
-        case enum_1.Type.Int64:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Int64:
             fn = visitor.visitInt64 || visitor.visitInt;
             break;
-        case enum_1.Type.Uint8:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Uint8:
             fn = visitor.visitUint8 || visitor.visitInt;
             break;
-        case enum_1.Type.Uint16:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Uint16:
             fn = visitor.visitUint16 || visitor.visitInt;
             break;
-        case enum_1.Type.Uint32:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Uint32:
             fn = visitor.visitUint32 || visitor.visitInt;
             break;
-        case enum_1.Type.Uint64:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Uint64:
             fn = visitor.visitUint64 || visitor.visitInt;
             break;
-        case enum_1.Type.Float:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Float:
             fn = visitor.visitFloat;
             break;
-        case enum_1.Type.Float16:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Float16:
             fn = visitor.visitFloat16 || visitor.visitFloat;
             break;
-        case enum_1.Type.Float32:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Float32:
             fn = visitor.visitFloat32 || visitor.visitFloat;
             break;
-        case enum_1.Type.Float64:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Float64:
             fn = visitor.visitFloat64 || visitor.visitFloat;
             break;
-        case enum_1.Type.Utf8:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Utf8:
             fn = visitor.visitUtf8;
             break;
-        case enum_1.Type.Binary:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Binary:
             fn = visitor.visitBinary;
             break;
-        case enum_1.Type.FixedSizeBinary:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].FixedSizeBinary:
             fn = visitor.visitFixedSizeBinary;
             break;
-        case enum_1.Type.Date:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Date:
             fn = visitor.visitDate;
             break;
-        case enum_1.Type.DateDay:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].DateDay:
             fn = visitor.visitDateDay || visitor.visitDate;
             break;
-        case enum_1.Type.DateMillisecond:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].DateMillisecond:
             fn = visitor.visitDateMillisecond || visitor.visitDate;
             break;
-        case enum_1.Type.Timestamp:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Timestamp:
             fn = visitor.visitTimestamp;
             break;
-        case enum_1.Type.TimestampSecond:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].TimestampSecond:
             fn = visitor.visitTimestampSecond || visitor.visitTimestamp;
             break;
-        case enum_1.Type.TimestampMillisecond:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].TimestampMillisecond:
             fn = visitor.visitTimestampMillisecond || visitor.visitTimestamp;
             break;
-        case enum_1.Type.TimestampMicrosecond:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].TimestampMicrosecond:
             fn = visitor.visitTimestampMicrosecond || visitor.visitTimestamp;
             break;
-        case enum_1.Type.TimestampNanosecond:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].TimestampNanosecond:
             fn = visitor.visitTimestampNanosecond || visitor.visitTimestamp;
             break;
-        case enum_1.Type.Time:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Time:
             fn = visitor.visitTime;
             break;
-        case enum_1.Type.TimeSecond:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].TimeSecond:
             fn = visitor.visitTimeSecond || visitor.visitTime;
             break;
-        case enum_1.Type.TimeMillisecond:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].TimeMillisecond:
             fn = visitor.visitTimeMillisecond || visitor.visitTime;
             break;
-        case enum_1.Type.TimeMicrosecond:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].TimeMicrosecond:
             fn = visitor.visitTimeMicrosecond || visitor.visitTime;
             break;
-        case enum_1.Type.TimeNanosecond:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].TimeNanosecond:
             fn = visitor.visitTimeNanosecond || visitor.visitTime;
             break;
-        case enum_1.Type.Decimal:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Decimal:
             fn = visitor.visitDecimal;
             break;
-        case enum_1.Type.List:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].List:
             fn = visitor.visitList;
             break;
-        case enum_1.Type.Struct:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Struct:
             fn = visitor.visitStruct;
             break;
-        case enum_1.Type.Union:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Union:
             fn = visitor.visitUnion;
             break;
-        case enum_1.Type.DenseUnion:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].DenseUnion:
             fn = visitor.visitDenseUnion || visitor.visitUnion;
             break;
-        case enum_1.Type.SparseUnion:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].SparseUnion:
             fn = visitor.visitSparseUnion || visitor.visitUnion;
             break;
-        case enum_1.Type.Dictionary:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Dictionary:
             fn = visitor.visitDictionary;
             break;
-        case enum_1.Type.Interval:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Interval:
             fn = visitor.visitInterval;
             break;
-        case enum_1.Type.IntervalDayTime:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].IntervalDayTime:
             fn = visitor.visitIntervalDayTime || visitor.visitInterval;
             break;
-        case enum_1.Type.IntervalYearMonth:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].IntervalYearMonth:
             fn = visitor.visitIntervalYearMonth || visitor.visitInterval;
             break;
-        case enum_1.Type.FixedSizeList:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].FixedSizeList:
             fn = visitor.visitFixedSizeList;
             break;
-        case enum_1.Type.Map:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Map:
             fn = visitor.visitMap;
             break;
     }
@@ -16186,74 +15905,74 @@ function getVisitFn(visitor, node, throwIfNotFound = true) {
         return fn;
     if (!throwIfNotFound)
         return () => null;
-    throw new Error(`Unrecognized type '${enum_1.Type[dtype]}'`);
+    throw new Error(`Unrecognized type '${_enum__WEBPACK_IMPORTED_MODULE_2__["Type"][dtype]}'`);
 }
 /** @ignore */
 function inferDType(type) {
     switch (type.typeId) {
-        case enum_1.Type.Null: return enum_1.Type.Null;
-        case enum_1.Type.Int:
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Null: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Null;
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Int:
             const { bitWidth, isSigned } = type;
             switch (bitWidth) {
-                case 8: return isSigned ? enum_1.Type.Int8 : enum_1.Type.Uint8;
-                case 16: return isSigned ? enum_1.Type.Int16 : enum_1.Type.Uint16;
-                case 32: return isSigned ? enum_1.Type.Int32 : enum_1.Type.Uint32;
-                case 64: return isSigned ? enum_1.Type.Int64 : enum_1.Type.Uint64;
+                case 8: return isSigned ? _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Int8 : _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Uint8;
+                case 16: return isSigned ? _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Int16 : _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Uint16;
+                case 32: return isSigned ? _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Int32 : _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Uint32;
+                case 64: return isSigned ? _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Int64 : _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Uint64;
             }
-            return enum_1.Type.Int;
-        case enum_1.Type.Float:
+            return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Int;
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Float:
             switch (type.precision) {
-                case enum_1.Precision.HALF: return enum_1.Type.Float16;
-                case enum_1.Precision.SINGLE: return enum_1.Type.Float32;
-                case enum_1.Precision.DOUBLE: return enum_1.Type.Float64;
+                case _enum__WEBPACK_IMPORTED_MODULE_2__["Precision"].HALF: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Float16;
+                case _enum__WEBPACK_IMPORTED_MODULE_2__["Precision"].SINGLE: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Float32;
+                case _enum__WEBPACK_IMPORTED_MODULE_2__["Precision"].DOUBLE: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Float64;
             }
-            return enum_1.Type.Float;
-        case enum_1.Type.Binary: return enum_1.Type.Binary;
-        case enum_1.Type.Utf8: return enum_1.Type.Utf8;
-        case enum_1.Type.Bool: return enum_1.Type.Bool;
-        case enum_1.Type.Decimal: return enum_1.Type.Decimal;
-        case enum_1.Type.Time:
+            return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Float;
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Binary: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Binary;
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Utf8: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Utf8;
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Bool: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Bool;
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Decimal: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Decimal;
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Time:
             switch (type.unit) {
-                case enum_1.TimeUnit.SECOND: return enum_1.Type.TimeSecond;
-                case enum_1.TimeUnit.MILLISECOND: return enum_1.Type.TimeMillisecond;
-                case enum_1.TimeUnit.MICROSECOND: return enum_1.Type.TimeMicrosecond;
-                case enum_1.TimeUnit.NANOSECOND: return enum_1.Type.TimeNanosecond;
+                case _enum__WEBPACK_IMPORTED_MODULE_2__["TimeUnit"].SECOND: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].TimeSecond;
+                case _enum__WEBPACK_IMPORTED_MODULE_2__["TimeUnit"].MILLISECOND: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].TimeMillisecond;
+                case _enum__WEBPACK_IMPORTED_MODULE_2__["TimeUnit"].MICROSECOND: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].TimeMicrosecond;
+                case _enum__WEBPACK_IMPORTED_MODULE_2__["TimeUnit"].NANOSECOND: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].TimeNanosecond;
             }
-            return enum_1.Type.Time;
-        case enum_1.Type.Timestamp:
+            return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Time;
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Timestamp:
             switch (type.unit) {
-                case enum_1.TimeUnit.SECOND: return enum_1.Type.TimestampSecond;
-                case enum_1.TimeUnit.MILLISECOND: return enum_1.Type.TimestampMillisecond;
-                case enum_1.TimeUnit.MICROSECOND: return enum_1.Type.TimestampMicrosecond;
-                case enum_1.TimeUnit.NANOSECOND: return enum_1.Type.TimestampNanosecond;
+                case _enum__WEBPACK_IMPORTED_MODULE_2__["TimeUnit"].SECOND: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].TimestampSecond;
+                case _enum__WEBPACK_IMPORTED_MODULE_2__["TimeUnit"].MILLISECOND: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].TimestampMillisecond;
+                case _enum__WEBPACK_IMPORTED_MODULE_2__["TimeUnit"].MICROSECOND: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].TimestampMicrosecond;
+                case _enum__WEBPACK_IMPORTED_MODULE_2__["TimeUnit"].NANOSECOND: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].TimestampNanosecond;
             }
-            return enum_1.Type.Timestamp;
-        case enum_1.Type.Date:
+            return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Timestamp;
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Date:
             switch (type.unit) {
-                case enum_1.DateUnit.DAY: return enum_1.Type.DateDay;
-                case enum_1.DateUnit.MILLISECOND: return enum_1.Type.DateMillisecond;
+                case _enum__WEBPACK_IMPORTED_MODULE_2__["DateUnit"].DAY: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].DateDay;
+                case _enum__WEBPACK_IMPORTED_MODULE_2__["DateUnit"].MILLISECOND: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].DateMillisecond;
             }
-            return enum_1.Type.Date;
-        case enum_1.Type.Interval:
+            return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Date;
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Interval:
             switch (type.unit) {
-                case enum_1.IntervalUnit.DAY_TIME: return enum_1.Type.IntervalDayTime;
-                case enum_1.IntervalUnit.YEAR_MONTH: return enum_1.Type.IntervalYearMonth;
+                case _enum__WEBPACK_IMPORTED_MODULE_2__["IntervalUnit"].DAY_TIME: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].IntervalDayTime;
+                case _enum__WEBPACK_IMPORTED_MODULE_2__["IntervalUnit"].YEAR_MONTH: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].IntervalYearMonth;
             }
-            return enum_1.Type.Interval;
-        case enum_1.Type.Map: return enum_1.Type.Map;
-        case enum_1.Type.List: return enum_1.Type.List;
-        case enum_1.Type.Struct: return enum_1.Type.Struct;
-        case enum_1.Type.Union:
+            return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Interval;
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Map: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Map;
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].List: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].List;
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Struct: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Struct;
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Union:
             switch (type.mode) {
-                case enum_1.UnionMode.Dense: return enum_1.Type.DenseUnion;
-                case enum_1.UnionMode.Sparse: return enum_1.Type.SparseUnion;
+                case _enum__WEBPACK_IMPORTED_MODULE_2__["UnionMode"].Dense: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].DenseUnion;
+                case _enum__WEBPACK_IMPORTED_MODULE_2__["UnionMode"].Sparse: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].SparseUnion;
             }
-            return enum_1.Type.Union;
-        case enum_1.Type.FixedSizeBinary: return enum_1.Type.FixedSizeBinary;
-        case enum_1.Type.FixedSizeList: return enum_1.Type.FixedSizeList;
-        case enum_1.Type.Dictionary: return enum_1.Type.Dictionary;
+            return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Union;
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].FixedSizeBinary: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].FixedSizeBinary;
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].FixedSizeList: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].FixedSizeList;
+        case _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Dictionary: return _enum__WEBPACK_IMPORTED_MODULE_2__["Type"].Dictionary;
     }
-    throw new Error(`Unrecognized type '${enum_1.Type[type.typeId]}'`);
+    throw new Error(`Unrecognized type '${_enum__WEBPACK_IMPORTED_MODULE_2__["Type"][type.typeId]}'`);
 }
 // Add these here so they're picked up by the externs creator
 // in the build, and closure-compiler doesn't minify them away
@@ -16283,10 +16002,41 @@ Visitor.prototype.visitSparseUnion = null;
 Visitor.prototype.visitIntervalDayTime = null;
 Visitor.prototype.visitIntervalYearMonth = null;
 
+//# sourceMappingURL=visitor.mjs.map
 
 
-},{"./data":33,"./enum":34,"./type":55,"./vector":68}],92:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/visitor/builderctor.mjs":
+/*!***********************************************************!*\
+  !*** ./node_modules/apache-arrow/visitor/builderctor.mjs ***!
+  \***********************************************************/
+/*! exports provided: GetBuilderCtor, instance */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GetBuilderCtor", function() { return GetBuilderCtor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "instance", function() { return instance; });
+/* harmony import */ var _visitor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../visitor */ "./node_modules/apache-arrow/visitor.mjs");
+/* harmony import */ var _builder_binary__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../builder/binary */ "./node_modules/apache-arrow/builder/binary.mjs");
+/* harmony import */ var _builder_bool__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../builder/bool */ "./node_modules/apache-arrow/builder/bool.mjs");
+/* harmony import */ var _builder_date__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../builder/date */ "./node_modules/apache-arrow/builder/date.mjs");
+/* harmony import */ var _builder_decimal__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../builder/decimal */ "./node_modules/apache-arrow/builder/decimal.mjs");
+/* harmony import */ var _builder_dictionary__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../builder/dictionary */ "./node_modules/apache-arrow/builder/dictionary.mjs");
+/* harmony import */ var _builder_fixedsizebinary__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../builder/fixedsizebinary */ "./node_modules/apache-arrow/builder/fixedsizebinary.mjs");
+/* harmony import */ var _builder_fixedsizelist__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../builder/fixedsizelist */ "./node_modules/apache-arrow/builder/fixedsizelist.mjs");
+/* harmony import */ var _builder_float__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../builder/float */ "./node_modules/apache-arrow/builder/float.mjs");
+/* harmony import */ var _builder_interval__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../builder/interval */ "./node_modules/apache-arrow/builder/interval.mjs");
+/* harmony import */ var _builder_int__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../builder/int */ "./node_modules/apache-arrow/builder/int.mjs");
+/* harmony import */ var _builder_list__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../builder/list */ "./node_modules/apache-arrow/builder/list.mjs");
+/* harmony import */ var _builder_map__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../builder/map */ "./node_modules/apache-arrow/builder/map.mjs");
+/* harmony import */ var _builder_null__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../builder/null */ "./node_modules/apache-arrow/builder/null.mjs");
+/* harmony import */ var _builder_struct__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../builder/struct */ "./node_modules/apache-arrow/builder/struct.mjs");
+/* harmony import */ var _builder_timestamp__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../builder/timestamp */ "./node_modules/apache-arrow/builder/timestamp.mjs");
+/* harmony import */ var _builder_time__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ../builder/time */ "./node_modules/apache-arrow/builder/time.mjs");
+/* harmony import */ var _builder_union__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ../builder/union */ "./node_modules/apache-arrow/builder/union.mjs");
+/* harmony import */ var _builder_utf8__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ../builder/utf8 */ "./node_modules/apache-arrow/builder/utf8.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -16303,88 +16053,99 @@ Visitor.prototype.visitIntervalYearMonth = null;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const visitor_1 = require("../visitor");
-const binary_1 = require("../builder/binary");
-const bool_1 = require("../builder/bool");
-const date_1 = require("../builder/date");
-const decimal_1 = require("../builder/decimal");
-const dictionary_1 = require("../builder/dictionary");
-const fixedsizebinary_1 = require("../builder/fixedsizebinary");
-const fixedsizelist_1 = require("../builder/fixedsizelist");
-const float_1 = require("../builder/float");
-const interval_1 = require("../builder/interval");
-const int_1 = require("../builder/int");
-const list_1 = require("../builder/list");
-const map_1 = require("../builder/map");
-const null_1 = require("../builder/null");
-const struct_1 = require("../builder/struct");
-const timestamp_1 = require("../builder/timestamp");
-const time_1 = require("../builder/time");
-const union_1 = require("../builder/union");
-const utf8_1 = require("../builder/utf8");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /** @ignore */
-class GetBuilderCtor extends visitor_1.Visitor {
-    visitNull() { return null_1.NullBuilder; }
-    visitBool() { return bool_1.BoolBuilder; }
-    visitInt() { return int_1.IntBuilder; }
-    visitInt8() { return int_1.Int8Builder; }
-    visitInt16() { return int_1.Int16Builder; }
-    visitInt32() { return int_1.Int32Builder; }
-    visitInt64() { return int_1.Int64Builder; }
-    visitUint8() { return int_1.Uint8Builder; }
-    visitUint16() { return int_1.Uint16Builder; }
-    visitUint32() { return int_1.Uint32Builder; }
-    visitUint64() { return int_1.Uint64Builder; }
-    visitFloat() { return float_1.FloatBuilder; }
-    visitFloat16() { return float_1.Float16Builder; }
-    visitFloat32() { return float_1.Float32Builder; }
-    visitFloat64() { return float_1.Float64Builder; }
-    visitUtf8() { return utf8_1.Utf8Builder; }
-    visitBinary() { return binary_1.BinaryBuilder; }
-    visitFixedSizeBinary() { return fixedsizebinary_1.FixedSizeBinaryBuilder; }
-    visitDate() { return date_1.DateBuilder; }
-    visitDateDay() { return date_1.DateDayBuilder; }
-    visitDateMillisecond() { return date_1.DateMillisecondBuilder; }
-    visitTimestamp() { return timestamp_1.TimestampBuilder; }
-    visitTimestampSecond() { return timestamp_1.TimestampSecondBuilder; }
-    visitTimestampMillisecond() { return timestamp_1.TimestampMillisecondBuilder; }
-    visitTimestampMicrosecond() { return timestamp_1.TimestampMicrosecondBuilder; }
-    visitTimestampNanosecond() { return timestamp_1.TimestampNanosecondBuilder; }
-    visitTime() { return time_1.TimeBuilder; }
-    visitTimeSecond() { return time_1.TimeSecondBuilder; }
-    visitTimeMillisecond() { return time_1.TimeMillisecondBuilder; }
-    visitTimeMicrosecond() { return time_1.TimeMicrosecondBuilder; }
-    visitTimeNanosecond() { return time_1.TimeNanosecondBuilder; }
-    visitDecimal() { return decimal_1.DecimalBuilder; }
-    visitList() { return list_1.ListBuilder; }
-    visitStruct() { return struct_1.StructBuilder; }
-    visitUnion() { return union_1.UnionBuilder; }
-    visitDenseUnion() { return union_1.DenseUnionBuilder; }
-    visitSparseUnion() { return union_1.SparseUnionBuilder; }
-    visitDictionary() { return dictionary_1.DictionaryBuilder; }
-    visitInterval() { return interval_1.IntervalBuilder; }
-    visitIntervalDayTime() { return interval_1.IntervalDayTimeBuilder; }
-    visitIntervalYearMonth() { return interval_1.IntervalYearMonthBuilder; }
-    visitFixedSizeList() { return fixedsizelist_1.FixedSizeListBuilder; }
-    visitMap() { return map_1.MapBuilder; }
+class GetBuilderCtor extends _visitor__WEBPACK_IMPORTED_MODULE_0__["Visitor"] {
+    visitNull() { return _builder_null__WEBPACK_IMPORTED_MODULE_13__["NullBuilder"]; }
+    visitBool() { return _builder_bool__WEBPACK_IMPORTED_MODULE_2__["BoolBuilder"]; }
+    visitInt() { return _builder_int__WEBPACK_IMPORTED_MODULE_10__["IntBuilder"]; }
+    visitInt8() { return _builder_int__WEBPACK_IMPORTED_MODULE_10__["Int8Builder"]; }
+    visitInt16() { return _builder_int__WEBPACK_IMPORTED_MODULE_10__["Int16Builder"]; }
+    visitInt32() { return _builder_int__WEBPACK_IMPORTED_MODULE_10__["Int32Builder"]; }
+    visitInt64() { return _builder_int__WEBPACK_IMPORTED_MODULE_10__["Int64Builder"]; }
+    visitUint8() { return _builder_int__WEBPACK_IMPORTED_MODULE_10__["Uint8Builder"]; }
+    visitUint16() { return _builder_int__WEBPACK_IMPORTED_MODULE_10__["Uint16Builder"]; }
+    visitUint32() { return _builder_int__WEBPACK_IMPORTED_MODULE_10__["Uint32Builder"]; }
+    visitUint64() { return _builder_int__WEBPACK_IMPORTED_MODULE_10__["Uint64Builder"]; }
+    visitFloat() { return _builder_float__WEBPACK_IMPORTED_MODULE_8__["FloatBuilder"]; }
+    visitFloat16() { return _builder_float__WEBPACK_IMPORTED_MODULE_8__["Float16Builder"]; }
+    visitFloat32() { return _builder_float__WEBPACK_IMPORTED_MODULE_8__["Float32Builder"]; }
+    visitFloat64() { return _builder_float__WEBPACK_IMPORTED_MODULE_8__["Float64Builder"]; }
+    visitUtf8() { return _builder_utf8__WEBPACK_IMPORTED_MODULE_18__["Utf8Builder"]; }
+    visitBinary() { return _builder_binary__WEBPACK_IMPORTED_MODULE_1__["BinaryBuilder"]; }
+    visitFixedSizeBinary() { return _builder_fixedsizebinary__WEBPACK_IMPORTED_MODULE_6__["FixedSizeBinaryBuilder"]; }
+    visitDate() { return _builder_date__WEBPACK_IMPORTED_MODULE_3__["DateBuilder"]; }
+    visitDateDay() { return _builder_date__WEBPACK_IMPORTED_MODULE_3__["DateDayBuilder"]; }
+    visitDateMillisecond() { return _builder_date__WEBPACK_IMPORTED_MODULE_3__["DateMillisecondBuilder"]; }
+    visitTimestamp() { return _builder_timestamp__WEBPACK_IMPORTED_MODULE_15__["TimestampBuilder"]; }
+    visitTimestampSecond() { return _builder_timestamp__WEBPACK_IMPORTED_MODULE_15__["TimestampSecondBuilder"]; }
+    visitTimestampMillisecond() { return _builder_timestamp__WEBPACK_IMPORTED_MODULE_15__["TimestampMillisecondBuilder"]; }
+    visitTimestampMicrosecond() { return _builder_timestamp__WEBPACK_IMPORTED_MODULE_15__["TimestampMicrosecondBuilder"]; }
+    visitTimestampNanosecond() { return _builder_timestamp__WEBPACK_IMPORTED_MODULE_15__["TimestampNanosecondBuilder"]; }
+    visitTime() { return _builder_time__WEBPACK_IMPORTED_MODULE_16__["TimeBuilder"]; }
+    visitTimeSecond() { return _builder_time__WEBPACK_IMPORTED_MODULE_16__["TimeSecondBuilder"]; }
+    visitTimeMillisecond() { return _builder_time__WEBPACK_IMPORTED_MODULE_16__["TimeMillisecondBuilder"]; }
+    visitTimeMicrosecond() { return _builder_time__WEBPACK_IMPORTED_MODULE_16__["TimeMicrosecondBuilder"]; }
+    visitTimeNanosecond() { return _builder_time__WEBPACK_IMPORTED_MODULE_16__["TimeNanosecondBuilder"]; }
+    visitDecimal() { return _builder_decimal__WEBPACK_IMPORTED_MODULE_4__["DecimalBuilder"]; }
+    visitList() { return _builder_list__WEBPACK_IMPORTED_MODULE_11__["ListBuilder"]; }
+    visitStruct() { return _builder_struct__WEBPACK_IMPORTED_MODULE_14__["StructBuilder"]; }
+    visitUnion() { return _builder_union__WEBPACK_IMPORTED_MODULE_17__["UnionBuilder"]; }
+    visitDenseUnion() { return _builder_union__WEBPACK_IMPORTED_MODULE_17__["DenseUnionBuilder"]; }
+    visitSparseUnion() { return _builder_union__WEBPACK_IMPORTED_MODULE_17__["SparseUnionBuilder"]; }
+    visitDictionary() { return _builder_dictionary__WEBPACK_IMPORTED_MODULE_5__["DictionaryBuilder"]; }
+    visitInterval() { return _builder_interval__WEBPACK_IMPORTED_MODULE_9__["IntervalBuilder"]; }
+    visitIntervalDayTime() { return _builder_interval__WEBPACK_IMPORTED_MODULE_9__["IntervalDayTimeBuilder"]; }
+    visitIntervalYearMonth() { return _builder_interval__WEBPACK_IMPORTED_MODULE_9__["IntervalYearMonthBuilder"]; }
+    visitFixedSizeList() { return _builder_fixedsizelist__WEBPACK_IMPORTED_MODULE_7__["FixedSizeListBuilder"]; }
+    visitMap() { return _builder_map__WEBPACK_IMPORTED_MODULE_12__["MapBuilder"]; }
 }
-exports.GetBuilderCtor = GetBuilderCtor;
 /** @ignore */
-exports.instance = new GetBuilderCtor();
+const instance = new GetBuilderCtor();
+
+//# sourceMappingURL=builderctor.mjs.map
 
 
+/***/ }),
 
-},{"../builder/binary":8,"../builder/bool":9,"../builder/date":11,"../builder/decimal":12,"../builder/dictionary":13,"../builder/fixedsizebinary":14,"../builder/fixedsizelist":15,"../builder/float":16,"../builder/int":18,"../builder/interval":19,"../builder/list":20,"../builder/map":21,"../builder/null":22,"../builder/struct":24,"../builder/time":25,"../builder/timestamp":26,"../builder/union":27,"../builder/utf8":28,"../visitor":91}],93:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/visitor/bytewidth.mjs":
+/*!*********************************************************!*\
+  !*** ./node_modules/apache-arrow/visitor/bytewidth.mjs ***!
+  \*********************************************************/
+/*! exports provided: ByteWidthVisitor, instance */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ByteWidthVisitor", function() { return ByteWidthVisitor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "instance", function() { return instance; });
+/* harmony import */ var _visitor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../visitor */ "./node_modules/apache-arrow/visitor.mjs");
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../enum */ "./node_modules/apache-arrow/enum.mjs");
 /* istanbul ignore file */
-Object.defineProperty(exports, "__esModule", { value: true });
-const visitor_1 = require("../visitor");
-const enum_1 = require("../enum");
+
+
 /** @ignore */ const sum = (x, y) => x + y;
 /** @ignore */ const variableWidthColumnErrorMessage = (type) => `Cannot compute the byte width of variable-width column ${type}`;
 /** @ignore */
-class ByteWidthVisitor extends visitor_1.Visitor {
+class ByteWidthVisitor extends _visitor__WEBPACK_IMPORTED_MODULE_0__["Visitor"] {
     visitNull(____) { return 0; }
     visitInt(type) { return type.bitWidth / 8; }
     visitFloat(type) { return type.ArrayType.BYTES_PER_ELEMENT; }
@@ -16394,7 +16155,7 @@ class ByteWidthVisitor extends visitor_1.Visitor {
     visitDecimal(____) { return 16; }
     visitDate(type) { return (type.unit + 1) * 4; }
     visitTime(type) { return type.bitWidth / 8; }
-    visitTimestamp(type) { return type.unit === enum_1.TimeUnit.SECOND ? 4 : 8; }
+    visitTimestamp(type) { return type.unit === _enum__WEBPACK_IMPORTED_MODULE_1__["TimeUnit"].SECOND ? 4 : 8; }
     visitInterval(type) { return (type.unit + 1) * 4; }
     visitList(type) { throw new Error(variableWidthColumnErrorMessage(type)); }
     visitStruct(type) { return this.visitFields(type.children).reduce(sum, 0); }
@@ -16406,14 +16167,30 @@ class ByteWidthVisitor extends visitor_1.Visitor {
     visitFields(fields) { return (fields || []).map((field) => this.visit(field.type)); }
     visitSchema(schema) { return this.visitFields(schema.fields).reduce(sum, 0); }
 }
-exports.ByteWidthVisitor = ByteWidthVisitor;
 /** @ignore */
-exports.instance = new ByteWidthVisitor();
+const instance = new ByteWidthVisitor();
+
+//# sourceMappingURL=bytewidth.mjs.map
 
 
+/***/ }),
 
-},{"../enum":34,"../visitor":91}],94:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/visitor/get.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/visitor/get.mjs ***!
+  \***************************************************/
+/*! exports provided: GetVisitor, instance */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GetVisitor", function() { return GetVisitor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "instance", function() { return instance; });
+/* harmony import */ var _util_bn__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/bn */ "./node_modules/apache-arrow/util/bn.mjs");
+/* harmony import */ var _visitor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../visitor */ "./node_modules/apache-arrow/visitor.mjs");
+/* harmony import */ var _util_utf8__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/utf8 */ "./node_modules/apache-arrow/util/utf8.mjs");
+/* harmony import */ var _util_math__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../util/math */ "./node_modules/apache-arrow/util/math.mjs");
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../enum */ "./node_modules/apache-arrow/enum.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -16430,16 +16207,14 @@ exports.instance = new ByteWidthVisitor();
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const bn_1 = require("../util/bn");
-const visitor_1 = require("../visitor");
-const utf8_1 = require("../util/utf8");
-const math_1 = require("../util/math");
-const enum_1 = require("../enum");
+
+
+
+
+
 /** @ignore */
-class GetVisitor extends visitor_1.Visitor {
+class GetVisitor extends _visitor__WEBPACK_IMPORTED_MODULE_1__["Visitor"] {
 }
-exports.GetVisitor = GetVisitor;
 /** @ignore */ const epochDaysToMs = (data, index) => 86400000 * data[index];
 /** @ignore */ const epochMillisecondsLongToMs = (data, index) => 4294967296 * (data[index + 1]) + (data[index] >>> 0);
 /** @ignore */ const epochMicrosecondsLongToMs = (data, index) => 4294967296 * (data[index + 1] / 1000) + ((data[index] >>> 0) / 1000);
@@ -16467,9 +16242,9 @@ const getDateMillisecond = ({ values }, index) => epochMillisecondsLongToDate(va
 /** @ignore */
 const getNumeric = ({ stride, values }, index) => values[stride * index];
 /** @ignore */
-const getFloat16 = ({ stride, values }, index) => math_1.uint16ToFloat64(values[stride * index]);
+const getFloat16 = ({ stride, values }, index) => Object(_util_math__WEBPACK_IMPORTED_MODULE_3__["uint16ToFloat64"])(values[stride * index]);
 /** @ignore */
-const getBigInts = ({ stride, values, type }, index) => bn_1.BN.new(values.subarray(stride * index, stride * (index + 1)), type.isSigned);
+const getBigInts = ({ stride, values, type }, index) => _util_bn__WEBPACK_IMPORTED_MODULE_0__["BN"].new(values.subarray(stride * index, stride * (index + 1)), type.isSigned);
 /** @ignore */
 const getFixedSizeBinary = ({ stride, values }, index) => values.subarray(stride * index, stride * (index + 1));
 /** @ignore */
@@ -16477,7 +16252,7 @@ const getBinary = ({ values, valueOffsets }, index) => getVariableWidthBytes(val
 /** @ignore */
 const getUtf8 = ({ values, valueOffsets }, index) => {
     const bytes = getVariableWidthBytes(values, valueOffsets, index);
-    return bytes !== null ? utf8_1.decodeUtf8(bytes) : null;
+    return bytes !== null ? Object(_util_utf8__WEBPACK_IMPORTED_MODULE_2__["decodeUtf8"])(bytes) : null;
 };
 /* istanbul ignore next */
 /** @ignore */
@@ -16486,12 +16261,12 @@ const getInt = (vector, index) => (vector.type.bitWidth < 64
     : getBigInts(vector, index));
 /* istanbul ignore next */
 /** @ignore */
-const getFloat = (vector, index) => (vector.type.precision !== enum_1.Precision.HALF
+const getFloat = (vector, index) => (vector.type.precision !== _enum__WEBPACK_IMPORTED_MODULE_4__["Precision"].HALF
     ? getNumeric(vector, index)
     : getFloat16(vector, index));
 /* istanbul ignore next */
 /** @ignore */
-const getDate = (vector, index) => (vector.type.unit === enum_1.DateUnit.DAY
+const getDate = (vector, index) => (vector.type.unit === _enum__WEBPACK_IMPORTED_MODULE_4__["DateUnit"].DAY
     ? getDateDay(vector, index)
     : getDateMillisecond(vector, index));
 /** @ignore */
@@ -16506,10 +16281,10 @@ const getTimestampNanosecond = ({ values }, index) => epochNanosecondsLongToMs(v
 /** @ignore */
 const getTimestamp = (vector, index) => {
     switch (vector.type.unit) {
-        case enum_1.TimeUnit.SECOND: return getTimestampSecond(vector, index);
-        case enum_1.TimeUnit.MILLISECOND: return getTimestampMillisecond(vector, index);
-        case enum_1.TimeUnit.MICROSECOND: return getTimestampMicrosecond(vector, index);
-        case enum_1.TimeUnit.NANOSECOND: return getTimestampNanosecond(vector, index);
+        case _enum__WEBPACK_IMPORTED_MODULE_4__["TimeUnit"].SECOND: return getTimestampSecond(vector, index);
+        case _enum__WEBPACK_IMPORTED_MODULE_4__["TimeUnit"].MILLISECOND: return getTimestampMillisecond(vector, index);
+        case _enum__WEBPACK_IMPORTED_MODULE_4__["TimeUnit"].MICROSECOND: return getTimestampMicrosecond(vector, index);
+        case _enum__WEBPACK_IMPORTED_MODULE_4__["TimeUnit"].NANOSECOND: return getTimestampNanosecond(vector, index);
     }
 };
 /** @ignore */
@@ -16517,21 +16292,21 @@ const getTimeSecond = ({ values, stride }, index) => values[stride * index];
 /** @ignore */
 const getTimeMillisecond = ({ values, stride }, index) => values[stride * index];
 /** @ignore */
-const getTimeMicrosecond = ({ values }, index) => bn_1.BN.signed(values.subarray(2 * index, 2 * (index + 1)));
+const getTimeMicrosecond = ({ values }, index) => _util_bn__WEBPACK_IMPORTED_MODULE_0__["BN"].signed(values.subarray(2 * index, 2 * (index + 1)));
 /** @ignore */
-const getTimeNanosecond = ({ values }, index) => bn_1.BN.signed(values.subarray(2 * index, 2 * (index + 1)));
+const getTimeNanosecond = ({ values }, index) => _util_bn__WEBPACK_IMPORTED_MODULE_0__["BN"].signed(values.subarray(2 * index, 2 * (index + 1)));
 /* istanbul ignore next */
 /** @ignore */
 const getTime = (vector, index) => {
     switch (vector.type.unit) {
-        case enum_1.TimeUnit.SECOND: return getTimeSecond(vector, index);
-        case enum_1.TimeUnit.MILLISECOND: return getTimeMillisecond(vector, index);
-        case enum_1.TimeUnit.MICROSECOND: return getTimeMicrosecond(vector, index);
-        case enum_1.TimeUnit.NANOSECOND: return getTimeNanosecond(vector, index);
+        case _enum__WEBPACK_IMPORTED_MODULE_4__["TimeUnit"].SECOND: return getTimeSecond(vector, index);
+        case _enum__WEBPACK_IMPORTED_MODULE_4__["TimeUnit"].MILLISECOND: return getTimeMillisecond(vector, index);
+        case _enum__WEBPACK_IMPORTED_MODULE_4__["TimeUnit"].MICROSECOND: return getTimeMicrosecond(vector, index);
+        case _enum__WEBPACK_IMPORTED_MODULE_4__["TimeUnit"].NANOSECOND: return getTimeNanosecond(vector, index);
     }
 };
 /** @ignore */
-const getDecimal = ({ values }, index) => bn_1.BN.decimal(values.subarray(4 * index, 4 * (index + 1)));
+const getDecimal = ({ values }, index) => _util_bn__WEBPACK_IMPORTED_MODULE_0__["BN"].decimal(values.subarray(4 * index, 4 * (index + 1)));
 /** @ignore */
 const getList = (vector, index) => {
     const child = vector.getChildAt(0), { valueOffsets, stride } = vector;
@@ -16548,7 +16323,7 @@ const getStruct = (vector, index) => {
 /* istanbul ignore next */
 /** @ignore */
 const getUnion = (vector, index) => {
-    return vector.type.mode === enum_1.UnionMode.Dense ?
+    return vector.type.mode === _enum__WEBPACK_IMPORTED_MODULE_4__["UnionMode"].Dense ?
         getDenseUnion(vector, index) :
         getSparseUnion(vector, index);
 };
@@ -16570,7 +16345,7 @@ const getDictionary = (vector, index) => {
 };
 /* istanbul ignore next */
 /** @ignore */
-const getInterval = (vector, index) => (vector.type.unit === enum_1.IntervalUnit.DAY_TIME)
+const getInterval = (vector, index) => (vector.type.unit === _enum__WEBPACK_IMPORTED_MODULE_4__["IntervalUnit"].DAY_TIME)
     ? getIntervalDayTime(vector, index)
     : getIntervalYearMonth(vector, index);
 /** @ignore */
@@ -16632,12 +16407,27 @@ GetVisitor.prototype.visitIntervalYearMonth = getIntervalYearMonth;
 GetVisitor.prototype.visitFixedSizeList = getFixedSizeList;
 GetVisitor.prototype.visitMap = getMap;
 /** @ignore */
-exports.instance = new GetVisitor();
+const instance = new GetVisitor();
+
+//# sourceMappingURL=get.mjs.map
 
 
+/***/ }),
 
-},{"../enum":34,"../util/bn":58,"../util/math":63,"../util/utf8":66,"../visitor":91}],95:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/visitor/indexof.mjs":
+/*!*******************************************************!*\
+  !*** ./node_modules/apache-arrow/visitor/indexof.mjs ***!
+  \*******************************************************/
+/*! exports provided: IndexOfVisitor, instance */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "IndexOfVisitor", function() { return IndexOfVisitor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "instance", function() { return instance; });
+/* harmony import */ var _visitor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../visitor */ "./node_modules/apache-arrow/visitor.mjs");
+/* harmony import */ var _util_bit__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/bit */ "./node_modules/apache-arrow/util/bit.mjs");
+/* harmony import */ var _util_vector__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/vector */ "./node_modules/apache-arrow/util/vector.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -16654,14 +16444,12 @@ exports.instance = new GetVisitor();
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const visitor_1 = require("../visitor");
-const bit_1 = require("../util/bit");
-const vector_1 = require("../util/vector");
+
+
+
 /** @ignore */
-class IndexOfVisitor extends visitor_1.Visitor {
+class IndexOfVisitor extends _visitor__WEBPACK_IMPORTED_MODULE_0__["Visitor"] {
 }
-exports.IndexOfVisitor = IndexOfVisitor;
 /** @ignore */
 function nullIndexOf(vector, searchElement) {
     // if you're looking for nulls and the vector isn't empty, we've got 'em!
@@ -16674,7 +16462,7 @@ function indexOfNull(vector, fromIndex) {
         return -1;
     }
     let i = 0;
-    for (const isValid of bit_1.iterateBits(nullBitmap, vector.data.offset + (fromIndex || 0), vector.length, nullBitmap, bit_1.getBool)) {
+    for (const isValid of Object(_util_bit__WEBPACK_IMPORTED_MODULE_1__["iterateBits"])(nullBitmap, vector.data.offset + (fromIndex || 0), vector.length, nullBitmap, _util_bit__WEBPACK_IMPORTED_MODULE_1__["getBool"])) {
         if (!isValid) {
             return i;
         }
@@ -16690,7 +16478,7 @@ function indexOfValue(vector, searchElement, fromIndex) {
     if (searchElement === null) {
         return indexOfNull(vector, fromIndex);
     }
-    const compare = vector_1.createElementComparator(searchElement);
+    const compare = Object(_util_vector__WEBPACK_IMPORTED_MODULE_2__["createElementComparator"])(searchElement);
     for (let i = (fromIndex || 0) - 1, n = vector.length; ++i < n;) {
         if (compare(vector.get(i))) {
             return i;
@@ -16704,7 +16492,7 @@ function indexOfUnion(vector, searchElement, fromIndex) {
     // If the searchElement is null, we don't know whether it came from the Union's
     // bitmap or one of its childrens'. So we don't interrogate the Union's bitmap,
     // since that will report the wrong index if a child has a null before the Union.
-    const compare = vector_1.createElementComparator(searchElement);
+    const compare = Object(_util_vector__WEBPACK_IMPORTED_MODULE_2__["createElementComparator"])(searchElement);
     for (let i = (fromIndex || 0) - 1, n = vector.length; ++i < n;) {
         if (compare(vector.get(i))) {
             return i;
@@ -16756,12 +16544,28 @@ IndexOfVisitor.prototype.visitIntervalYearMonth = indexOfValue;
 IndexOfVisitor.prototype.visitFixedSizeList = indexOfValue;
 IndexOfVisitor.prototype.visitMap = indexOfValue;
 /** @ignore */
-exports.instance = new IndexOfVisitor();
+const instance = new IndexOfVisitor();
+
+//# sourceMappingURL=indexof.mjs.map
 
 
+/***/ }),
 
-},{"../util/bit":57,"../util/vector":67,"../visitor":91}],96:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/visitor/iterator.mjs":
+/*!********************************************************!*\
+  !*** ./node_modules/apache-arrow/visitor/iterator.mjs ***!
+  \********************************************************/
+/*! exports provided: IteratorVisitor, instance */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "IteratorVisitor", function() { return IteratorVisitor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "instance", function() { return instance; });
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony import */ var _visitor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../visitor */ "./node_modules/apache-arrow/visitor.mjs");
+/* harmony import */ var _util_bit__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/bit */ "./node_modules/apache-arrow/util/bit.mjs");
+/* harmony import */ var _get__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./get */ "./node_modules/apache-arrow/visitor/get.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -16778,19 +16582,17 @@ exports.instance = new IndexOfVisitor();
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const enum_1 = require("../enum");
-const visitor_1 = require("../visitor");
-const bit_1 = require("../util/bit");
-const get_1 = require("./get");
+
+
+
+
 /** @ignore */
-class IteratorVisitor extends visitor_1.Visitor {
+class IteratorVisitor extends _visitor__WEBPACK_IMPORTED_MODULE_1__["Visitor"] {
 }
-exports.IteratorVisitor = IteratorVisitor;
 /** @ignore */
 function nullableIterator(vector) {
-    const getFn = get_1.instance.getVisitFn(vector);
-    return bit_1.iterateBits(vector.nullBitmap, vector.offset, vector.length, vector, (vec, idx, nullByte, nullBit) => ((nullByte & 1 << nullBit) !== 0) ? getFn(vec, idx) : null);
+    const getFn = _get__WEBPACK_IMPORTED_MODULE_3__["instance"].getVisitFn(vector);
+    return Object(_util_bit__WEBPACK_IMPORTED_MODULE_2__["iterateBits"])(vector.nullBitmap, vector.offset, vector.length, vector, (vec, idx, nullByte, nullBit) => ((nullByte & 1 << nullBit) !== 0) ? getFn(vec, idx) : null);
 }
 /** @ignore */
 function vectorIterator(vector) {
@@ -16800,10 +16602,10 @@ function vectorIterator(vector) {
     }
     const { type, typeId, length } = vector;
     // Fast case, defer to native iterators if possible
-    if (vector.stride === 1 && ((typeId === enum_1.Type.Timestamp) ||
-        (typeId === enum_1.Type.Int && type.bitWidth !== 64) ||
-        (typeId === enum_1.Type.Time && type.bitWidth !== 64) ||
-        (typeId === enum_1.Type.Float && type.precision > 0 /* Precision.HALF */))) {
+    if (vector.stride === 1 && ((typeId === _enum__WEBPACK_IMPORTED_MODULE_0__["Type"].Timestamp) ||
+        (typeId === _enum__WEBPACK_IMPORTED_MODULE_0__["Type"].Int && type.bitWidth !== 64) ||
+        (typeId === _enum__WEBPACK_IMPORTED_MODULE_0__["Type"].Time && type.bitWidth !== 64) ||
+        (typeId === _enum__WEBPACK_IMPORTED_MODULE_0__["Type"].Float && type.precision > 0 /* Precision.HALF */))) {
         return vector.values.subarray(0, length)[Symbol.iterator]();
     }
     // Otherwise, iterate manually
@@ -16811,7 +16613,7 @@ function vectorIterator(vector) {
         for (let index = -1; ++index < length;) {
             yield getFn(vector, index);
         }
-    })(get_1.instance.getVisitFn(vector));
+    })(_get__WEBPACK_IMPORTED_MODULE_3__["instance"].getVisitFn(vector));
 }
 IteratorVisitor.prototype.visitNull = vectorIterator;
 IteratorVisitor.prototype.visitBool = vectorIterator;
@@ -16857,12 +16659,25 @@ IteratorVisitor.prototype.visitIntervalYearMonth = vectorIterator;
 IteratorVisitor.prototype.visitFixedSizeList = vectorIterator;
 IteratorVisitor.prototype.visitMap = vectorIterator;
 /** @ignore */
-exports.instance = new IteratorVisitor();
+const instance = new IteratorVisitor();
+
+//# sourceMappingURL=iterator.mjs.map
 
 
+/***/ }),
 
-},{"../enum":34,"../util/bit":57,"../visitor":91,"./get":94}],97:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/visitor/jsontypeassembler.mjs":
+/*!*****************************************************************!*\
+  !*** ./node_modules/apache-arrow/visitor/jsontypeassembler.mjs ***!
+  \*****************************************************************/
+/*! exports provided: JSONTypeAssembler */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "JSONTypeAssembler", function() { return JSONTypeAssembler; });
+/* harmony import */ var _visitor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../visitor */ "./node_modules/apache-arrow/visitor.mjs");
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../enum */ "./node_modules/apache-arrow/enum.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -16879,57 +16694,56 @@ exports.instance = new IteratorVisitor();
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const visitor_1 = require("../visitor");
-const enum_1 = require("../enum");
+
+
 /** @ignore */
-class JSONTypeAssembler extends visitor_1.Visitor {
+class JSONTypeAssembler extends _visitor__WEBPACK_IMPORTED_MODULE_0__["Visitor"] {
     visit(node) {
         return node == null ? undefined : super.visit(node);
     }
     visitNull({ typeId }) {
-        return { 'name': enum_1.ArrowType[typeId].toLowerCase() };
+        return { 'name': _enum__WEBPACK_IMPORTED_MODULE_1__["ArrowType"][typeId].toLowerCase() };
     }
     visitInt({ typeId, bitWidth, isSigned }) {
-        return { 'name': enum_1.ArrowType[typeId].toLowerCase(), 'bitWidth': bitWidth, 'isSigned': isSigned };
+        return { 'name': _enum__WEBPACK_IMPORTED_MODULE_1__["ArrowType"][typeId].toLowerCase(), 'bitWidth': bitWidth, 'isSigned': isSigned };
     }
     visitFloat({ typeId, precision }) {
-        return { 'name': enum_1.ArrowType[typeId].toLowerCase(), 'precision': enum_1.Precision[precision] };
+        return { 'name': _enum__WEBPACK_IMPORTED_MODULE_1__["ArrowType"][typeId].toLowerCase(), 'precision': _enum__WEBPACK_IMPORTED_MODULE_1__["Precision"][precision] };
     }
     visitBinary({ typeId }) {
-        return { 'name': enum_1.ArrowType[typeId].toLowerCase() };
+        return { 'name': _enum__WEBPACK_IMPORTED_MODULE_1__["ArrowType"][typeId].toLowerCase() };
     }
     visitBool({ typeId }) {
-        return { 'name': enum_1.ArrowType[typeId].toLowerCase() };
+        return { 'name': _enum__WEBPACK_IMPORTED_MODULE_1__["ArrowType"][typeId].toLowerCase() };
     }
     visitUtf8({ typeId }) {
-        return { 'name': enum_1.ArrowType[typeId].toLowerCase() };
+        return { 'name': _enum__WEBPACK_IMPORTED_MODULE_1__["ArrowType"][typeId].toLowerCase() };
     }
     visitDecimal({ typeId, scale, precision }) {
-        return { 'name': enum_1.ArrowType[typeId].toLowerCase(), 'scale': scale, 'precision': precision };
+        return { 'name': _enum__WEBPACK_IMPORTED_MODULE_1__["ArrowType"][typeId].toLowerCase(), 'scale': scale, 'precision': precision };
     }
     visitDate({ typeId, unit }) {
-        return { 'name': enum_1.ArrowType[typeId].toLowerCase(), 'unit': enum_1.DateUnit[unit] };
+        return { 'name': _enum__WEBPACK_IMPORTED_MODULE_1__["ArrowType"][typeId].toLowerCase(), 'unit': _enum__WEBPACK_IMPORTED_MODULE_1__["DateUnit"][unit] };
     }
     visitTime({ typeId, unit, bitWidth }) {
-        return { 'name': enum_1.ArrowType[typeId].toLowerCase(), 'unit': enum_1.TimeUnit[unit], bitWidth };
+        return { 'name': _enum__WEBPACK_IMPORTED_MODULE_1__["ArrowType"][typeId].toLowerCase(), 'unit': _enum__WEBPACK_IMPORTED_MODULE_1__["TimeUnit"][unit], bitWidth };
     }
     visitTimestamp({ typeId, timezone, unit }) {
-        return { 'name': enum_1.ArrowType[typeId].toLowerCase(), 'unit': enum_1.TimeUnit[unit], timezone };
+        return { 'name': _enum__WEBPACK_IMPORTED_MODULE_1__["ArrowType"][typeId].toLowerCase(), 'unit': _enum__WEBPACK_IMPORTED_MODULE_1__["TimeUnit"][unit], timezone };
     }
     visitInterval({ typeId, unit }) {
-        return { 'name': enum_1.ArrowType[typeId].toLowerCase(), 'unit': enum_1.IntervalUnit[unit] };
+        return { 'name': _enum__WEBPACK_IMPORTED_MODULE_1__["ArrowType"][typeId].toLowerCase(), 'unit': _enum__WEBPACK_IMPORTED_MODULE_1__["IntervalUnit"][unit] };
     }
     visitList({ typeId }) {
-        return { 'name': enum_1.ArrowType[typeId].toLowerCase() };
+        return { 'name': _enum__WEBPACK_IMPORTED_MODULE_1__["ArrowType"][typeId].toLowerCase() };
     }
     visitStruct({ typeId }) {
-        return { 'name': enum_1.ArrowType[typeId].toLowerCase() };
+        return { 'name': _enum__WEBPACK_IMPORTED_MODULE_1__["ArrowType"][typeId].toLowerCase() };
     }
     visitUnion({ typeId, mode, typeIds }) {
         return {
-            'name': enum_1.ArrowType[typeId].toLowerCase(),
-            'mode': enum_1.UnionMode[mode],
+            'name': _enum__WEBPACK_IMPORTED_MODULE_1__["ArrowType"][typeId].toLowerCase(),
+            'mode': _enum__WEBPACK_IMPORTED_MODULE_1__["UnionMode"][mode],
             'typeIds': [...typeIds]
         };
     }
@@ -16937,21 +16751,40 @@ class JSONTypeAssembler extends visitor_1.Visitor {
         return this.visit(node.dictionary);
     }
     visitFixedSizeBinary({ typeId, byteWidth }) {
-        return { 'name': enum_1.ArrowType[typeId].toLowerCase(), 'byteWidth': byteWidth };
+        return { 'name': _enum__WEBPACK_IMPORTED_MODULE_1__["ArrowType"][typeId].toLowerCase(), 'byteWidth': byteWidth };
     }
     visitFixedSizeList({ typeId, listSize }) {
-        return { 'name': enum_1.ArrowType[typeId].toLowerCase(), 'listSize': listSize };
+        return { 'name': _enum__WEBPACK_IMPORTED_MODULE_1__["ArrowType"][typeId].toLowerCase(), 'listSize': listSize };
     }
     visitMap({ typeId, keysSorted }) {
-        return { 'name': enum_1.ArrowType[typeId].toLowerCase(), 'keysSorted': keysSorted };
+        return { 'name': _enum__WEBPACK_IMPORTED_MODULE_1__["ArrowType"][typeId].toLowerCase(), 'keysSorted': keysSorted };
     }
 }
-exports.JSONTypeAssembler = JSONTypeAssembler;
+
+//# sourceMappingURL=jsontypeassembler.mjs.map
 
 
+/***/ }),
 
-},{"../enum":34,"../visitor":91}],98:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/visitor/jsonvectorassembler.mjs":
+/*!*******************************************************************!*\
+  !*** ./node_modules/apache-arrow/visitor/jsonvectorassembler.mjs ***!
+  \*******************************************************************/
+/*! exports provided: JSONVectorAssembler */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "JSONVectorAssembler", function() { return JSONVectorAssembler; });
+/* harmony import */ var _util_bn__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/bn */ "./node_modules/apache-arrow/util/bn.mjs");
+/* harmony import */ var _column__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../column */ "./node_modules/apache-arrow/column.mjs");
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../vector */ "./node_modules/apache-arrow/vector.mjs");
+/* harmony import */ var _visitor__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../visitor */ "./node_modules/apache-arrow/visitor.mjs");
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony import */ var _recordbatch__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../recordbatch */ "./node_modules/apache-arrow/recordbatch.mjs");
+/* harmony import */ var _util_bit__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../util/bit */ "./node_modules/apache-arrow/util/bit.mjs");
+/* harmony import */ var _util_args__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../util/args */ "./node_modules/apache-arrow/util/args.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -16968,40 +16801,39 @@ exports.JSONTypeAssembler = JSONTypeAssembler;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const bn_1 = require("../util/bn");
-const column_1 = require("../column");
-const vector_1 = require("../vector");
-const visitor_1 = require("../visitor");
-const enum_1 = require("../enum");
-const recordbatch_1 = require("../recordbatch");
-const enum_2 = require("../enum");
-const bit_1 = require("../util/bit");
-const args_1 = require("../util/args");
-const type_1 = require("../type");
+
+
+
+
+
+
+
+
+
+
 /** @ignore */
-class JSONVectorAssembler extends visitor_1.Visitor {
+class JSONVectorAssembler extends _visitor__WEBPACK_IMPORTED_MODULE_3__["Visitor"] {
     /** @nocollapse */
     static assemble(...args) {
-        return new JSONVectorAssembler().visitMany(args_1.selectColumnChildrenArgs(recordbatch_1.RecordBatch, args));
+        return new JSONVectorAssembler().visitMany(Object(_util_args__WEBPACK_IMPORTED_MODULE_7__["selectColumnChildrenArgs"])(_recordbatch__WEBPACK_IMPORTED_MODULE_5__["RecordBatch"], args));
     }
     visit(column) {
         const { data, name, length } = column;
         const { offset, nullCount, nullBitmap } = data;
-        const type = type_1.DataType.isDictionary(column.type) ? column.type.indices : column.type;
-        const buffers = Object.assign([], data.buffers, { [enum_1.BufferType.VALIDITY]: undefined });
+        const type = _type__WEBPACK_IMPORTED_MODULE_8__["DataType"].isDictionary(column.type) ? column.type.indices : column.type;
+        const buffers = Object.assign([], data.buffers, { [_enum__WEBPACK_IMPORTED_MODULE_4__["BufferType"].VALIDITY]: undefined });
         return {
             'name': name,
             'count': length,
-            'VALIDITY': type_1.DataType.isNull(type) ? undefined
+            'VALIDITY': _type__WEBPACK_IMPORTED_MODULE_8__["DataType"].isNull(type) ? undefined
                 : nullCount <= 0 ? Array.from({ length }, () => 1)
-                    : [...bit_1.iterateBits(nullBitmap, offset, length, null, bit_1.getBit)],
-            ...super.visit(vector_1.Vector.new(data.clone(type, offset, length, 0, buffers)))
+                    : [...Object(_util_bit__WEBPACK_IMPORTED_MODULE_6__["iterateBits"])(nullBitmap, offset, length, null, _util_bit__WEBPACK_IMPORTED_MODULE_6__["getBit"])],
+            ...super.visit(_vector__WEBPACK_IMPORTED_MODULE_2__["Vector"].new(data.clone(type, offset, length, 0, buffers)))
         };
     }
     visitNull() { return {}; }
     visitBool({ values, offset, length }) {
-        return { 'DATA': [...bit_1.iterateBits(values, offset, length, null, bit_1.getBool)] };
+        return { 'DATA': [...Object(_util_bit__WEBPACK_IMPORTED_MODULE_6__["iterateBits"])(values, offset, length, null, _util_bit__WEBPACK_IMPORTED_MODULE_6__["getBool"])] };
     }
     visitInt(vector) {
         return {
@@ -17024,7 +16856,7 @@ class JSONVectorAssembler extends visitor_1.Visitor {
     }
     visitDate(vector) {
         return {
-            'DATA': vector.type.unit === enum_2.DateUnit.DAY
+            'DATA': vector.type.unit === _enum__WEBPACK_IMPORTED_MODULE_4__["DateUnit"].DAY
                 ? [...vector.values]
                 : [...bigNumsToStrings(vector.values, 2)]
         };
@@ -17034,7 +16866,7 @@ class JSONVectorAssembler extends visitor_1.Visitor {
     }
     visitTime(vector) {
         return {
-            'DATA': vector.type.unit < enum_2.TimeUnit.MICROSECOND
+            'DATA': vector.type.unit < _enum__WEBPACK_IMPORTED_MODULE_4__["TimeUnit"].MICROSECOND
                 ? [...vector.values]
                 : [...bigNumsToStrings(vector.values, 2)]
         };
@@ -17045,19 +16877,19 @@ class JSONVectorAssembler extends visitor_1.Visitor {
     visitList(vector) {
         return {
             'OFFSET': [...vector.valueOffsets],
-            'children': vector.type.children.map((f, i) => this.visit(new column_1.Column(f, [vector.getChildAt(i)])))
+            'children': vector.type.children.map((f, i) => this.visit(new _column__WEBPACK_IMPORTED_MODULE_1__["Column"](f, [vector.getChildAt(i)])))
         };
     }
     visitStruct(vector) {
         return {
-            'children': vector.type.children.map((f, i) => this.visit(new column_1.Column(f, [vector.getChildAt(i)])))
+            'children': vector.type.children.map((f, i) => this.visit(new _column__WEBPACK_IMPORTED_MODULE_1__["Column"](f, [vector.getChildAt(i)])))
         };
     }
     visitUnion(vector) {
         return {
             'TYPE': [...vector.typeIds],
-            'OFFSET': vector.type.mode === enum_2.UnionMode.Dense ? [...vector.valueOffsets] : undefined,
-            'children': vector.type.children.map((f, i) => this.visit(new column_1.Column(f, [vector.getChildAt(i)])))
+            'OFFSET': vector.type.mode === _enum__WEBPACK_IMPORTED_MODULE_4__["UnionMode"].Dense ? [...vector.valueOffsets] : undefined,
+            'children': vector.type.children.map((f, i) => this.visit(new _column__WEBPACK_IMPORTED_MODULE_1__["Column"](f, [vector.getChildAt(i)])))
         };
     }
     visitInterval(vector) {
@@ -17065,17 +16897,16 @@ class JSONVectorAssembler extends visitor_1.Visitor {
     }
     visitFixedSizeList(vector) {
         return {
-            'children': vector.type.children.map((f, i) => this.visit(new column_1.Column(f, [vector.getChildAt(i)])))
+            'children': vector.type.children.map((f, i) => this.visit(new _column__WEBPACK_IMPORTED_MODULE_1__["Column"](f, [vector.getChildAt(i)])))
         };
     }
     visitMap(vector) {
         return {
             'OFFSET': [...vector.valueOffsets],
-            'children': vector.type.children.map((f, i) => this.visit(new column_1.Column(f, [vector.getChildAt(i)])))
+            'children': vector.type.children.map((f, i) => this.visit(new _column__WEBPACK_IMPORTED_MODULE_1__["Column"](f, [vector.getChildAt(i)])))
         };
     }
 }
-exports.JSONVectorAssembler = JSONVectorAssembler;
 /** @ignore */
 function* binaryToString(vector) {
     for (const octets of vector) {
@@ -17087,14 +16918,32 @@ function* binaryToString(vector) {
 /** @ignore */
 function* bigNumsToStrings(values, stride) {
     for (let i = -1, n = values.length / stride; ++i < n;) {
-        yield `${bn_1.BN.new(values.subarray((i + 0) * stride, (i + 1) * stride), false)}`;
+        yield `${_util_bn__WEBPACK_IMPORTED_MODULE_0__["BN"].new(values.subarray((i + 0) * stride, (i + 1) * stride), false)}`;
     }
 }
 
+//# sourceMappingURL=jsonvectorassembler.mjs.map
 
 
-},{"../column":30,"../enum":34,"../recordbatch":52,"../type":55,"../util/args":56,"../util/bit":57,"../util/bn":58,"../vector":68,"../visitor":91}],99:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/visitor/set.mjs":
+/*!***************************************************!*\
+  !*** ./node_modules/apache-arrow/visitor/set.mjs ***!
+  \***************************************************/
+/*! exports provided: SetVisitor, instance */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SetVisitor", function() { return SetVisitor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "instance", function() { return instance; });
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../vector */ "./node_modules/apache-arrow/vector.mjs");
+/* harmony import */ var _visitor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../visitor */ "./node_modules/apache-arrow/visitor.mjs");
+/* harmony import */ var _util_utf8__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/utf8 */ "./node_modules/apache-arrow/util/utf8.mjs");
+/* harmony import */ var _util_math__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../util/math */ "./node_modules/apache-arrow/util/math.mjs");
+/* harmony import */ var _util_buffer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../util/buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../enum */ "./node_modules/apache-arrow/enum.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -17111,17 +16960,15 @@ function* bigNumsToStrings(values, stride) {
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const vector_1 = require("../vector");
-const visitor_1 = require("../visitor");
-const utf8_1 = require("../util/utf8");
-const math_1 = require("../util/math");
-const buffer_1 = require("../util/buffer");
-const enum_1 = require("../enum");
+
+
+
+
+
+
 /** @ignore */
-class SetVisitor extends visitor_1.Visitor {
+class SetVisitor extends _visitor__WEBPACK_IMPORTED_MODULE_1__["Visitor"] {
 }
-exports.SetVisitor = SetVisitor;
 /** @ignore */
 const setEpochMsToDays = (data, index, epochMs) => { data[index] = (epochMs / 86400000) | 0; };
 /** @ignore */
@@ -17159,7 +17006,7 @@ const setDateMillisecond = ({ values }, index, value) => { setEpochMsToMilliseco
 /** @ignore */
 const setNumeric = ({ stride, values }, index, value) => { values[stride * index] = value; };
 /** @ignore */
-const setFloat16 = ({ stride, values }, index, value) => { values[stride * index] = math_1.float64ToUint16(value); };
+const setFloat16 = ({ stride, values }, index, value) => { values[stride * index] = Object(_util_math__WEBPACK_IMPORTED_MODULE_3__["float64ToUint16"])(value); };
 /** @ignore */
 const setNumericX2 = (vector, index, value) => {
     switch (typeof value) {
@@ -17172,7 +17019,7 @@ const setNumericX2 = (vector, index, value) => {
         default:
             const val = value;
             const { stride, ArrayType } = vector;
-            const long = buffer_1.toArrayBufferView(ArrayType, val);
+            const long = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_4__["toArrayBufferView"])(ArrayType, val);
             vector.values.set(long.subarray(0, stride), stride * index);
     }
 };
@@ -17182,7 +17029,7 @@ const setFixedSizeBinary = ({ stride, values }, index, value) => { values.set(va
 const setBinary = ({ values, valueOffsets }, index, value) => setVariableWidthBytes(values, valueOffsets, index, value);
 /** @ignore */
 const setUtf8 = ({ values, valueOffsets }, index, value) => {
-    setVariableWidthBytes(values, valueOffsets, index, utf8_1.encodeUtf8(value));
+    setVariableWidthBytes(values, valueOffsets, index, Object(_util_utf8__WEBPACK_IMPORTED_MODULE_2__["encodeUtf8"])(value));
 };
 /* istanbul ignore next */
 /** @ignore */
@@ -17194,13 +17041,13 @@ const setInt = (vector, index, value) => {
 /* istanbul ignore next */
 /** @ignore */
 const setFloat = (vector, index, value) => {
-    vector.type.precision !== enum_1.Precision.HALF
+    vector.type.precision !== _enum__WEBPACK_IMPORTED_MODULE_5__["Precision"].HALF
         ? setNumeric(vector, index, value)
         : setFloat16(vector, index, value);
 };
 /* istanbul ignore next */
 const setDate = (vector, index, value) => {
-    vector.type.unit === enum_1.DateUnit.DAY
+    vector.type.unit === _enum__WEBPACK_IMPORTED_MODULE_5__["DateUnit"].DAY
         ? setDateDay(vector, index, value)
         : setDateMillisecond(vector, index, value);
 };
@@ -17216,10 +17063,10 @@ const setTimestampNanosecond = ({ values }, index, value) => setEpochMsToNanosec
 /** @ignore */
 const setTimestamp = (vector, index, value) => {
     switch (vector.type.unit) {
-        case enum_1.TimeUnit.SECOND: return setTimestampSecond(vector, index, value);
-        case enum_1.TimeUnit.MILLISECOND: return setTimestampMillisecond(vector, index, value);
-        case enum_1.TimeUnit.MICROSECOND: return setTimestampMicrosecond(vector, index, value);
-        case enum_1.TimeUnit.NANOSECOND: return setTimestampNanosecond(vector, index, value);
+        case _enum__WEBPACK_IMPORTED_MODULE_5__["TimeUnit"].SECOND: return setTimestampSecond(vector, index, value);
+        case _enum__WEBPACK_IMPORTED_MODULE_5__["TimeUnit"].MILLISECOND: return setTimestampMillisecond(vector, index, value);
+        case _enum__WEBPACK_IMPORTED_MODULE_5__["TimeUnit"].MICROSECOND: return setTimestampMicrosecond(vector, index, value);
+        case _enum__WEBPACK_IMPORTED_MODULE_5__["TimeUnit"].NANOSECOND: return setTimestampNanosecond(vector, index, value);
     }
 };
 /** @ignore */
@@ -17234,10 +17081,10 @@ const setTimeNanosecond = ({ values }, index, value) => { values.set(value.subar
 /** @ignore */
 const setTime = (vector, index, value) => {
     switch (vector.type.unit) {
-        case enum_1.TimeUnit.SECOND: return setTimeSecond(vector, index, value);
-        case enum_1.TimeUnit.MILLISECOND: return setTimeMillisecond(vector, index, value);
-        case enum_1.TimeUnit.MICROSECOND: return setTimeMicrosecond(vector, index, value);
-        case enum_1.TimeUnit.NANOSECOND: return setTimeNanosecond(vector, index, value);
+        case _enum__WEBPACK_IMPORTED_MODULE_5__["TimeUnit"].SECOND: return setTimeSecond(vector, index, value);
+        case _enum__WEBPACK_IMPORTED_MODULE_5__["TimeUnit"].MILLISECOND: return setTimeMillisecond(vector, index, value);
+        case _enum__WEBPACK_IMPORTED_MODULE_5__["TimeUnit"].MICROSECOND: return setTimeMicrosecond(vector, index, value);
+        case _enum__WEBPACK_IMPORTED_MODULE_5__["TimeUnit"].NANOSECOND: return setTimeNanosecond(vector, index, value);
     }
 };
 /** @ignore */
@@ -17264,7 +17111,7 @@ const setMap = (vector, index, value) => {
 /** @ignore */
 const setStruct = (vector, index, value) => {
     const setValue = value instanceof Map ? _setStructMapValue(index, value) :
-        value instanceof vector_1.Vector ? _setStructVectorValue(index, value) :
+        value instanceof _vector__WEBPACK_IMPORTED_MODULE_0__["Vector"] ? _setStructVectorValue(index, value) :
             Array.isArray(value) ? _setStructArrayValue(index, value) :
                 _setStructObjectValue(index, value);
     vector.type.children.forEach((f, i) => setValue(vector.getChildAt(i), f, i));
@@ -17272,7 +17119,7 @@ const setStruct = (vector, index, value) => {
 /* istanbul ignore next */
 /** @ignore */
 const setUnion = (vector, index, value) => {
-    vector.type.mode === enum_1.UnionMode.Dense ?
+    vector.type.mode === _enum__WEBPACK_IMPORTED_MODULE_5__["UnionMode"].Dense ?
         setDenseUnion(vector, index, value) :
         setSparseUnion(vector, index, value);
 };
@@ -17298,7 +17145,7 @@ const setDictionary = (vector, index, value) => {
 /* istanbul ignore next */
 /** @ignore */
 const setIntervalValue = (vector, index, value) => {
-    (vector.type.unit === enum_1.IntervalUnit.DAY_TIME)
+    (vector.type.unit === _enum__WEBPACK_IMPORTED_MODULE_5__["IntervalUnit"].DAY_TIME)
         ? setIntervalDayTime(vector, index, value)
         : setIntervalYearMonth(vector, index, value);
 };
@@ -17356,12 +17203,27 @@ SetVisitor.prototype.visitIntervalYearMonth = setIntervalYearMonth;
 SetVisitor.prototype.visitFixedSizeList = setFixedSizeList;
 SetVisitor.prototype.visitMap = setMap;
 /** @ignore */
-exports.instance = new SetVisitor();
+const instance = new SetVisitor();
+
+//# sourceMappingURL=set.mjs.map
 
 
+/***/ }),
 
-},{"../enum":34,"../util/buffer":59,"../util/math":63,"../util/utf8":66,"../vector":68,"../visitor":91}],100:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/visitor/toarray.mjs":
+/*!*******************************************************!*\
+  !*** ./node_modules/apache-arrow/visitor/toarray.mjs ***!
+  \*******************************************************/
+/*! exports provided: ToArrayVisitor, instance */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ToArrayVisitor", function() { return ToArrayVisitor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "instance", function() { return instance; });
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony import */ var _visitor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../visitor */ "./node_modules/apache-arrow/visitor.mjs");
+/* harmony import */ var _iterator__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./iterator */ "./node_modules/apache-arrow/visitor/iterator.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -17378,28 +17240,26 @@ exports.instance = new SetVisitor();
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const enum_1 = require("../enum");
-const visitor_1 = require("../visitor");
-const iterator_1 = require("./iterator");
+
+
+
 /** @ignore */
-class ToArrayVisitor extends visitor_1.Visitor {
+class ToArrayVisitor extends _visitor__WEBPACK_IMPORTED_MODULE_1__["Visitor"] {
 }
-exports.ToArrayVisitor = ToArrayVisitor;
 /** @ignore */
 function arrayOfVector(vector) {
     const { type, length, stride } = vector;
     // Fast case, return subarray if possible
     switch (type.typeId) {
-        case enum_1.Type.Int:
-        case enum_1.Type.Float:
-        case enum_1.Type.Decimal:
-        case enum_1.Type.Time:
-        case enum_1.Type.Timestamp:
+        case _enum__WEBPACK_IMPORTED_MODULE_0__["Type"].Int:
+        case _enum__WEBPACK_IMPORTED_MODULE_0__["Type"].Float:
+        case _enum__WEBPACK_IMPORTED_MODULE_0__["Type"].Decimal:
+        case _enum__WEBPACK_IMPORTED_MODULE_0__["Type"].Time:
+        case _enum__WEBPACK_IMPORTED_MODULE_0__["Type"].Timestamp:
             return vector.values.subarray(0, length * stride);
     }
     // Otherwise if not primitive, slow copy
-    return [...iterator_1.instance.visit(vector)];
+    return [..._iterator__WEBPACK_IMPORTED_MODULE_2__["instance"].visit(vector)];
 }
 ToArrayVisitor.prototype.visitNull = arrayOfVector;
 ToArrayVisitor.prototype.visitBool = arrayOfVector;
@@ -17445,12 +17305,27 @@ ToArrayVisitor.prototype.visitIntervalYearMonth = arrayOfVector;
 ToArrayVisitor.prototype.visitFixedSizeList = arrayOfVector;
 ToArrayVisitor.prototype.visitMap = arrayOfVector;
 /** @ignore */
-exports.instance = new ToArrayVisitor();
+const instance = new ToArrayVisitor();
+
+//# sourceMappingURL=toarray.mjs.map
 
 
+/***/ }),
 
-},{"../enum":34,"../visitor":91,"./iterator":96}],101:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/visitor/typeassembler.mjs":
+/*!*************************************************************!*\
+  !*** ./node_modules/apache-arrow/visitor/typeassembler.mjs ***!
+  \*************************************************************/
+/*! exports provided: TypeAssembler, instance */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TypeAssembler", function() { return TypeAssembler; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "instance", function() { return instance; });
+/* harmony import */ var flatbuffers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! flatbuffers */ "./node_modules/flatbuffers/js/flatbuffers.mjs");
+/* harmony import */ var _fb_Schema__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../fb/Schema */ "./node_modules/apache-arrow/fb/Schema.mjs");
+/* harmony import */ var _visitor__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../visitor */ "./node_modules/apache-arrow/visitor.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -17467,31 +17342,30 @@ exports.instance = new ToArrayVisitor();
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const flatbuffers_1 = require("flatbuffers");
-var Long = flatbuffers_1.flatbuffers.Long;
-const Schema_ = require("../fb/Schema");
-const visitor_1 = require("../visitor");
-var Null = Schema_.org.apache.arrow.flatbuf.Null;
-var Int = Schema_.org.apache.arrow.flatbuf.Int;
-var FloatingPoint = Schema_.org.apache.arrow.flatbuf.FloatingPoint;
-var Binary = Schema_.org.apache.arrow.flatbuf.Binary;
-var Bool = Schema_.org.apache.arrow.flatbuf.Bool;
-var Utf8 = Schema_.org.apache.arrow.flatbuf.Utf8;
-var Decimal = Schema_.org.apache.arrow.flatbuf.Decimal;
-var Date = Schema_.org.apache.arrow.flatbuf.Date;
-var Time = Schema_.org.apache.arrow.flatbuf.Time;
-var Timestamp = Schema_.org.apache.arrow.flatbuf.Timestamp;
-var Interval = Schema_.org.apache.arrow.flatbuf.Interval;
-var List = Schema_.org.apache.arrow.flatbuf.List;
-var Struct = Schema_.org.apache.arrow.flatbuf.Struct_;
-var Union = Schema_.org.apache.arrow.flatbuf.Union;
-var DictionaryEncoding = Schema_.org.apache.arrow.flatbuf.DictionaryEncoding;
-var FixedSizeBinary = Schema_.org.apache.arrow.flatbuf.FixedSizeBinary;
-var FixedSizeList = Schema_.org.apache.arrow.flatbuf.FixedSizeList;
-var Map_ = Schema_.org.apache.arrow.flatbuf.Map;
+
+var Long = flatbuffers__WEBPACK_IMPORTED_MODULE_0__["flatbuffers"].Long;
+
+
+var Null = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Null;
+var Int = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Int;
+var FloatingPoint = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.FloatingPoint;
+var Binary = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Binary;
+var Bool = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Bool;
+var Utf8 = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Utf8;
+var Decimal = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Decimal;
+var Date = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Date;
+var Time = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Time;
+var Timestamp = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Timestamp;
+var Interval = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Interval;
+var List = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.List;
+var Struct = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Struct_;
+var Union = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Union;
+var DictionaryEncoding = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.DictionaryEncoding;
+var FixedSizeBinary = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.FixedSizeBinary;
+var FixedSizeList = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.FixedSizeList;
+var Map_ = _fb_Schema__WEBPACK_IMPORTED_MODULE_1__["org"].apache.arrow.flatbuf.Map;
 /** @ignore */
-class TypeAssembler extends visitor_1.Visitor {
+class TypeAssembler extends _visitor__WEBPACK_IMPORTED_MODULE_2__["Visitor"] {
     visit(node, builder) {
         return (node == null || builder == null) ? undefined : super.visit(node, builder);
     }
@@ -17595,14 +17469,26 @@ class TypeAssembler extends visitor_1.Visitor {
         return Map_.endMap(b);
     }
 }
-exports.TypeAssembler = TypeAssembler;
 /** @ignore */
-exports.instance = new TypeAssembler();
+const instance = new TypeAssembler();
+
+//# sourceMappingURL=typeassembler.mjs.map
 
 
+/***/ }),
 
-},{"../fb/Schema":37,"../visitor":91,"flatbuffers":106}],102:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/visitor/typecomparator.mjs":
+/*!**************************************************************!*\
+  !*** ./node_modules/apache-arrow/visitor/typecomparator.mjs ***!
+  \**************************************************************/
+/*! exports provided: TypeComparator, instance */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TypeComparator", function() { return TypeComparator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "instance", function() { return instance; });
+/* harmony import */ var _visitor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../visitor */ "./node_modules/apache-arrow/visitor.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -17619,28 +17505,26 @@ exports.instance = new TypeAssembler();
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const visitor_1 = require("../visitor");
+
 /** @ignore */
-class TypeComparator extends visitor_1.Visitor {
+class TypeComparator extends _visitor__WEBPACK_IMPORTED_MODULE_0__["Visitor"] {
     compareSchemas(schema, other) {
         return (schema === other) || (other instanceof schema.constructor &&
-            exports.instance.compareFields(schema.fields, other.fields));
+            instance.compareFields(schema.fields, other.fields));
     }
     compareFields(fields, others) {
         return (fields === others) || (Array.isArray(fields) &&
             Array.isArray(others) &&
             fields.length === others.length &&
-            fields.every((f, i) => exports.instance.compareField(f, others[i])));
+            fields.every((f, i) => instance.compareField(f, others[i])));
     }
     compareField(field, other) {
         return (field === other) || (other instanceof field.constructor &&
             field.name === other.name &&
             field.nullable === other.nullable &&
-            exports.instance.visit(field.type, other.type));
+            instance.visit(field.type, other.type));
     }
 }
-exports.TypeComparator = TypeComparator;
 function compareConstructor(type, other) {
     return other instanceof type.constructor;
 }
@@ -17677,25 +17561,25 @@ function compareTime(type, other) {
 function compareList(type, other) {
     return (type === other) || (compareConstructor(type, other) &&
         type.children.length === other.children.length &&
-        exports.instance.compareFields(type.children, other.children));
+        instance.compareFields(type.children, other.children));
 }
 function compareStruct(type, other) {
     return (type === other) || (compareConstructor(type, other) &&
         type.children.length === other.children.length &&
-        exports.instance.compareFields(type.children, other.children));
+        instance.compareFields(type.children, other.children));
 }
 function compareUnion(type, other) {
     return (type === other) || (compareConstructor(type, other) &&
         type.mode === other.mode &&
         type.typeIds.every((x, i) => x === other.typeIds[i]) &&
-        exports.instance.compareFields(type.children, other.children));
+        instance.compareFields(type.children, other.children));
 }
 function compareDictionary(type, other) {
     return (type === other) || (compareConstructor(type, other) &&
         type.id === other.id &&
         type.isOrdered === other.isOrdered &&
-        exports.instance.visit(type.indices, other.indices) &&
-        exports.instance.visit(type.dictionary, other.dictionary));
+        instance.visit(type.indices, other.indices) &&
+        instance.visit(type.dictionary, other.dictionary));
 }
 function compareInterval(type, other) {
     return (type === other) || (compareConstructor(type, other) &&
@@ -17705,13 +17589,13 @@ function compareFixedSizeList(type, other) {
     return (type === other) || (compareConstructor(type, other) &&
         type.listSize === other.listSize &&
         type.children.length === other.children.length &&
-        exports.instance.compareFields(type.children, other.children));
+        instance.compareFields(type.children, other.children));
 }
 function compareMap(type, other) {
     return (type === other) || (compareConstructor(type, other) &&
         type.keysSorted === other.keysSorted &&
         type.children.length === other.children.length &&
-        exports.instance.compareFields(type.children, other.children));
+        instance.compareFields(type.children, other.children));
 }
 TypeComparator.prototype.visitNull = compareAny;
 TypeComparator.prototype.visitBool = compareAny;
@@ -17757,12 +17641,31 @@ TypeComparator.prototype.visitIntervalYearMonth = compareInterval;
 TypeComparator.prototype.visitFixedSizeList = compareFixedSizeList;
 TypeComparator.prototype.visitMap = compareMap;
 /** @ignore */
-exports.instance = new TypeComparator();
+const instance = new TypeComparator();
+
+//# sourceMappingURL=typecomparator.mjs.map
 
 
+/***/ }),
 
-},{"../visitor":91}],103:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/visitor/vectorassembler.mjs":
+/*!***************************************************************!*\
+  !*** ./node_modules/apache-arrow/visitor/vectorassembler.mjs ***!
+  \***************************************************************/
+/*! exports provided: VectorAssembler */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "VectorAssembler", function() { return VectorAssembler; });
+/* harmony import */ var _visitor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../visitor */ "./node_modules/apache-arrow/visitor.mjs");
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony import */ var _recordbatch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../recordbatch */ "./node_modules/apache-arrow/recordbatch.mjs");
+/* harmony import */ var _util_buffer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../util/buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
+/* harmony import */ var _util_bit__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../util/bit */ "./node_modules/apache-arrow/util/bit.mjs");
+/* harmony import */ var _util_args__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../util/args */ "./node_modules/apache-arrow/util/args.mjs");
+/* harmony import */ var _ipc_metadata_message__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../ipc/metadata/message */ "./node_modules/apache-arrow/ipc/metadata/message.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -17779,17 +17682,16 @@ exports.instance = new TypeComparator();
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const visitor_1 = require("../visitor");
-const enum_1 = require("../enum");
-const recordbatch_1 = require("../recordbatch");
-const buffer_1 = require("../util/buffer");
-const bit_1 = require("../util/bit");
-const args_1 = require("../util/args");
-const message_1 = require("../ipc/metadata/message");
-const type_1 = require("../type");
+
+
+
+
+
+
+
+
 /** @ignore */
-class VectorAssembler extends visitor_1.Visitor {
+class VectorAssembler extends _visitor__WEBPACK_IMPORTED_MODULE_0__["Visitor"] {
     constructor() {
         super();
         this._byteLength = 0;
@@ -17800,23 +17702,23 @@ class VectorAssembler extends visitor_1.Visitor {
     /** @nocollapse */
     static assemble(...args) {
         const assembler = new VectorAssembler();
-        const vectorChildren = args_1.selectVectorChildrenArgs(recordbatch_1.RecordBatch, args);
+        const vectorChildren = Object(_util_args__WEBPACK_IMPORTED_MODULE_5__["selectVectorChildrenArgs"])(_recordbatch__WEBPACK_IMPORTED_MODULE_2__["RecordBatch"], args);
         const [assembleResult = assembler] = assembler.visitMany(vectorChildren);
         return assembleResult;
     }
     visit(vector) {
-        if (!type_1.DataType.isDictionary(vector.type)) {
+        if (!_type__WEBPACK_IMPORTED_MODULE_7__["DataType"].isDictionary(vector.type)) {
             const { data, length, nullCount } = vector;
             if (length > 2147483647) {
                 /* istanbul ignore next */
                 throw new RangeError('Cannot write arrays larger than 2^31 - 1 in length');
             }
-            if (!type_1.DataType.isNull(vector.type)) {
+            if (!_type__WEBPACK_IMPORTED_MODULE_7__["DataType"].isNull(vector.type)) {
                 addBuffer.call(this, nullCount <= 0
                     ? new Uint8Array(0) // placeholder validity buffer
-                    : bit_1.truncateBitmap(data.offset, length, data.nullBitmap));
+                    : Object(_util_bit__WEBPACK_IMPORTED_MODULE_4__["truncateBitmap"])(data.offset, length, data.nullBitmap));
             }
-            this.nodes.push(new message_1.FieldNode(length, nullCount));
+            this.nodes.push(new _ipc_metadata_message__WEBPACK_IMPORTED_MODULE_6__["FieldNode"](length, nullCount));
         }
         return super.visit(vector);
     }
@@ -17832,12 +17734,11 @@ class VectorAssembler extends visitor_1.Visitor {
     get byteLength() { return this._byteLength; }
     get bufferRegions() { return this._bufferRegions; }
 }
-exports.VectorAssembler = VectorAssembler;
 /** @ignore */
 function addBuffer(values) {
     const byteLength = (values.byteLength + 7) & ~7; // Round up to a multiple of 8
     this.buffers.push(values);
-    this.bufferRegions.push(new message_1.BufferRegion(this._byteLength, byteLength));
+    this.bufferRegions.push(new _ipc_metadata_message__WEBPACK_IMPORTED_MODULE_6__["BufferRegion"](this._byteLength, byteLength));
     this._byteLength += byteLength;
     return this;
 }
@@ -17847,10 +17748,10 @@ function assembleUnion(vector) {
     // All Union Vectors have a typeIds buffer
     addBuffer.call(this, typeIds);
     // If this is a Sparse Union, treat it like all other Nested types
-    if (type.mode === enum_1.UnionMode.Sparse) {
+    if (type.mode === _enum__WEBPACK_IMPORTED_MODULE_1__["UnionMode"].Sparse) {
         return assembleNestedVector.call(this, vector);
     }
-    else if (type.mode === enum_1.UnionMode.Dense) {
+    else if (type.mode === _enum__WEBPACK_IMPORTED_MODULE_1__["UnionMode"].Dense) {
         // If this is a Dense Union, add the valueOffsets buffer and potentially slice the children
         if (vector.offset <= 0) {
             // If the Vector hasn't been sliced, write the existing valueOffsets
@@ -17870,7 +17771,7 @@ function assembleUnion(vector) {
             // If we have a non-zero offset, then the value offsets do not start at
             // zero. We must a) create a new offsets array with shifted offsets and
             // b) slice the values array accordingly
-            const unshiftedOffsets = buffer_1.rebaseValueOffsets(-valueOffsets[0], length, valueOffsets);
+            const unshiftedOffsets = Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["rebaseValueOffsets"])(-valueOffsets[0], length, valueOffsets);
             for (let typeId, shift, index = -1; ++index < length;) {
                 if ((shift = childOffsets[typeId = typeIds[index]]) === -1) {
                     shift = childOffsets[typeId] = unshiftedOffsets[typeId];
@@ -17901,14 +17802,14 @@ function assembleBoolVector(vector) {
     }
     else if ((values = vector.values) instanceof Uint8Array) {
         // If values is already a Uint8Array, slice the bitmap (fast path)
-        return addBuffer.call(this, bit_1.truncateBitmap(vector.offset, vector.length, values));
+        return addBuffer.call(this, Object(_util_bit__WEBPACK_IMPORTED_MODULE_4__["truncateBitmap"])(vector.offset, vector.length, values));
     }
     // Otherwise if the underlying data *isn't* a Uint8Array, enumerate the
     // values as bools and re-pack them into a Uint8Array. This code isn't
     // reachable unless you're trying to manipulate the Data internals,
     // we we're only doing this for safety.
     /* istanbul ignore next */
-    return addBuffer.call(this, bit_1.packBools(vector));
+    return addBuffer.call(this, Object(_util_bit__WEBPACK_IMPORTED_MODULE_4__["packBools"])(vector));
 }
 /** @ignore */
 function assembleFlatVector(vector) {
@@ -17921,7 +17822,7 @@ function assembleFlatListVector(vector) {
     const lastOffset = valueOffsets[length];
     const byteLength = Math.min(lastOffset - firstOffset, values.byteLength - firstOffset);
     // Push in the order FlatList types read their buffers
-    addBuffer.call(this, buffer_1.rebaseValueOffsets(-valueOffsets[0], length, valueOffsets)); // valueOffsets buffer first
+    addBuffer.call(this, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["rebaseValueOffsets"])(-valueOffsets[0], length, valueOffsets)); // valueOffsets buffer first
     addBuffer.call(this, values.subarray(firstOffset, firstOffset + byteLength)); // sliced values buffer second
     return this;
 }
@@ -17930,7 +17831,7 @@ function assembleListVector(vector) {
     const { length, valueOffsets } = vector;
     // If we have valueOffsets (MapVector, ListVector), push that buffer first
     if (valueOffsets) {
-        addBuffer.call(this, buffer_1.rebaseValueOffsets(valueOffsets[0], length, valueOffsets));
+        addBuffer.call(this, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_3__["rebaseValueOffsets"])(valueOffsets[0], length, valueOffsets));
     }
     // Then insert the List's values child
     return this.visit(vector.getChildAt(0));
@@ -17956,10 +17857,41 @@ VectorAssembler.prototype.visitInterval = assembleFlatVector;
 VectorAssembler.prototype.visitFixedSizeList = assembleListVector;
 VectorAssembler.prototype.visitMap = assembleListVector;
 
+//# sourceMappingURL=vectorassembler.mjs.map
 
 
-},{"../enum":34,"../ipc/metadata/message":49,"../recordbatch":52,"../type":55,"../util/args":56,"../util/bit":57,"../util/buffer":59,"../visitor":91}],104:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/apache-arrow/visitor/vectorctor.mjs":
+/*!**********************************************************!*\
+  !*** ./node_modules/apache-arrow/visitor/vectorctor.mjs ***!
+  \**********************************************************/
+/*! exports provided: GetVectorConstructor, instance */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GetVectorConstructor", function() { return GetVectorConstructor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "instance", function() { return instance; });
+/* harmony import */ var _visitor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../visitor */ "./node_modules/apache-arrow/visitor.mjs");
+/* harmony import */ var _vector_binary__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../vector/binary */ "./node_modules/apache-arrow/vector/binary.mjs");
+/* harmony import */ var _vector_bool__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../vector/bool */ "./node_modules/apache-arrow/vector/bool.mjs");
+/* harmony import */ var _vector_date__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../vector/date */ "./node_modules/apache-arrow/vector/date.mjs");
+/* harmony import */ var _vector_decimal__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../vector/decimal */ "./node_modules/apache-arrow/vector/decimal.mjs");
+/* harmony import */ var _vector_dictionary__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../vector/dictionary */ "./node_modules/apache-arrow/vector/dictionary.mjs");
+/* harmony import */ var _vector_fixedsizebinary__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../vector/fixedsizebinary */ "./node_modules/apache-arrow/vector/fixedsizebinary.mjs");
+/* harmony import */ var _vector_fixedsizelist__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../vector/fixedsizelist */ "./node_modules/apache-arrow/vector/fixedsizelist.mjs");
+/* harmony import */ var _vector_float__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../vector/float */ "./node_modules/apache-arrow/vector/float.mjs");
+/* harmony import */ var _vector_interval__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../vector/interval */ "./node_modules/apache-arrow/vector/interval.mjs");
+/* harmony import */ var _vector_int__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../vector/int */ "./node_modules/apache-arrow/vector/int.mjs");
+/* harmony import */ var _vector_list__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../vector/list */ "./node_modules/apache-arrow/vector/list.mjs");
+/* harmony import */ var _vector_map__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../vector/map */ "./node_modules/apache-arrow/vector/map.mjs");
+/* harmony import */ var _vector_null__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../vector/null */ "./node_modules/apache-arrow/vector/null.mjs");
+/* harmony import */ var _vector_struct__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../vector/struct */ "./node_modules/apache-arrow/vector/struct.mjs");
+/* harmony import */ var _vector_timestamp__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../vector/timestamp */ "./node_modules/apache-arrow/vector/timestamp.mjs");
+/* harmony import */ var _vector_time__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ../vector/time */ "./node_modules/apache-arrow/vector/time.mjs");
+/* harmony import */ var _vector_union__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ../vector/union */ "./node_modules/apache-arrow/vector/union.mjs");
+/* harmony import */ var _vector_utf8__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ../vector/utf8 */ "./node_modules/apache-arrow/vector/utf8.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -17976,80 +17908,99 @@ VectorAssembler.prototype.visitMap = assembleListVector;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const visitor_1 = require("../visitor");
-const binary_1 = require("../vector/binary");
-const bool_1 = require("../vector/bool");
-const date_1 = require("../vector/date");
-const decimal_1 = require("../vector/decimal");
-const dictionary_1 = require("../vector/dictionary");
-const fixedsizebinary_1 = require("../vector/fixedsizebinary");
-const fixedsizelist_1 = require("../vector/fixedsizelist");
-const float_1 = require("../vector/float");
-const interval_1 = require("../vector/interval");
-const int_1 = require("../vector/int");
-const list_1 = require("../vector/list");
-const map_1 = require("../vector/map");
-const null_1 = require("../vector/null");
-const struct_1 = require("../vector/struct");
-const timestamp_1 = require("../vector/timestamp");
-const time_1 = require("../vector/time");
-const union_1 = require("../vector/union");
-const utf8_1 = require("../vector/utf8");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /** @ignore */
-class GetVectorConstructor extends visitor_1.Visitor {
-    visitNull() { return null_1.NullVector; }
-    visitBool() { return bool_1.BoolVector; }
-    visitInt() { return int_1.IntVector; }
-    visitInt8() { return int_1.Int8Vector; }
-    visitInt16() { return int_1.Int16Vector; }
-    visitInt32() { return int_1.Int32Vector; }
-    visitInt64() { return int_1.Int64Vector; }
-    visitUint8() { return int_1.Uint8Vector; }
-    visitUint16() { return int_1.Uint16Vector; }
-    visitUint32() { return int_1.Uint32Vector; }
-    visitUint64() { return int_1.Uint64Vector; }
-    visitFloat() { return float_1.FloatVector; }
-    visitFloat16() { return float_1.Float16Vector; }
-    visitFloat32() { return float_1.Float32Vector; }
-    visitFloat64() { return float_1.Float64Vector; }
-    visitUtf8() { return utf8_1.Utf8Vector; }
-    visitBinary() { return binary_1.BinaryVector; }
-    visitFixedSizeBinary() { return fixedsizebinary_1.FixedSizeBinaryVector; }
-    visitDate() { return date_1.DateVector; }
-    visitDateDay() { return date_1.DateDayVector; }
-    visitDateMillisecond() { return date_1.DateMillisecondVector; }
-    visitTimestamp() { return timestamp_1.TimestampVector; }
-    visitTimestampSecond() { return timestamp_1.TimestampSecondVector; }
-    visitTimestampMillisecond() { return timestamp_1.TimestampMillisecondVector; }
-    visitTimestampMicrosecond() { return timestamp_1.TimestampMicrosecondVector; }
-    visitTimestampNanosecond() { return timestamp_1.TimestampNanosecondVector; }
-    visitTime() { return time_1.TimeVector; }
-    visitTimeSecond() { return time_1.TimeSecondVector; }
-    visitTimeMillisecond() { return time_1.TimeMillisecondVector; }
-    visitTimeMicrosecond() { return time_1.TimeMicrosecondVector; }
-    visitTimeNanosecond() { return time_1.TimeNanosecondVector; }
-    visitDecimal() { return decimal_1.DecimalVector; }
-    visitList() { return list_1.ListVector; }
-    visitStruct() { return struct_1.StructVector; }
-    visitUnion() { return union_1.UnionVector; }
-    visitDenseUnion() { return union_1.DenseUnionVector; }
-    visitSparseUnion() { return union_1.SparseUnionVector; }
-    visitDictionary() { return dictionary_1.DictionaryVector; }
-    visitInterval() { return interval_1.IntervalVector; }
-    visitIntervalDayTime() { return interval_1.IntervalDayTimeVector; }
-    visitIntervalYearMonth() { return interval_1.IntervalYearMonthVector; }
-    visitFixedSizeList() { return fixedsizelist_1.FixedSizeListVector; }
-    visitMap() { return map_1.MapVector; }
+class GetVectorConstructor extends _visitor__WEBPACK_IMPORTED_MODULE_0__["Visitor"] {
+    visitNull() { return _vector_null__WEBPACK_IMPORTED_MODULE_13__["NullVector"]; }
+    visitBool() { return _vector_bool__WEBPACK_IMPORTED_MODULE_2__["BoolVector"]; }
+    visitInt() { return _vector_int__WEBPACK_IMPORTED_MODULE_10__["IntVector"]; }
+    visitInt8() { return _vector_int__WEBPACK_IMPORTED_MODULE_10__["Int8Vector"]; }
+    visitInt16() { return _vector_int__WEBPACK_IMPORTED_MODULE_10__["Int16Vector"]; }
+    visitInt32() { return _vector_int__WEBPACK_IMPORTED_MODULE_10__["Int32Vector"]; }
+    visitInt64() { return _vector_int__WEBPACK_IMPORTED_MODULE_10__["Int64Vector"]; }
+    visitUint8() { return _vector_int__WEBPACK_IMPORTED_MODULE_10__["Uint8Vector"]; }
+    visitUint16() { return _vector_int__WEBPACK_IMPORTED_MODULE_10__["Uint16Vector"]; }
+    visitUint32() { return _vector_int__WEBPACK_IMPORTED_MODULE_10__["Uint32Vector"]; }
+    visitUint64() { return _vector_int__WEBPACK_IMPORTED_MODULE_10__["Uint64Vector"]; }
+    visitFloat() { return _vector_float__WEBPACK_IMPORTED_MODULE_8__["FloatVector"]; }
+    visitFloat16() { return _vector_float__WEBPACK_IMPORTED_MODULE_8__["Float16Vector"]; }
+    visitFloat32() { return _vector_float__WEBPACK_IMPORTED_MODULE_8__["Float32Vector"]; }
+    visitFloat64() { return _vector_float__WEBPACK_IMPORTED_MODULE_8__["Float64Vector"]; }
+    visitUtf8() { return _vector_utf8__WEBPACK_IMPORTED_MODULE_18__["Utf8Vector"]; }
+    visitBinary() { return _vector_binary__WEBPACK_IMPORTED_MODULE_1__["BinaryVector"]; }
+    visitFixedSizeBinary() { return _vector_fixedsizebinary__WEBPACK_IMPORTED_MODULE_6__["FixedSizeBinaryVector"]; }
+    visitDate() { return _vector_date__WEBPACK_IMPORTED_MODULE_3__["DateVector"]; }
+    visitDateDay() { return _vector_date__WEBPACK_IMPORTED_MODULE_3__["DateDayVector"]; }
+    visitDateMillisecond() { return _vector_date__WEBPACK_IMPORTED_MODULE_3__["DateMillisecondVector"]; }
+    visitTimestamp() { return _vector_timestamp__WEBPACK_IMPORTED_MODULE_15__["TimestampVector"]; }
+    visitTimestampSecond() { return _vector_timestamp__WEBPACK_IMPORTED_MODULE_15__["TimestampSecondVector"]; }
+    visitTimestampMillisecond() { return _vector_timestamp__WEBPACK_IMPORTED_MODULE_15__["TimestampMillisecondVector"]; }
+    visitTimestampMicrosecond() { return _vector_timestamp__WEBPACK_IMPORTED_MODULE_15__["TimestampMicrosecondVector"]; }
+    visitTimestampNanosecond() { return _vector_timestamp__WEBPACK_IMPORTED_MODULE_15__["TimestampNanosecondVector"]; }
+    visitTime() { return _vector_time__WEBPACK_IMPORTED_MODULE_16__["TimeVector"]; }
+    visitTimeSecond() { return _vector_time__WEBPACK_IMPORTED_MODULE_16__["TimeSecondVector"]; }
+    visitTimeMillisecond() { return _vector_time__WEBPACK_IMPORTED_MODULE_16__["TimeMillisecondVector"]; }
+    visitTimeMicrosecond() { return _vector_time__WEBPACK_IMPORTED_MODULE_16__["TimeMicrosecondVector"]; }
+    visitTimeNanosecond() { return _vector_time__WEBPACK_IMPORTED_MODULE_16__["TimeNanosecondVector"]; }
+    visitDecimal() { return _vector_decimal__WEBPACK_IMPORTED_MODULE_4__["DecimalVector"]; }
+    visitList() { return _vector_list__WEBPACK_IMPORTED_MODULE_11__["ListVector"]; }
+    visitStruct() { return _vector_struct__WEBPACK_IMPORTED_MODULE_14__["StructVector"]; }
+    visitUnion() { return _vector_union__WEBPACK_IMPORTED_MODULE_17__["UnionVector"]; }
+    visitDenseUnion() { return _vector_union__WEBPACK_IMPORTED_MODULE_17__["DenseUnionVector"]; }
+    visitSparseUnion() { return _vector_union__WEBPACK_IMPORTED_MODULE_17__["SparseUnionVector"]; }
+    visitDictionary() { return _vector_dictionary__WEBPACK_IMPORTED_MODULE_5__["DictionaryVector"]; }
+    visitInterval() { return _vector_interval__WEBPACK_IMPORTED_MODULE_9__["IntervalVector"]; }
+    visitIntervalDayTime() { return _vector_interval__WEBPACK_IMPORTED_MODULE_9__["IntervalDayTimeVector"]; }
+    visitIntervalYearMonth() { return _vector_interval__WEBPACK_IMPORTED_MODULE_9__["IntervalYearMonthVector"]; }
+    visitFixedSizeList() { return _vector_fixedsizelist__WEBPACK_IMPORTED_MODULE_7__["FixedSizeListVector"]; }
+    visitMap() { return _vector_map__WEBPACK_IMPORTED_MODULE_12__["MapVector"]; }
 }
-exports.GetVectorConstructor = GetVectorConstructor;
 /** @ignore */
-exports.instance = new GetVectorConstructor();
+const instance = new GetVectorConstructor();
+
+//# sourceMappingURL=vectorctor.mjs.map
 
 
+/***/ }),
 
-},{"../vector/binary":70,"../vector/bool":71,"../vector/date":73,"../vector/decimal":74,"../vector/dictionary":75,"../vector/fixedsizebinary":76,"../vector/fixedsizelist":77,"../vector/float":78,"../vector/int":80,"../vector/interval":81,"../vector/list":82,"../vector/map":83,"../vector/null":84,"../vector/struct":86,"../vector/time":87,"../vector/timestamp":88,"../vector/union":89,"../vector/utf8":90,"../visitor":91}],105:[function(require,module,exports){
+/***/ "./node_modules/apache-arrow/visitor/vectorloader.mjs":
+/*!************************************************************!*\
+  !*** ./node_modules/apache-arrow/visitor/vectorloader.mjs ***!
+  \************************************************************/
+/*! exports provided: VectorLoader, JSONVectorLoader */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "VectorLoader", function() { return VectorLoader; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "JSONVectorLoader", function() { return JSONVectorLoader; });
+/* harmony import */ var _data__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../data */ "./node_modules/apache-arrow/data.mjs");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../schema */ "./node_modules/apache-arrow/schema.mjs");
+/* harmony import */ var _type__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../type */ "./node_modules/apache-arrow/type.mjs");
+/* harmony import */ var _visitor__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../visitor */ "./node_modules/apache-arrow/visitor.mjs");
+/* harmony import */ var _util_bit__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../util/bit */ "./node_modules/apache-arrow/util/bit.mjs");
+/* harmony import */ var _util_utf8__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../util/utf8 */ "./node_modules/apache-arrow/util/utf8.mjs");
+/* harmony import */ var _util_int__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../util/int */ "./node_modules/apache-arrow/util/int.mjs");
+/* harmony import */ var _enum__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../enum */ "./node_modules/apache-arrow/enum.mjs");
+/* harmony import */ var _util_buffer__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../util/buffer */ "./node_modules/apache-arrow/util/buffer.mjs");
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -18066,18 +18017,17 @@ exports.instance = new GetVectorConstructor();
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-Object.defineProperty(exports, "__esModule", { value: true });
-const data_1 = require("../data");
-const schema_1 = require("../schema");
-const type_1 = require("../type");
-const visitor_1 = require("../visitor");
-const bit_1 = require("../util/bit");
-const utf8_1 = require("../util/utf8");
-const int_1 = require("../util/int");
-const enum_1 = require("../enum");
-const buffer_1 = require("../util/buffer");
+
+
+
+
+
+
+
+
+
 /** @ignore */
-class VectorLoader extends visitor_1.Visitor {
+class VectorLoader extends _visitor__WEBPACK_IMPORTED_MODULE_3__["Visitor"] {
     constructor(bytes, nodes, buffers, dictionaries) {
         super();
         this.nodesIndex = -1;
@@ -18088,28 +18038,28 @@ class VectorLoader extends visitor_1.Visitor {
         this.dictionaries = dictionaries;
     }
     visit(node) {
-        return super.visit(node instanceof schema_1.Field ? node.type : node);
+        return super.visit(node instanceof _schema__WEBPACK_IMPORTED_MODULE_1__["Field"] ? node.type : node);
     }
-    visitNull(type, { length, } = this.nextFieldNode()) { return data_1.Data.Null(type, 0, length); }
-    visitBool(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.Bool(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
-    visitInt(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.Int(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
-    visitFloat(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.Float(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
-    visitUtf8(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.Utf8(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readOffsets(type), this.readData(type)); }
-    visitBinary(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.Binary(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readOffsets(type), this.readData(type)); }
-    visitFixedSizeBinary(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.FixedSizeBinary(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
-    visitDate(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.Date(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
-    visitTimestamp(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.Timestamp(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
-    visitTime(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.Time(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
-    visitDecimal(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.Decimal(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
-    visitList(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.List(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readOffsets(type), this.visit(type.children[0])); }
-    visitStruct(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.Struct(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.visitMany(type.children)); }
-    visitUnion(type) { return type.mode === enum_1.UnionMode.Sparse ? this.visitSparseUnion(type) : this.visitDenseUnion(type); }
-    visitDenseUnion(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.Union(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readTypeIds(type), this.readOffsets(type), this.visitMany(type.children)); }
-    visitSparseUnion(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.Union(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readTypeIds(type), this.visitMany(type.children)); }
-    visitDictionary(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.Dictionary(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type.indices), this.readDictionary(type)); }
-    visitInterval(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.Interval(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
-    visitFixedSizeList(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.FixedSizeList(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.visit(type.children[0])); }
-    visitMap(type, { length, nullCount } = this.nextFieldNode()) { return data_1.Data.Map(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readOffsets(type), this.visit(type.children[0])); }
+    visitNull(type, { length, } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].Null(type, 0, length); }
+    visitBool(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].Bool(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
+    visitInt(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].Int(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
+    visitFloat(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].Float(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
+    visitUtf8(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].Utf8(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readOffsets(type), this.readData(type)); }
+    visitBinary(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].Binary(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readOffsets(type), this.readData(type)); }
+    visitFixedSizeBinary(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].FixedSizeBinary(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
+    visitDate(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].Date(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
+    visitTimestamp(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].Timestamp(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
+    visitTime(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].Time(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
+    visitDecimal(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].Decimal(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
+    visitList(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].List(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readOffsets(type), this.visit(type.children[0])); }
+    visitStruct(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].Struct(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.visitMany(type.children)); }
+    visitUnion(type) { return type.mode === _enum__WEBPACK_IMPORTED_MODULE_7__["UnionMode"].Sparse ? this.visitSparseUnion(type) : this.visitDenseUnion(type); }
+    visitDenseUnion(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].Union(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readTypeIds(type), this.readOffsets(type), this.visitMany(type.children)); }
+    visitSparseUnion(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].Union(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readTypeIds(type), this.visitMany(type.children)); }
+    visitDictionary(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].Dictionary(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type.indices), this.readDictionary(type)); }
+    visitInterval(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].Interval(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readData(type)); }
+    visitFixedSizeList(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].FixedSizeList(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.visit(type.children[0])); }
+    visitMap(type, { length, nullCount } = this.nextFieldNode()) { return _data__WEBPACK_IMPORTED_MODULE_0__["Data"].Map(type, 0, length, nullCount, this.readNullBitmap(type, nullCount), this.readOffsets(type), this.visit(type.children[0])); }
     nextFieldNode() { return this.nodes[++this.nodesIndex]; }
     nextBufferRange() { return this.buffers[++this.buffersIndex]; }
     readNullBitmap(type, nullCount, buffer = this.nextBufferRange()) {
@@ -18124,7 +18074,6 @@ class VectorLoader extends visitor_1.Visitor {
         return this.dictionaries.get(type.id);
     }
 }
-exports.VectorLoader = VectorLoader;
 /** @ignore */
 class JSONVectorLoader extends VectorLoader {
     constructor(sources, nodes, buffers, dictionaries) {
@@ -18132,41 +18081,40 @@ class JSONVectorLoader extends VectorLoader {
         this.sources = sources;
     }
     readNullBitmap(_type, nullCount, { offset } = this.nextBufferRange()) {
-        return nullCount <= 0 ? new Uint8Array(0) : bit_1.packBools(this.sources[offset]);
+        return nullCount <= 0 ? new Uint8Array(0) : Object(_util_bit__WEBPACK_IMPORTED_MODULE_4__["packBools"])(this.sources[offset]);
     }
     readOffsets(_type, { offset } = this.nextBufferRange()) {
-        return buffer_1.toArrayBufferView(Uint8Array, buffer_1.toArrayBufferView(Int32Array, this.sources[offset]));
+        return Object(_util_buffer__WEBPACK_IMPORTED_MODULE_8__["toArrayBufferView"])(Uint8Array, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_8__["toArrayBufferView"])(Int32Array, this.sources[offset]));
     }
     readTypeIds(type, { offset } = this.nextBufferRange()) {
-        return buffer_1.toArrayBufferView(Uint8Array, buffer_1.toArrayBufferView(type.ArrayType, this.sources[offset]));
+        return Object(_util_buffer__WEBPACK_IMPORTED_MODULE_8__["toArrayBufferView"])(Uint8Array, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_8__["toArrayBufferView"])(type.ArrayType, this.sources[offset]));
     }
     readData(type, { offset } = this.nextBufferRange()) {
         const { sources } = this;
-        if (type_1.DataType.isTimestamp(type)) {
-            return buffer_1.toArrayBufferView(Uint8Array, int_1.Int64.convertArray(sources[offset]));
+        if (_type__WEBPACK_IMPORTED_MODULE_2__["DataType"].isTimestamp(type)) {
+            return Object(_util_buffer__WEBPACK_IMPORTED_MODULE_8__["toArrayBufferView"])(Uint8Array, _util_int__WEBPACK_IMPORTED_MODULE_6__["Int64"].convertArray(sources[offset]));
         }
-        else if ((type_1.DataType.isInt(type) || type_1.DataType.isTime(type)) && type.bitWidth === 64) {
-            return buffer_1.toArrayBufferView(Uint8Array, int_1.Int64.convertArray(sources[offset]));
+        else if ((_type__WEBPACK_IMPORTED_MODULE_2__["DataType"].isInt(type) || _type__WEBPACK_IMPORTED_MODULE_2__["DataType"].isTime(type)) && type.bitWidth === 64) {
+            return Object(_util_buffer__WEBPACK_IMPORTED_MODULE_8__["toArrayBufferView"])(Uint8Array, _util_int__WEBPACK_IMPORTED_MODULE_6__["Int64"].convertArray(sources[offset]));
         }
-        else if (type_1.DataType.isDate(type) && type.unit === enum_1.DateUnit.MILLISECOND) {
-            return buffer_1.toArrayBufferView(Uint8Array, int_1.Int64.convertArray(sources[offset]));
+        else if (_type__WEBPACK_IMPORTED_MODULE_2__["DataType"].isDate(type) && type.unit === _enum__WEBPACK_IMPORTED_MODULE_7__["DateUnit"].MILLISECOND) {
+            return Object(_util_buffer__WEBPACK_IMPORTED_MODULE_8__["toArrayBufferView"])(Uint8Array, _util_int__WEBPACK_IMPORTED_MODULE_6__["Int64"].convertArray(sources[offset]));
         }
-        else if (type_1.DataType.isDecimal(type)) {
-            return buffer_1.toArrayBufferView(Uint8Array, int_1.Int128.convertArray(sources[offset]));
+        else if (_type__WEBPACK_IMPORTED_MODULE_2__["DataType"].isDecimal(type)) {
+            return Object(_util_buffer__WEBPACK_IMPORTED_MODULE_8__["toArrayBufferView"])(Uint8Array, _util_int__WEBPACK_IMPORTED_MODULE_6__["Int128"].convertArray(sources[offset]));
         }
-        else if (type_1.DataType.isBinary(type) || type_1.DataType.isFixedSizeBinary(type)) {
+        else if (_type__WEBPACK_IMPORTED_MODULE_2__["DataType"].isBinary(type) || _type__WEBPACK_IMPORTED_MODULE_2__["DataType"].isFixedSizeBinary(type)) {
             return binaryDataFromJSON(sources[offset]);
         }
-        else if (type_1.DataType.isBool(type)) {
-            return bit_1.packBools(sources[offset]);
+        else if (_type__WEBPACK_IMPORTED_MODULE_2__["DataType"].isBool(type)) {
+            return Object(_util_bit__WEBPACK_IMPORTED_MODULE_4__["packBools"])(sources[offset]);
         }
-        else if (type_1.DataType.isUtf8(type)) {
-            return utf8_1.encodeUtf8(sources[offset].join(''));
+        else if (_type__WEBPACK_IMPORTED_MODULE_2__["DataType"].isUtf8(type)) {
+            return Object(_util_utf8__WEBPACK_IMPORTED_MODULE_5__["encodeUtf8"])(sources[offset].join(''));
         }
-        return buffer_1.toArrayBufferView(Uint8Array, buffer_1.toArrayBufferView(type.ArrayType, sources[offset].map((x) => +x)));
+        return Object(_util_buffer__WEBPACK_IMPORTED_MODULE_8__["toArrayBufferView"])(Uint8Array, Object(_util_buffer__WEBPACK_IMPORTED_MODULE_8__["toArrayBufferView"])(type.ArrayType, sources[offset].map((x) => +x)));
     }
 }
-exports.JSONVectorLoader = JSONVectorLoader;
 /** @ignore */
 function binaryDataFromJSON(values) {
     // "DATA": ["49BC7D5B6C47D2","3F5FB6D9322026"]
@@ -18180,9 +18128,21 @@ function binaryDataFromJSON(values) {
     return data;
 }
 
+//# sourceMappingURL=vectorloader.mjs.map
 
 
-},{"../data":33,"../enum":34,"../schema":53,"../type":55,"../util/bit":57,"../util/buffer":59,"../util/int":62,"../util/utf8":66,"../visitor":91}],106:[function(require,module,exports){
+/***/ }),
+
+/***/ "./node_modules/flatbuffers/js/flatbuffers.mjs":
+/*!*****************************************************!*\
+  !*** ./node_modules/flatbuffers/js/flatbuffers.mjs ***!
+  \*****************************************************/
+/*! exports provided: flatbuffers */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "flatbuffers", function() { return flatbuffers; });
 /// @file
 /// @addtogroup flatbuffers_javascript_api
 /// @{
@@ -19417,13 +19377,26 @@ flatbuffers.ByteBuffer.prototype.createLong = function(low, high) {
 };
 
 // Exports for Node.js and RequireJS
-this.flatbuffers = flatbuffers;
+
 
 /// @endcond
 /// @}
 
-},{}],107:[function(require,module,exports){
-'use strict';
+
+/***/ }),
+
+/***/ "./node_modules/text-encoding-utf-8/lib/encoding.lib.mjs":
+/*!***************************************************************!*\
+  !*** ./node_modules/text-encoding-utf-8/lib/encoding.lib.mjs ***!
+  \***************************************************************/
+/*! exports provided: TextEncoder, TextDecoder */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TextEncoder", function() { return TextEncoder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TextDecoder", function() { return TextDecoder; });
+
 
 // This is free and unencumbered software released into the public domain.
 // See LICENSE.md for more information.
@@ -19658,6 +19631,30 @@ function decoderError(fatal, opt_code_point) {
     throw TypeError('Decoder error');
   return opt_code_point || 0xFFFD;
 }
+
+/** @interface */
+function Decoder() {}
+Decoder.prototype = {
+  /**
+   * @param {Stream} stream The stream of bytes being decoded.
+   * @param {number} bite The next byte read from the stream.
+   * @return {?(number|!Array.<number>)} The next code point(s)
+   *     decoded, or null if not enough data exists in the input
+   *     stream to decode a complete code point, or |finished|.
+   */
+  handler: function(stream, bite) {}
+};
+
+/** @interface */
+function Encoder() {}
+Encoder.prototype = {
+  /**
+   * @param {Stream} stream The stream of code points being encoded.
+   * @param {number} code_point Next code point read from the stream.
+   * @return {(number|!Array.<number>)} Byte(s) to emit, or |finished|.
+   */
+  handler: function(stream, code_point) {}
+};
 
 //
 // 7. API
@@ -20063,6 +20060,10 @@ function UTF8Encoder(options) {
   };
 }
 
-exports.TextEncoder = TextEncoder;
-exports.TextDecoder = TextDecoder;
-},{}]},{},[4]);
+
+
+
+/***/ })
+
+/******/ });
+//# sourceMappingURL=bundle.js.map

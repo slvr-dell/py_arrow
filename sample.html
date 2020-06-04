@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://unpkg.com/apache-arrow/Arrow.es5.min.js"></script>
+</head>
+<body>
+    <h1 id="msg">Hello JavaScript</h1>
+    <script>
+        async function main(){
+        //const table = await Arrow.Table.from(fetch(("./pw.arrow")));
+        const table = await Arrow.Table.from(fetch("http://192.168.179.3:8080/loc_time.arrow"));
+        const table1 = await Arrow.Table.from(fetch("http://192.168.179.3:8080/dewpointTemperature.arrow"));
+        const table2 = await Arrow.Table.from(fetch("http://192.168.179.3:8080/airTemperature.arrow"));
+        //const table = await Arrow.Table.from(fetch("https://github.com/public-tatsuya-noyori/meteorological_preprocessor/tree/master/tests/loc_time.arrow",{mode:"cors"}));
+        for (let i = 0 ; i < 5; i++){
+            console.log(table.get(i).toString());
+            console.log(table1.get(i).toString());
+            console.log(table2.get(i).toString());
+        }
+        
+        }
+
+        main();
+    </script>
+</body>
+</html>
