@@ -1,27 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <script src="https://unpkg.com/apache-arrow/Arrow.es5.min.js"></script>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.70/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.70/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
 </head>
+
 <body>
     <h1 id="msg">Hello JavaScript</h1>
     <script>
-        async function main(){
-        //const table = await Arrow.Table.from(fetch(("./pw.arrow")));
-        const table = await Arrow.Table.from(fetch("http://192.168.179.3:8080/loc_time.arrow"));
-        const table1 = await Arrow.Table.from(fetch("http://192.168.179.3:8080/dewpointTemperature.arrow"));
-        const table2 = await Arrow.Table.from(fetch("http://192.168.179.3:8080/airTemperature.arrow"));
-        //const table = await Arrow.Table.from(fetch("https://github.com/public-tatsuya-noyori/meteorological_preprocessor/tree/master/tests/loc_time.arrow",{mode:"cors"}));
-        for (let i = 0 ; i < 5; i++){
-            console.log(table.get(i).toString());
-            console.log(table1.get(i).toString());
-            console.log(table2.get(i).toString());
-        }
-        
+        async function main() {
+            //const table = await Arrow.Table.from(fetch(("./pw.arrow")));
+            const table = await Arrow.Table.from(fetch("http://127.0.0.1:8080/arrow_data/loc_time.arrow"));
+            const table1 = await Arrow.Table.from(fetch("http://127.0.0.1:8080/arrow_data/dewpointTemperature.arrow"));
+            const table2 = await Arrow.Table.from(fetch("http://127.0.0.1:8080/arrow_data/airTemperature.arrow"));
+            //const table = await Arrow.Table.from(fetch("https://github.com/public-tatsuya-noyori/meteorological_preprocessor/tree/master/tests/loc_time.arrow",{mode:"cors"}));
+            for (let i = 0; i < 5; i++) {
+                //console.log(table.get(i).toString());
+                //console.log(table1.get(i).toString());
+                //console.log(table2.get(i).toString());
+            }
+            console.log("-----");
+            console.log(table.selectAt(0));
+            //var x_ar = table.get(0).toArray();
+            //var lonn = String(x_ar[3]);
+            //var latt = String(x_ar[4]);
+            //console.log(lonn);
+            //console.log(latt);
+            var x_st = table.get(0).toString();
+            var x_new = Array.from(table.get(0));
+            //console.log(Array.isArray(x_ar));
+            console.log(x_st);
+            //console.log(x_ar);
+            console.log(x_new);
+            var cnt = 0;
+            var latt = [];
+            var lonn = [];
+
+
+            while (table.get(cnt)) {
+                var x_ar = table.get(cnt).toArray();
+                var lonn_tmp = String(x_ar[3]);
+                var latt_tmp = String(x_ar[4]);
+                latt.push(latt_tmp);
+                lonn.push(lonn_tmp);
+                cnt = cnt + 1;
+            }
+            console.log(cnt);
+
+            //--描画に関する記述
+            var viewer = new Cesium.Viewer('cesiumContainer');
+            for (let i = 0; i < cnt; i++) {
+                var citizensBankPark = viewer.entities.add({
+                    name: 'Citizens Bank Park', position:
+                        Cesium.Cartesian3.fromDegrees(latt[i], lonn[i]), point: {
+                            pixelSize: 5, color: Cesium.Color.RED,
+                            outlineColor: Cesium.Color.WHITE, outlineWidth: 2
+                        },
+                });
+            }
+            //viewer.zoomTo(viewer.entities);
+
         }
 
         main();
     </script>
+    <div id="cesiumContainer" style="width: 700px; height:400px"></div>
+    <!--<script type="text/javascript" src="point_test.js"></script>-->
 </body>
+
 </html>
