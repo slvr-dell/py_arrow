@@ -4,6 +4,7 @@ fs = require("fs")
 function main(){
     const table1 = aa.Table.from(fs.readFileSync("./arrow_data/pw.arrow"));
     const table2 = aa.Table.from(fs.readFileSync("./arrow_data/pw.arrow"));
+    console.log(table1.length);
     console.log(table1.get(0).toString());
     var res = inner_join(table1,table2,"bar")   
     console.log(res)   
@@ -51,7 +52,7 @@ function inner_join(table1,table2,key){
     cnt = 0
     table1_and = {}
 
-    while (table1.get(cnt)){
+    for(let i ; i < table1.length ;i++){
         iid = table1.getColumn(key).toArray()[cnt]
         //console.log(iid)
         if(intersection_id.has(iid)){
@@ -59,30 +60,25 @@ function inner_join(table1,table2,key){
             table1_and[iid] = data
             
         }
-        cnt += 1
     }
-    cnt = 0
     table2_and = {}
-    console.log("jjjjjj")
     var ignore_list = []
     for (let colname of intersection_colname){
         ignore_list.push(table2.getColumnIndex(colname))
     }
     
-    while (table2.get(cnt)){
+    for(let i ; i < table2.length ;i++){
         iid = table2.getColumn(key).toArray()[cnt]
         if(intersection_id.has(iid)){
             data = table2.get(cnt).toArray()
             for (let j of ignore_list){
-                delete data[j]
+                delete data[j]//table1とtable2で重複している列を削除。削除された箇所はundefinedになる
             }
-            const x_data = data.filter(v => v)
+            const x_data = data.filter(v => v)//undefined,falseなど値がないものを削除したarrayにする。
             table2_and[iid] = x_data
         }
-        cnt += 1
     }
     ans = []
-    //console.log(table1_and)
 
     for (let i of intersection_id){
         var ar1 = table1_and[i]
