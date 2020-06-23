@@ -4,12 +4,19 @@ import pyarrow.parquet as pq
 
 
 df = pd.read_csv("./data.csv")
+df1 = pd.read_csv("./data1.csv")
+df = df.astype({'id': "int32"})
+df1 = df1.astype({'id': "int32"})
 print(df)
+print(df1)
+
 
 table = pa.Table.from_pandas(df)
-print(type(table))
+table1 = pa.Table.from_pandas(df1)
+
 
 record_batch = table.to_batches()
+record_batch1 = table1.to_batches()
 
 with pa.OSFile("pw.arrow","wb") as sink:
 
@@ -18,11 +25,13 @@ with pa.OSFile("pw.arrow","wb") as sink:
     writer.write_batch(record_batch[0])
     writer.close()
 
-reader = pa.RecordBatchFileReader("pw.arrow")
-rb = reader.get_record_batch(0)
-df_aw = rb.to_pandas()
+with pa.OSFile("pw1.arrow","wb") as sink:
 
-print(df_aw)
+    schema = record_batch1[0].schema
+    writer = pa.RecordBatchFileWriter(sink, schema)
+    writer.write_batch(record_batch[0])
+    writer.close()
+
 '''
 table1 = pa.RecordBatch.from_pandas(df)    
 with open("./arrow-out.ipc", 'wb') as f:
