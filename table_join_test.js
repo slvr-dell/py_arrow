@@ -6,14 +6,7 @@ function main(){
     const table2 = aa.Table.from(fs.readFileSync("./arrow_data/pw.arrow"));
     console.log(table1.get(0).toString());
     var res = inner_join(table1,table2,"bar")   
-    console.log(res)
-    var foo = table1.concat(table2)
-    console.log(foo.toArray())
-    mx = foo.numCols
-    for(let i = 0;i<mx;i++){
-        console.log(foo.schema.fields[i].name)
-    }
-    
+    console.log(res)   
 }
 
 main();
@@ -43,15 +36,18 @@ function inner_join(table1,table2,key){
     name_list_table2 = []
 
     for(let i = 0; i<table1.numCols; i++){
-        name_list_table1.push = table1.schema.fields[i].name
+        name_list_table1.push(table1.schema.fields[i].name)
     }
 
     for(let i = 0; i<table2.numCols; i++){
-        name_list_table2.push = table2.schema.fields[i].name
+        name_list_table2.push(table2.schema.fields[i].name)
     }
 
+    console.log(name_list_table2)
+
     var intersection_colname = intersection_for_list(name_list_table1,name_list_table2)
-    //console.log(intersection)
+    console.log("-------")
+    console.log(intersection_colname)
     cnt = 0
     table1_and = {}
 
@@ -59,7 +55,6 @@ function inner_join(table1,table2,key){
         iid = table1.getColumn(key).toArray()[cnt]
         //console.log(iid)
         if(intersection_id.has(iid)){
-            console.log("hi")
             data = table1.get(cnt).toArray()
             table1_and[iid] = data
             
@@ -68,12 +63,21 @@ function inner_join(table1,table2,key){
     }
     cnt = 0
     table2_and = {}
-
+    console.log("jjjjjj")
+    var ignore_list = []
+    for (let colname of intersection_colname){
+        ignore_list.push(table2.getColumnIndex(colname))
+    }
+    
     while (table2.get(cnt)){
         iid = table2.getColumn(key).toArray()[cnt]
         if(intersection_id.has(iid)){
             data = table2.get(cnt).toArray()
-            table2_and[iid] = data
+            for (let j of ignore_list){
+                delete data[j]
+            }
+            const x_data = data.filter(v => v)
+            table2_and[iid] = x_data
         }
         cnt += 1
     }
